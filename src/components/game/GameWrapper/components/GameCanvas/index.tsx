@@ -72,47 +72,56 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
     const stone = gameState.stones.find(s => s.id === stoneId)
     if (!stone) return
 
-    setGameState(prev => ({ ...prev, isAnimating: true }))
+    // Create a local copy of the state to work with
+    let currentState = { ...gameState, isAnimating: true }
+    setGameState(currentState)
 
     // Move to stone
-    while (Math.abs(gameState.player.x - stone.x) > 5 || Math.abs(gameState.player.y - stone.y) > 5) {
-      setGameState(prev => ({
-        ...prev,
+    while (Math.abs(currentState.player.x - stone.x) > 5 || Math.abs(currentState.player.y - stone.y) > 5) {
+      const newPosition = moveTowards(currentState.player, stone, 5)
+      currentState = {
+        ...currentState,
         player: {
-          ...prev.player,
-          ...moveTowards(prev.player, stone, 5)
+          ...currentState.player,
+          ...newPosition
         }
-      }))
+      }
+      setGameState(currentState)
       await new Promise(resolve => setTimeout(resolve, 16))
     }
 
     // Pick up stone
     await new Promise(resolve => setTimeout(resolve, 500))
-    setGameState(prev => ({
-      ...prev,
-      stones: prev.stones.filter(s => s.id !== stoneId),
+    currentState = {
+      ...currentState,
+      stones: currentState.stones.filter(s => s.id !== stoneId),
       playerCarrying: stone
-    }))
+    }
+    setGameState(currentState)
 
     // Return to base
-    while (Math.abs(gameState.player.x - gameState.base.x) > 5 || Math.abs(gameState.player.y - gameState.base.y) > 5) {
-      setGameState(prev => ({
-        ...prev,
+    while (Math.abs(currentState.player.x - currentState.base.x) > 5 || 
+           Math.abs(currentState.player.y - currentState.base.y) > 5) {
+      const newPosition = moveTowards(currentState.player, currentState.base, 5)
+      currentState = {
+        ...currentState,
         player: {
-          ...prev.player,
-          ...moveTowards(prev.player, prev.base, 5)
+          ...currentState.player,
+          ...newPosition
         }
-      }))
+      }
+      setGameState(currentState)
       await new Promise(resolve => setTimeout(resolve, 16))
     }
 
     // Drop stone at base
     await new Promise(resolve => setTimeout(resolve, 500))
-    setGameState(prev => ({
-      ...prev,
+    currentState = {
+      ...currentState,
       playerCarrying: null,
       isAnimating: false
-    }))
+    }
+    setGameState(currentState)
 
     if (onStoneCollected) {
       onStoneCollected()
