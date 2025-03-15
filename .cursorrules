@@ -1,0 +1,118 @@
+# Cursor Rules for Project Structure
+
+# Project Vision
+- Incremental game focusing on visual scale and automation
+- Start with manual resource gathering, evolve into automated systems
+- Progressive complexity: introduce mechanics gradually
+- Visual feedback is crucial - players should see their progress
+- Future plans for multiplayer/cooperative gameplay
+
+# Development Philosophy
+- Start simple, add complexity only when needed
+- Prefer composition over inheritance
+- Keep components focused and single-purpose
+- Extract reusable logic into hooks
+- Maintain clear visual hierarchy in UI components
+- Consider performance implications early (e.g., canvas vs. DOM)
+
+# Code Complexity Guidelines
+- If a component exceeds 200 lines, consider splitting it
+- If a component has more than 3 levels of nested JSX, extract components
+- If a hook manages multiple concerns, split it
+- If you're passing more than 4-5 props, consider composition or context
+- Avoid prop drilling more than 2 levels deep
+- Keep functions focused: if a function needs more than 2-3 parameters, use an options object
+
+# State Management
+- Use local state for component-specific state
+- Use context for shared state that spans multiple components
+- Consider moving state up only when necessary
+- Document state shape and mutations
+
+# Performance Considerations
+- Use React.memo() for expensive renders
+- Keep canvas operations efficient
+- Batch state updates when possible
+- Consider using web workers for heavy computations
+- Profile early and often
+
+# Root-level directories
+src/                            # Source code
+  app/                          # Next.js app router pages
+  components/                   # React components
+    common/                     # Shared/reusable components
+    game/                       # Game-specific components
+      ${ComponentName}/         # Main component directory (PascalCase)
+        index.tsx              # Main component file
+        components/            # Child components specific to this component
+          ${ChildComponent}/   # Child component that may have its own children
+            index.tsx         # Child component main file
+            components/       # Nested components (if needed)
+              ${Name}.tsx    # Simple child components (if no further nesting needed)
+        hooks/                # Custom hooks specific to this component
+          use${Name}.ts      # Hook naming convention
+        utils/                # Utility functions specific to this component
+          ${name}.ts         # Utility file naming convention
+        types/               # TypeScript types/interfaces specific to this component
+          ${name}.types.ts   # Type definition file naming convention
+        constants/           # Constants specific to this component
+          ${name}.constants.ts
+
+# File naming conventions
+- Use PascalCase for component directories and files
+- Use camelCase for utility files, hooks, and other non-component files
+- Use kebab-case for CSS module files
+- Always use .tsx extension for files containing JSX
+- Use .ts extension for files containing only TypeScript
+- Use index.tsx for main component files
+- Prefix hooks with 'use'
+- Suffix type files with '.types.ts'
+- Suffix constant files with '.constants.ts'
+
+# Component structure conventions
+- Each major component should have its own directory
+- Use index.tsx for the main component file
+- Keep related files (hooks, utils, types) close to the component
+- Nest child components in a components/ subdirectory
+- If a child component becomes complex, promote it to its own directory
+
+# Import conventions
+- Use '@/' alias for imports from src directory
+- Use relative imports for files within the same component directory
+- Group imports in the following order:
+  1. React and external libraries
+  2. Components
+  3. Hooks
+  4. Utils/Helpers
+  5. Types
+  6. Constants
+  7. Styles
+
+# Type conventions
+- Suffix component prop interfaces with 'Props'
+- Suffix handler prop names with 'Handler'
+- Use 'Handle' prefix for event handler functions
+
+# Example structure:
+src/
+  components/
+    game/
+      GameWrapper/           # Main game component
+        index.tsx           # Main component file
+        components/
+          GameCanvas/      # Complex child component
+            index.tsx     
+            components/   
+          ManagementUI/    # Complex child component
+            index.tsx
+            components/
+              ActionButton.tsx   # Simple child component
+              StoneInventory.tsx # Simple child component
+        hooks/
+          useGameState.ts
+        utils/
+          animation.ts
+        types/
+          game.types.ts
+        constants/
+          game.constants.ts 

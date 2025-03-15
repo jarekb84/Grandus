@@ -1,8 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import GameCanvas, { GameCanvasHandle } from '@/components/GameCanvas'
-import ManagementUI from '@/components/ManagementUI'
+import GameCanvas, { GameCanvasHandle } from './components/GameCanvas'
+import ManagementUI from './components/ManagementUI'
 
 export default function GameWrapper() {
   const canvasRef = useRef<GameCanvasHandle>(null)

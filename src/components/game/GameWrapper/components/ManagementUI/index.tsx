@@ -1,7 +1,7 @@
 'use client'
 
-import ActionButton from './ActionButton'
-import StoneInventory from './StoneInventory'
+import ActionButton from './components/ActionButton'
+import StoneInventory from './components/StoneInventory'
 
 interface ManagementUIProps {
   onGatherClick: () => void
