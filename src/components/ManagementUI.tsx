@@ -1,17 +1,19 @@
 'use client'
 
-export default function ManagementUI() {
+import ActionButton from './ActionButton'
+import StoneInventory from './StoneInventory'
+
+interface ManagementUIProps {
+  onGatherClick: () => void
+  isGathering: boolean
+  stoneCount: number
+}
+
+export default function ManagementUI({ onGatherClick, isGathering, stoneCount }: ManagementUIProps) {
   return (
-    <div className="flex gap-4">
-      <button 
-        className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors"
-        onClick={() => {
-          // Placeholder for future functionality
-          console.log('Button clicked!')
-        }}
-      >
-        Action Button
-      </button>
+    <div className="flex gap-4 items-start">
+      <ActionButton onClick={onGatherClick} disabled={isGathering} />
+      <StoneInventory count={stoneCount} />
     </div>
   )
 } 
