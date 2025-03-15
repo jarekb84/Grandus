@@ -115,4 +115,15 @@ src/
         types/
           game.types.ts
         constants/
-          game.constants.ts 
+          game.constants.ts
+
+# Development Environment
+- Windows 10/11 development environment
+- Use PowerShell commands instead of Bash
+  - Use `rmdir /s /q` instead of `rm -rf`
+  - Use `mkdir` without the `-p` flag
+  - Use `copy` instead of `cp`
+  - Use backslashes `\` in paths instead of forward slashes
+  - Use `; ` for command chaining instead of `&&`
+- Terminal commands should be Windows-compatible
+- File paths should use Windows conventions 
