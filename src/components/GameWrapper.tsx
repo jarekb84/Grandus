@@ -1,5 +1,5 @@
-import GameCanvas from './GameCanvas'
-import ManagementUI from './ManagementUI'
+import GameCanvas from '@/components/GameCanvas'
+import ManagementUI from '@/components/ManagementUI'
 
 export default function GameWrapper() {
   return (
