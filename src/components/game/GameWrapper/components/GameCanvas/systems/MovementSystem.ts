@@ -6,8 +6,8 @@ class MovementSystem {
     const dy = target.y - current.y
     const distance = Math.sqrt(dx * dx + dy * dy)
     
-    if (distance < speed) {
-      return target
+    if (distance <= speed) {
+      return { ...target }
     }
     
     const ratio = speed / distance
@@ -18,8 +18,10 @@ class MovementSystem {
   }
 
   hasReachedTarget(entity: GameEntity, target: Position, threshold: number = 5): boolean {
-    return Math.abs(entity.x - target.x) <= threshold && 
-           Math.abs(entity.y - target.y) <= threshold
+    const dx = Math.abs(entity.x - target.x)
+    const dy = Math.abs(entity.y - target.y)
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    return distance <= threshold
   }
 
   updatePosition(entity: GameEntity, newPosition: Position): GameEntity {

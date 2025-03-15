@@ -19,9 +19,9 @@ export interface GameCanvasHandle {
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCanvas({ onStoneCollected, onWoodCollected }, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const animationFrameRef = useRef<number>()
-  const renderSystem = useRef(new RenderSystem())
-  const resourceSystem = useRef(new ResourceSystem())
+  const animationFrameRef = useRef<number | null>(null)
+  const renderSystem = useRef<RenderSystem>(new RenderSystem())
+  const resourceSystem = useRef<ResourceSystem>(new ResourceSystem())
 
   const [gameState, setGameState] = useState<GameState>({
     player: { id: 'player', x: 400, y: 300, type: 'player', size: 20, color: '#4ade80' },
