@@ -32,9 +32,42 @@
 # Performance Considerations
 - Use React.memo() for expensive renders
 - Keep canvas operations efficient
+  - Use requestAnimationFrame for animations
+  - Batch draw operations where possible
+  - Implement proper object pooling for frequently created/destroyed objects
+  - Consider using multiple canvas layers for different update frequencies
 - Batch state updates when possible
 - Consider using web workers for heavy computations
 - Profile early and often
+- Minimize DOM updates in game loop
+
+# Canvas vs DOM Usage Guidelines
+- Use Canvas for:
+  - All game world elements (stones, resources, characters, etc.)
+  - Character/entity movement and animations
+  - Resource collection animations
+  - Combat and projectile systems
+  - Particle effects and visual feedback
+  - Any elements that will be frequently updated or animated
+  - Areas expecting high object counts (100+ elements)
+  - Interactive game elements requiring frequent position updates
+
+- Use DOM/HTML for:
+  - UI controls (buttons, menus, settings)
+  - Stats displays and resource counters
+  - Tooltips and information panels
+  - Configuration interfaces
+  - Management screens
+  - Any static or infrequently updated interface elements
+  - Modal dialogs and notifications
+  - Forms and input controls
+
+# Component Organization for Canvas Integration
+- Separate canvas rendering logic into dedicated hooks (e.g., useCanvasRenderer)
+- Keep canvas-related state separate from UI state
+- Use typed interfaces for all game objects and entities
+- Implement proper cleanup in useEffect for canvas subscriptions
+- Consider breaking large canvas operations into worker threads
 
 # Root-level directories
 src/                            # Source code
@@ -43,12 +76,12 @@ src/                            # Source code
     common/                     # Shared/reusable components
     game/                       # Game-specific components
       ${ComponentName}/         # Main component directory (PascalCase)
-        index.tsx              # Main component file
+        ${ComponentName}.tsx    # Main component file
         components/            # Child components specific to this component
-          ${ChildComponent}/   # Child component that may have its own children
-            index.tsx         # Child component main file
+          ${ChildComponent}/   # Child component directory
+            ${ChildComponent}.tsx  # Child component file
             components/       # Nested components (if needed)
-              ${Name}.tsx    # Simple child components (if no further nesting needed)
+              ${Name}.tsx    # Simple child components
         hooks/                # Custom hooks specific to this component
           use${Name}.ts      # Hook naming convention
         utils/                # Utility functions specific to this component
@@ -59,22 +92,23 @@ src/                            # Source code
           ${name}.constants.ts
 
 # File naming conventions
-- Use PascalCase for component directories and files
+- Use PascalCase for component directories and component files
 - Use camelCase for utility files, hooks, and other non-component files
 - Use kebab-case for CSS module files
 - Always use .tsx extension for files containing JSX
 - Use .ts extension for files containing only TypeScript
-- Use index.tsx for main component files
+- Component files should be named exactly the same as their directory (if in a directory)
 - Prefix hooks with 'use'
 - Suffix type files with '.types.ts'
 - Suffix constant files with '.constants.ts'
+- Never use index.tsx as a default export - always name files explicitly
 
 # Component structure conventions
 - Each major component should have its own directory
-- Use index.tsx for the main component file
+- Component file should be named the same as its directory
 - Keep related files (hooks, utils, types) close to the component
 - Nest child components in a components/ subdirectory
-- If a child component becomes complex, promote it to its own directory
+- If a child component becomes complex, promote it to its own directory with matching filename
 
 # Import conventions
 - Use '@/' alias for imports from src directory
@@ -98,13 +132,13 @@ src/
   components/
     game/
       GameWrapper/           # Main game component
-        index.tsx           # Main component file
+        GameWrapper.tsx      # Main component file
         components/
           GameCanvas/      # Complex child component
-            index.tsx     
+            GameCanvas.tsx
             components/   
           ManagementUI/    # Complex child component
-            index.tsx
+            ManagementUI.tsx
             components/
               ActionButton.tsx   # Simple child component
               StoneInventory.tsx # Simple child component

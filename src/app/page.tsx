@@ -1,4 +1,4 @@
-import GameWrapper from '@/components/game/GameWrapper'
+import GameWrapper from '@/components/game/GameWrapper/GameWrapper'
 
 export default function Home() {
   return (
