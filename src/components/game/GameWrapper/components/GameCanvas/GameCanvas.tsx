@@ -57,7 +57,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
             })
           }
 
-          create() {
+          override create() {
             super.create()
             
             // Store scene reference after it's fully initialized

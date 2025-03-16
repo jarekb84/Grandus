@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { 
-  GameEntity, 
+  Entity, 
   EntityType, 
   ResourceType,
   ResourceEntity,
@@ -25,13 +25,14 @@ const RESOURCE_CONFIGS = {
   }
 }
 
-export function generateInitialEntities(): GameEntity[] {
-  const entities: GameEntity[] = []
+export function generateInitialEntities(): Entity[] {
+  const entities: Entity[] = []
 
   // Add player
   entities.push({
     id: 'player1',
     type: EntityType.CHARACTER,
+    health: 100,
     position: { x: 400, y: 300 },
     properties: {
       size: 20,
@@ -44,6 +45,7 @@ export function generateInitialEntities(): GameEntity[] {
   entities.push({
     id: 'base1',
     type: EntityType.BUILDING,
+    buildingType: 'base',
     position: { x: 400, y: 400 },
     properties: {
       size: 40,

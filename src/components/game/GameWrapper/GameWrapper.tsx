@@ -22,10 +22,11 @@ const GameWrapper = () => {
     if (!gameCanvasRef.current || isGathering || !hasAvailableResource(type)) return
     
     const resources = getResourceEntitiesByType(type)
-    if (resources.length > 0) {
+    const firstResource = resources[0]
+    if (firstResource) {
       setIsGathering(true)
       try {
-        await gameCanvasRef.current.gatherResource(resources[0].id)
+        await gameCanvasRef.current.gatherResource(firstResource.id)
       } finally {
         setIsGathering(false)
       }

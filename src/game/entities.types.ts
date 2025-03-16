@@ -12,13 +12,6 @@ export enum Shape {
   // etc...
 }
 
-export interface EntityProperties {
-  size: number
-  color: number
-  shape: Shape
-  spriteKey?: string
-}
-
 export enum EntityType {
   RESOURCE = 'RESOURCE',
   CHARACTER = 'CHARACTER',
@@ -39,7 +32,7 @@ interface BaseEntity {
     y: number
   }
   properties: {
-    shape: string
+    shape: Shape
     size: number
     color: number
   }

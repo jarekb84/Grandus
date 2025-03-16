@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { GameEntity, EntityType, Shape } from '../entities.types'
+import { Entity, EntityType, Shape } from '../entities.types'
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void
@@ -65,7 +65,7 @@ export class MainScene extends Phaser.Scene {
     return this.textures.exists(key)
   }
 
-  addEntity(entity: GameEntity) {
+  addEntity(entity: Entity) {
     // Verify texture exists before creating sprite
     if (!this.ensureTexture(entity.properties.shape)) {
       console.error('Failed to create entity - missing texture')
@@ -93,7 +93,7 @@ export class MainScene extends Phaser.Scene {
     }
   }
 
-  private createSpritesForEntity(entity: GameEntity): EntitySprites {
+  private createSpritesForEntity(entity: Entity): EntitySprites {
     const { shape, size, color } = entity.properties
     const { x, y } = entity.position
 
