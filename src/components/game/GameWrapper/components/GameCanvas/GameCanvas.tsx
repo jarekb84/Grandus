@@ -38,11 +38,28 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
     const initPhaser = async () => {
       const Phaser = (await import('phaser')).default
 
+      const mainScene = new MainScene()
+      
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent: containerRef.current,
         backgroundColor: '#1e293b', // slate-800
-        scene: MainScene,
+        scene: {
+          preload: function(this: Phaser.Scene) {
+            mainScene.init({ 
+              onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
+              onWoodCollected: () => callbacksRef.current.onWoodCollected?.(),
+              scene: this
+            })
+            mainScene.preload()
+          },
+          create: function(this: Phaser.Scene) {
+            mainScene.create()
+          },
+          update: function(this: Phaser.Scene) {
+            mainScene.update()
+          }
+        },
         scale: {
           mode: Phaser.Scale.RESIZE,
           width: '100%',
@@ -53,14 +70,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
       // Create the game instance
       game = new Phaser.Game(config)
 
-      // Get reference to the main scene
-      game.events.once('ready', () => {
-        sceneRef.current = game?.scene.getScene('MainScene') as MainScene
-        sceneRef.current?.init({ 
-          onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
-          onWoodCollected: () => callbacksRef.current.onWoodCollected?.()
-        })
-      })
+      // Store scene reference
+      sceneRef.current = mainScene
     }
 
     initPhaser()

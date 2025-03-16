@@ -1,7 +1,6 @@
-import { Scene } from 'phaser'
 import type * as Phaser from 'phaser'
 
-export default class MainScene extends Scene {
+export default class MainScene {
   private player!: Phaser.GameObjects.Sprite
   private base!: Phaser.GameObjects.Sprite
   private stones: Phaser.GameObjects.Sprite[] = []
@@ -10,27 +9,30 @@ export default class MainScene extends Scene {
   private carriedResource: Phaser.GameObjects.Sprite | null = null
   private onStoneCollected?: () => void
   private onWoodCollected?: () => void
+  private scene!: Phaser.Scene
 
   constructor() {
-    super({ key: 'MainScene' })
+    // Scene configuration will be set up in create()
   }
 
   init(data: { 
     onStoneCollected?: () => void
     onWoodCollected?: () => void 
+    scene: Phaser.Scene
   }) {
     this.onStoneCollected = data.onStoneCollected
     this.onWoodCollected = data.onWoodCollected
+    this.scene = data.scene
   }
 
   create() {
     // Create base
-    this.base = this.add.sprite(400, 400, 'placeholder')
+    this.base = this.scene.add.sprite(400, 400, 'placeholder')
     this.base.setDisplaySize(40, 40)
     this.base.setTint(0x60a5fa)
 
     // Create player
-    this.player = this.add.sprite(400, 300, 'placeholder')
+    this.player = this.scene.add.sprite(400, 300, 'placeholder')
     this.player.setDisplaySize(20, 20)
     this.player.setTint(0x4ade80)
 
@@ -44,7 +46,7 @@ export default class MainScene extends Scene {
     ]
 
     stonePositions.forEach((pos, index) => {
-      const stone = this.add.sprite(pos.x, pos.y, 'placeholder')
+      const stone = this.scene.add.sprite(pos.x, pos.y, 'placeholder')
       stone.setDisplaySize(8, 8)
       stone.setTint(0x94a3b8)
       stone.setData('id', `stone${index + 1}`)
@@ -61,7 +63,7 @@ export default class MainScene extends Scene {
     ]
 
     woodPositions.forEach((pos, index) => {
-      const wood = this.add.sprite(pos.x, pos.y, 'placeholder')
+      const wood = this.scene.add.sprite(pos.x, pos.y, 'placeholder')
       wood.setDisplaySize(15, 15)
       wood.setTint(0xca8a04)
       wood.setData('id', `wood${index + 1}`)
@@ -72,7 +74,7 @@ export default class MainScene extends Scene {
 
   preload() {
     // Load a simple placeholder texture for our shapes
-    this.load.image('placeholder', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')
+    this.scene.load.image('placeholder', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')
   }
 
   async gatherResource(resourceId: string) {
@@ -120,7 +122,7 @@ export default class MainScene extends Scene {
 
   private movePlayerTo(x: number, y: number): Promise<void> {
     return new Promise((resolve) => {
-      this.tweens.add({
+      this.scene.tweens.add({
         targets: this.player,
         x,
         y,
