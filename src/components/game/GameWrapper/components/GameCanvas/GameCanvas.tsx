@@ -36,8 +36,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         parent: containerRef.current,
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 800,
         backgroundColor: '#1e293b',
         scene: class extends MainScene {
           constructor() {
