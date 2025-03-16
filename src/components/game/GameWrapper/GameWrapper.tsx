@@ -34,46 +34,68 @@ const GameWrapper = () => {
   }
 
   return (
-    <div className="relative w-full h-screen bg-gray-900">
-      <GameCanvas 
-        ref={gameCanvasRef}
-        onResourceCollected={(type) => {
-          useGameState.getState().incrementResource(type)
-        }}
-      />      
-      <Inventory 
-        stoneCount={inventory.stone} 
-        woodCount={inventory.wood} 
-        foodCount={inventory.food}
-      />
-      <div className="fixed bottom-4 left-4 space-y-2">
-        <button
-          onClick={() => handleGatherResource(ResourceType.STONE)}
-          disabled={isGathering || !hasAvailableResource(ResourceType.STONE)}
-          className={`block px-4 py-2 bg-gray-700 text-white rounded min-w-[120px] ${
-            isGathering || !hasAvailableResource(ResourceType.STONE) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
-          }`}
-        >
-          Gather Stone
-        </button>
-        <button
-          onClick={() => handleGatherResource(ResourceType.WOOD)}
-          disabled={isGathering || !hasAvailableResource(ResourceType.WOOD)}
-          className={`block px-4 py-2 bg-yellow-700 text-white rounded min-w-[120px] ${
-            isGathering || !hasAvailableResource(ResourceType.WOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-600'
-          }`}
-        >
-          Gather Wood
-        </button>
-        <button
-          onClick={() => handleGatherResource(ResourceType.FOOD)}
-          disabled={isGathering || !hasAvailableResource(ResourceType.FOOD)}
-          className={`block px-4 py-2 bg-green-700 text-white rounded min-w-[120px] ${
-            isGathering || !hasAvailableResource(ResourceType.FOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
-          }`}
-        >
-          Gather Food
-        </button>
+    <div className="flex flex-col items-center min-h-screen bg-gray-900 p-4">
+      {/* Main game area with inventory */}
+      <div className="relative flex gap-4 mb-4">
+        {/* Left sidebar with inventory */}
+        <div className="w-64">
+          <Inventory 
+            stoneCount={inventory.stone} 
+            woodCount={inventory.wood} 
+            foodCount={inventory.food}
+          />
+        </div>
+        
+        {/* Centered game canvas */}
+        <div className="w-[1024px] h-[768px] bg-gray-800 rounded-lg overflow-hidden">
+          <GameCanvas 
+            ref={gameCanvasRef}
+            onResourceCollected={(type) => {
+              useGameState.getState().incrementResource(type)
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Action panel below game */}
+      <div className="w-[1288px] bg-gray-800 rounded-lg p-4"> {/* Width matches game + inventory + gap */}
+        <div className="flex flex-col gap-4">
+          {/* Action categories */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <h3 className="text-white font-semibold mb-2">Resource Gathering</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleGatherResource(ResourceType.STONE)}
+                  disabled={isGathering || !hasAvailableResource(ResourceType.STONE)}
+                  className={`flex-1 px-4 py-2 bg-gray-700 text-white rounded ${
+                    isGathering || !hasAvailableResource(ResourceType.STONE) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+                  }`}
+                >
+                  Gather Stone
+                </button>
+                <button
+                  onClick={() => handleGatherResource(ResourceType.WOOD)}
+                  disabled={isGathering || !hasAvailableResource(ResourceType.WOOD)}
+                  className={`flex-1 px-4 py-2 bg-yellow-700 text-white rounded ${
+                    isGathering || !hasAvailableResource(ResourceType.WOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-600'
+                  }`}
+                >
+                  Gather Wood
+                </button>
+                <button
+                  onClick={() => handleGatherResource(ResourceType.FOOD)}
+                  disabled={isGathering || !hasAvailableResource(ResourceType.FOOD)}
+                  className={`flex-1 px-4 py-2 bg-green-700 text-white rounded ${
+                    isGathering || !hasAvailableResource(ResourceType.FOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+                  }`}
+                >
+                  Gather Food
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
