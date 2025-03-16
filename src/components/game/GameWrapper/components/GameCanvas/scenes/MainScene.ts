@@ -1,5 +1,4 @@
 import * as Phaser from 'phaser'
-import { GameState } from '../types/game.types'
 
 export default class MainScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite
