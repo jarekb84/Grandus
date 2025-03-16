@@ -91,17 +91,17 @@ src/                            # Source code
     game/                       # Game-specific components
       ${ComponentName}/         # Main component directory (PascalCase)
         ${ComponentName}.tsx    # Main component file
+        ${ComponentName}.types.ts  # Types for this component
         components/            # Child components specific to this component
           ${ChildComponent}/   # Child component directory
             ${ChildComponent}.tsx  # Child component file
+            ${ChildComponent}.types.ts  # Types for this child component
             components/       # Nested components (if needed)
               ${Name}.tsx    # Simple child components
         hooks/                # Custom hooks specific to this component
           use${Name}.ts      # Hook naming convention
         utils/                # Utility functions specific to this component
           ${name}.ts         # Utility file naming convention
-        types/               # TypeScript types/interfaces specific to this component
-          ${name}.types.ts   # Type definition file naming convention
         constants/           # Constants specific to this component
           ${name}.constants.ts
 
@@ -147,12 +147,15 @@ src/
     game/
       GameWrapper/           # Main game component
         GameWrapper.tsx      # Main component file
+        GameWrapper.types.ts # Types for GameWrapper
         components/
           GameCanvas/      # Complex child component
             GameCanvas.tsx
+            GameCanvas.types.ts
             components/   
           ManagementUI/    # Complex child component
             ManagementUI.tsx
+            ManagementUI.types.ts
             components/
               ActionButton.tsx   # Simple child component
               StoneInventory.tsx # Simple child component
@@ -160,8 +163,6 @@ src/
           useGameState.ts
         utils/
           animation.ts
-        types/
-          game.types.ts
         constants/
           game.constants.ts
 

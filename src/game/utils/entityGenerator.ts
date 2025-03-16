@@ -4,7 +4,7 @@ import {
   EntityType, 
   ResourceType,
   ResourceEntity 
-} from '../types/entities.types'
+} from '../entities.types'
 
 const RESOURCE_CONFIGS = {
   [ResourceType.STONE]: {

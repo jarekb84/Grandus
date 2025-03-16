@@ -1,5 +1,5 @@
 import { create, StateCreator } from 'zustand'
-import { GameEntity, ResourceType } from '../types/entities.types'
+import { GameEntity, ResourceType } from '../entities.types'
 
 interface GameState {
   entities: Map<string, GameEntity>

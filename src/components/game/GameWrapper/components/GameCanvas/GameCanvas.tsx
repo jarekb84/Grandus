@@ -5,7 +5,7 @@ import * as Phaser from 'phaser'
 import { MainScene } from '@/game/scenes/MainScene'
 import { ResourceSystem } from '@/game/systems/ResourceSystem'
 import { useGameState } from '@/game/state/GameState'
-import { EntityType, ResourceType } from '@/game/types/entities.types'
+import { EntityType, ResourceType } from '@/game/entities.types'
 import { generateInitialEntities } from '@/game/utils/entityGenerator'
 
 export interface GameCanvasProps {
