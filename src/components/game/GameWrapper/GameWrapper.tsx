@@ -8,6 +8,7 @@ const GameWrapper = () => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
   const [stoneCount, setStoneCount] = useState(0)
   const [woodCount, setWoodCount] = useState(0)
+  const [foodCount, setFoodCount] = useState(0)
 
   const handleGatherStone = () => {
     if (!gameCanvasRef.current) return
@@ -27,6 +28,15 @@ const GameWrapper = () => {
     }
   }
 
+  const handleGatherFood = () => {
+    if (!gameCanvasRef.current) return
+    
+    const food = gameCanvasRef.current.getAvailableFood()
+    if (food.length > 0) {
+      gameCanvasRef.current.gatherFood(food[0].id)
+    }
+  }
+
   const handleStoneCollected = useCallback(() => {
     setStoneCount(prev => prev + 1)
   }, [])
@@ -35,14 +45,23 @@ const GameWrapper = () => {
     setWoodCount(prev => prev + 1)
   }, [])
 
+  const handleFoodCollected = useCallback(() => {
+    setFoodCount(prev => prev + 1)
+  }, [])
+
   return (
     <div className="relative w-full h-screen bg-gray-900">
       <GameCanvas 
         ref={gameCanvasRef}
         onStoneCollected={handleStoneCollected}
         onWoodCollected={handleWoodCollected}
+        onFoodCollected={handleFoodCollected}
       />
-      <Inventory stoneCount={stoneCount} woodCount={woodCount} />
+      <Inventory 
+        stoneCount={stoneCount} 
+        woodCount={woodCount} 
+        foodCount={foodCount}
+      />
       <div className="fixed bottom-4 left-4 space-y-2">
         <button
           onClick={handleGatherStone}
@@ -55,6 +74,12 @@ const GameWrapper = () => {
           className="block px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-600"
         >
           Gather Wood
+        </button>
+        <button
+          onClick={handleGatherFood}
+          className="block px-4 py-2 bg-green-700 text-white rounded hover:bg-green-600"
+        >
+          Gather Food
         </button>
       </div>
     </div>

@@ -3,9 +3,10 @@
 interface InventoryProps {
   stoneCount: number
   woodCount: number
+  foodCount: number
 }
 
-const Inventory = ({ stoneCount, woodCount }: InventoryProps) => {
+const Inventory = ({ stoneCount, woodCount, foodCount }: InventoryProps) => {
   return (
     <div className="fixed top-4 right-4 bg-gray-800 p-4 rounded-lg shadow-lg text-white">
       <h2 className="text-lg font-bold mb-2">Inventory</h2>
@@ -17,6 +18,10 @@ const Inventory = ({ stoneCount, woodCount }: InventoryProps) => {
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-yellow-600" />
           <span>Wood: {woodCount}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-green-500" />
+          <span>Food: {foodCount}</span>
         </div>
       </div>
     </div>

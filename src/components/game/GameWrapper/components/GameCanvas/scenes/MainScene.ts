@@ -5,10 +5,12 @@ export default class MainScene {
   private base!: Phaser.GameObjects.Sprite
   private stones: Phaser.GameObjects.Sprite[] = []
   private wood: Phaser.GameObjects.Sprite[] = []
+  private food: Phaser.GameObjects.Sprite[] = []
   private isAnimating: boolean = false
   private carriedResource: Phaser.GameObjects.Sprite | null = null
   private onStoneCollected?: () => void
   private onWoodCollected?: () => void
+  private onFoodCollected?: () => void
   private scene!: Phaser.Scene
 
   constructor() {
@@ -18,10 +20,12 @@ export default class MainScene {
   init(data: { 
     onStoneCollected?: () => void
     onWoodCollected?: () => void 
+    onFoodCollected?: () => void
     scene: Phaser.Scene
   }) {
     this.onStoneCollected = data.onStoneCollected
     this.onWoodCollected = data.onWoodCollected
+    this.onFoodCollected = data.onFoodCollected
     this.scene = data.scene
   }
 
@@ -70,6 +74,24 @@ export default class MainScene {
       wood.setData('type', 'wood')
       this.wood.push(wood)
     })
+
+    // Create food (berry bushes)
+    const foodPositions = [
+      { x: 100, y: 300 },
+      { x: 700, y: 300 },
+      { x: 400, y: 600 },
+      { x: 200, y: 400 },
+      { x: 600, y: 400 }
+    ]
+
+    foodPositions.forEach((pos, index) => {
+      const food = this.scene.add.sprite(pos.x, pos.y, 'placeholder')
+      food.setDisplaySize(12, 12)
+      food.setTint(0x22c55e)  // Green color for berry bushes
+      food.setData('id', `food${index + 1}`)
+      food.setData('type', 'food')
+      this.food.push(food)
+    })
   }
 
   preload() {
@@ -80,7 +102,7 @@ export default class MainScene {
   async gatherResource(resourceId: string) {
     if (this.isAnimating) return
 
-    const resource = [...this.stones, ...this.wood].find(r => r.getData('id') === resourceId)
+    const resource = [...this.stones, ...this.wood, ...this.food].find(r => r.getData('id') === resourceId)
     if (!resource) return
 
     this.isAnimating = true
@@ -97,8 +119,10 @@ export default class MainScene {
       const resourceType = resource.getData('type')
       if (resourceType === 'stone') {
         this.stones = this.stones.filter(s => s.getData('id') !== resourceId)
-      } else {
+      } else if (resourceType === 'wood') {
         this.wood = this.wood.filter(w => w.getData('id') !== resourceId)
+      } else if (resourceType === 'food') {
+        this.food = this.food.filter(f => f.getData('id') !== resourceId)
       }
 
       // Move back to base
@@ -114,6 +138,8 @@ export default class MainScene {
         this.onStoneCollected()
       } else if (resourceType === 'wood' && this.onWoodCollected) {
         this.onWoodCollected()
+      } else if (resourceType === 'food' && this.onFoodCollected) {
+        this.onFoodCollected()
       }
     } finally {
       this.isAnimating = false
@@ -147,8 +173,10 @@ export default class MainScene {
     }
   }
 
-  getAvailableResources(type: 'stone' | 'wood'): { id: string }[] {
-    const resources = type === 'stone' ? this.stones : this.wood
+  getAvailableResources(type: 'stone' | 'wood' | 'food'): { id: string }[] {
+    const resources = type === 'stone' ? this.stones : 
+                     type === 'wood' ? this.wood :
+                     this.food
     return resources.map(r => ({ 
       id: r.getData('id')
     }))

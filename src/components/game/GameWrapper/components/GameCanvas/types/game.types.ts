@@ -6,7 +6,7 @@ export interface GameEntity {
   id: string
   x: number
   y: number
-  type: string
+  type: 'stone' | 'wood' | 'food'
   size: number
   color: string
 } 
