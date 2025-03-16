@@ -13,7 +13,8 @@
 - Keep components focused and single-purpose
 - Extract reusable logic into hooks
 - Maintain clear visual hierarchy in UI components
-- Consider performance implications early (e.g., canvas vs. DOM)
+- Consider performance implications early
+- Separate Phaser game logic from React UI components
 
 # Code Complexity Guidelines
 - If a component exceeds 200 lines, consider splitting it
@@ -24,56 +25,69 @@
 - Keep functions focused: if a function needs more than 2-3 parameters, use an options object
 
 # State Management
-- Use local state for component-specific state
-- Use context for shared state that spans multiple components
-- Consider moving state up only when necessary
+- Use local state for React UI components
+- Use context for shared UI state that spans multiple components
+- Use Phaser's built-in state management for game state
+- Use a bridge pattern to sync game state with UI when needed
 - Document state shape and mutations
 
 # Performance Considerations
-- Use React.memo() for expensive renders
-- Keep canvas operations efficient
-  - Use requestAnimationFrame for animations
-  - Batch draw operations where possible
-  - Implement proper object pooling for frequently created/destroyed objects
-  - Consider using multiple canvas layers for different update frequencies
-- Batch state updates when possible
+- Use React.memo() for expensive UI renders
+- Keep Phaser game operations efficient
+  - Use proper scene management
+  - Implement object pooling for frequently created/destroyed game objects
+  - Use sprite sheets and texture atlases
+  - Implement proper physics group management
+  - Consider using multiple scenes for different game areas
+- Batch React state updates when possible
 - Consider using web workers for heavy computations
 - Profile early and often
-- Minimize DOM updates in game loop
+- Minimize unnecessary communication between Phaser and React
 
-# Canvas vs DOM Usage Guidelines
-- Use Canvas for:
+# Game Architecture Guidelines
+- Use Phaser for:
   - All game world elements (stones, resources, characters, etc.)
+  - Game physics and collision detection
   - Character/entity movement and animations
-  - Resource collection animations
+  - Resource collection mechanics
   - Combat and projectile systems
   - Particle effects and visual feedback
-  - Any elements that will be frequently updated or animated
-  - Areas expecting high object counts (100+ elements)
-  - Interactive game elements requiring frequent position updates
+  - Game world interactions
+  - Scene management
+  - Asset loading and management
 
-- Use DOM/HTML for:
+- Use React for:
   - UI controls (buttons, menus, settings)
   - Stats displays and resource counters
   - Tooltips and information panels
   - Configuration interfaces
   - Management screens
-  - Any static or infrequently updated interface elements
   - Modal dialogs and notifications
   - Forms and input controls
+  - Game settings and preferences
 
-# Component Organization for Canvas Integration
-- Separate canvas rendering logic into dedicated hooks (e.g., useCanvasRenderer)
-- Keep canvas-related state separate from UI state
-- Use typed interfaces for all game objects and entities
-- Implement proper cleanup in useEffect for canvas subscriptions
-- Consider breaking large canvas operations into worker threads
+# Component Organization for Phaser Integration
+- Separate Phaser scenes into dedicated files
+- Keep game logic in Phaser scenes and systems
+- Use TypeScript classes for game objects and systems
+- Implement proper cleanup in scene shutdown methods
+- Use event emitters to communicate between Phaser and React
+- Create typed interfaces for all game objects and systems
 
 # Root-level directories
 src/                            # Source code
   app/                          # Next.js app router pages
   components/                   # React components
     common/                     # Shared/reusable components
+    ui/                        # Game UI components
+  game/                        # Phaser game code
+    scenes/                    # Phaser scenes
+    objects/                   # Game object classes
+    systems/                   # Game systems
+    assets/                    # Game assets
+    config/                    # Game configuration
+    utils/                     # Game utilities
+  components/                   # React components
     game/                       # Game-specific components
       ${ComponentName}/         # Main component directory (PascalCase)
         ${ComponentName}.tsx    # Main component file
@@ -150,6 +164,14 @@ src/
           game.types.ts
         constants/
           game.constants.ts
+
+# Additional Phaser-specific Conventions
+- Scene files should be suffixed with 'Scene'
+- Game object classes should be suffixed with relevant type (e.g., 'Sprite', 'Container')
+- Use Phaser's built-in types where available
+- Implement proper preload methods in scenes
+- Use TypeScript enums for game states and constants
+- Follow Phaser's lifecycle methods (preload, create, update)
 
 # Development Environment
 - Windows 10/11 development environment
