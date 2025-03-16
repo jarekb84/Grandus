@@ -24,6 +24,12 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
   const gameRef = useRef<Phaser.Game | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<MainScene | null>(null)
+  const callbacksRef = useRef({ onStoneCollected, onWoodCollected })
+
+  // Update callbacks ref when props change
+  useEffect(() => {
+    callbacksRef.current = { onStoneCollected, onWoodCollected }
+  }, [onStoneCollected, onWoodCollected])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -46,13 +52,16 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
     // Get reference to the main scene
     gameRef.current.events.once('ready', () => {
       sceneRef.current = gameRef.current?.scene.getScene('MainScene') as MainScene
-      sceneRef.current?.init({ onStoneCollected, onWoodCollected })
+      sceneRef.current?.init({ 
+        onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
+        onWoodCollected: () => callbacksRef.current.onWoodCollected?.()
+      })
     })
 
     return () => {
       gameRef.current?.destroy(true)
     }
-  }, [onStoneCollected, onWoodCollected])
+  }, []) // Remove callbacks from dependencies
 
   useImperativeHandle(ref, () => ({
     gatherStone: async (stoneId: string) => {

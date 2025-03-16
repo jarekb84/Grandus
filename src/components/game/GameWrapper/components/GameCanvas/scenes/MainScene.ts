@@ -83,34 +83,38 @@ export default class MainScene extends Phaser.Scene {
 
     this.isAnimating = true
 
-    // Move to resource
-    await this.movePlayerTo(resource.x, resource.y)
+    try {
+      // Move to resource
+      await this.movePlayerTo(resource.x, resource.y)
 
-    // Pick up resource
-    await this.delay(500)
-    this.carriedResource = resource
-    resource.setVisible(false)
+      // Pick up resource
+      await this.delay(500)
+      this.carriedResource = resource
+      resource.setVisible(false)
 
-    if (resource.getData('type') === 'stone') {
-      this.stones = this.stones.filter(s => s.getData('id') !== resourceId)
-    } else {
-      this.wood = this.wood.filter(w => w.getData('id') !== resourceId)
-    }
+      const resourceType = resource.getData('type')
+      if (resourceType === 'stone') {
+        this.stones = this.stones.filter(s => s.getData('id') !== resourceId)
+      } else {
+        this.wood = this.wood.filter(w => w.getData('id') !== resourceId)
+      }
 
-    // Move back to base
-    await this.movePlayerTo(this.base.x, this.base.y)
+      // Move back to base
+      await this.movePlayerTo(this.base.x, this.base.y)
 
-    // Drop resource
-    await this.delay(500)
-    this.carriedResource = null
-    resource.destroy()
-    this.isAnimating = false
+      // Drop resource
+      await this.delay(500)
+      this.carriedResource = null
+      resource.destroy()
 
-    // Trigger callback
-    if (resource.getData('type') === 'stone' && this.onStoneCollected) {
-      this.onStoneCollected()
-    } else if (resource.getData('type') === 'wood' && this.onWoodCollected) {
-      this.onWoodCollected()
+      // Trigger callback
+      if (resourceType === 'stone' && this.onStoneCollected) {
+        this.onStoneCollected()
+      } else if (resourceType === 'wood' && this.onWoodCollected) {
+        this.onWoodCollected()
+      }
+    } finally {
+      this.isAnimating = false
     }
   }
 

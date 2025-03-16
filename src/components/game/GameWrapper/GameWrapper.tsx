@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import GameCanvas, { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
 import Inventory from './components/Inventory/Inventory'
 
@@ -12,32 +12,28 @@ const GameWrapper = () => {
   const handleGatherStone = () => {
     if (!gameCanvasRef.current) return
     
-    const canvas = gameCanvasRef.current
-    const stones = canvas.getAvailableStones()
-    
+    const stones = gameCanvasRef.current.getAvailableStones()
     if (stones.length > 0) {
-      canvas.gatherStone(stones[0].id)
+      gameCanvasRef.current.gatherStone(stones[0].id)
     }
   }
 
   const handleGatherWood = () => {
     if (!gameCanvasRef.current) return
     
-    const canvas = gameCanvasRef.current
-    const wood = canvas.getAvailableWood()
-    
+    const wood = gameCanvasRef.current.getAvailableWood()
     if (wood.length > 0) {
-      canvas.gatherWood(wood[0].id)
+      gameCanvasRef.current.gatherWood(wood[0].id)
     }
   }
 
-  const handleStoneCollected = () => {
+  const handleStoneCollected = useCallback(() => {
     setStoneCount(prev => prev + 1)
-  }
+  }, [])
 
-  const handleWoodCollected = () => {
+  const handleWoodCollected = useCallback(() => {
     setWoodCount(prev => prev + 1)
-  }
+  }, [])
 
   return (
     <div className="relative w-full h-screen bg-gray-900">
