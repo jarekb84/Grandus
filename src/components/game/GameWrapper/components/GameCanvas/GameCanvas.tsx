@@ -1,142 +1,115 @@
 'use client'
 
-import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react'
-import { GameEntity } from './types/game.types'
-import type * as Phaser from 'phaser'
-import MainScene from './scenes/MainScene'
+import { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { MainScene } from '@/game/scenes/MainScene'
+import { ResourceSystem } from '@/game/systems/ResourceSystem'
+import { useGameState } from '@/game/state/GameState'
+import { EntityType, ResourceType } from '@/game/types/entities.types'
+import { generateInitialEntities } from '@/game/utils/entityGenerator'
 
-interface GameCanvasProps {
-  onStoneCollected?: () => void
-  onWoodCollected?: () => void
-  onFoodCollected?: () => void
+// Types only import
+import type * as Phaser from 'phaser'
+
+export interface GameCanvasProps {
+  onResourceCollected: (type: ResourceType) => void
 }
 
 export interface GameCanvasHandle {
-  gatherStone: (stoneId: string) => Promise<void>
-  gatherWood: (woodId: string) => Promise<void>
-  gatherFood: (foodId: string) => Promise<void>
-  getAvailableStones: () => GameEntity[]
-  getAvailableWood: () => GameEntity[]
-  getAvailableFood: () => GameEntity[]
+  gatherResource: (resourceId: string) => void
 }
 
-const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCanvas(
-  { onStoneCollected, onWoodCollected, onFoodCollected }, 
-  ref
-) {  
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  const sceneRef = useRef<MainScene | null>(null)
-  const callbacksRef = useRef({ onStoneCollected, onWoodCollected, onFoodCollected })
+const GameCanvasComponent = forwardRef<GameCanvasHandle, GameCanvasProps>(
+  ({ onResourceCollected }, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const gameRef = useRef<Phaser.Game | null>(null)
+    const sceneRef = useRef<MainScene | null>(null)
+    const systemsRef = useRef<{ resource: ResourceSystem } | null>(null)
+    const { entities, addEntity } = useGameState()
+    const [isClient, setIsClient] = useState(false)
 
-  // Update callbacks ref when props change
-  useEffect(() => {
-    callbacksRef.current = { onStoneCollected, onWoodCollected, onFoodCollected }
-  }, [onStoneCollected, onWoodCollected, onFoodCollected])
+    useImperativeHandle(ref, () => ({
+      gatherResource: (resourceId: string) => {
+        systemsRef.current?.resource.gatherResource(resourceId, 'player1')
+      }
+    }))
 
-  useEffect(() => {
-    if (!containerRef.current) return
+    useEffect(() => {
+      setIsClient(true)
+    }, [])
 
-    let game: Phaser.Game | undefined
+    useEffect(() => {
+      if (!containerRef.current || !isClient) return
 
-    const initPhaser = async () => {
-      const Phaser = (await import('phaser')).default
+      let game: Phaser.Game | undefined
 
-      const mainScene = new MainScene()
-      
-      const config: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO,
-        parent: containerRef.current,
-        backgroundColor: '#1e293b', // slate-800
-        scene: {
-          preload: function(this: Phaser.Scene) {
-            mainScene.init({ 
-              onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
-              onWoodCollected: () => callbacksRef.current.onWoodCollected?.(),
-              onFoodCollected: () => callbacksRef.current.onFoodCollected?.(),
-              scene: this
-            })
-            mainScene.preload()
-          },
-          create: function(this: Phaser.Scene) {
-            mainScene.create()
-          },
-          update: function(this: Phaser.Scene) {
-            mainScene.update()
+      const initGame = async () => {
+        try {
+          // Dynamically import Phaser only on client side
+          const Phaser = (await import('phaser')).default
+
+          const config: Phaser.Types.Core.GameConfig = {
+            type: Phaser.AUTO,
+            parent: containerRef.current,
+            width: 800,
+            height: 600,
+            backgroundColor: '#1e293b',
+            scene: class extends MainScene {
+              constructor() {
+                super({
+                  onEntityInteraction: (entityId: string, type: EntityType) => {
+                    if (type === EntityType.RESOURCE) {
+                      systemsRef.current?.resource.gatherResource(entityId, 'player1')
+                    }
+                  }
+                })
+              }
+
+              create() {
+                super.create()
+                
+                // Store scene reference after it's fully initialized
+                sceneRef.current = this
+
+                systemsRef.current = {
+                  resource: new ResourceSystem(this)
+                }
+
+                const initialEntities = generateInitialEntities()
+                initialEntities.forEach(entity => {
+                  addEntity(entity)
+                  this.addEntity(entity)
+                })
+              }
+            }
           }
-        },
-        scale: {
-          mode: Phaser.Scale.RESIZE,
-          width: '100%',
-          height: '100%'
+
+          game = new Phaser.Game(config)
+          gameRef.current = game
+        } catch (error) {
+          console.error('Failed to initialize game:', error)
         }
       }
 
-      // Create the game instance
-      game = new Phaser.Game(config)
+      // Initialize the game
+      initGame()
 
-      // Store scene reference
-      sceneRef.current = mainScene
-    }
+      return () => {
+        game?.destroy(true)
+        gameRef.current = null
+        sceneRef.current = null
+        systemsRef.current = null
+      }
+    }, [isClient, addEntity])
 
-    initPhaser()
+    return <div ref={containerRef} className="w-full h-full bg-gray-900" />
+  }
+)
 
-    return () => {
-      game?.destroy(true)
-    }
-  }, []) // Remove callbacks from dependencies
+GameCanvasComponent.displayName = 'GameCanvas'
 
-  useImperativeHandle(ref, () => ({
-    gatherStone: async (stoneId: string) => {
-      await sceneRef.current?.gatherResource(stoneId)
-    },
-    gatherWood: async (woodId: string) => {
-      await sceneRef.current?.gatherResource(woodId)
-    },
-    gatherFood: async (foodId: string) => {
-      await sceneRef.current?.gatherResource(foodId)
-    },
-    getAvailableStones: () => {
-      const resources = sceneRef.current?.getAvailableResources('stone') || []
-      return resources.map(r => ({
-        id: r.id,
-        x: 0,
-        y: 0,
-        type: 'stone',
-        size: 8,
-        color: '#94a3b8'
-      }))
-    },
-    getAvailableWood: () => {
-      const resources = sceneRef.current?.getAvailableResources('wood') || []
-      return resources.map(r => ({
-        id: r.id,
-        x: 0,
-        y: 0,
-        type: 'wood',
-        size: 15,
-        color: '#ca8a04'
-      }))
-    },
-    getAvailableFood: () => {
-      const resources = sceneRef.current?.getAvailableResources('food') || []
-      return resources.map(r => ({
-        id: r.id,
-        x: 0,
-        y: 0,
-        type: 'food',
-        size: 12,
-        color: '#22c55e'
-      }))
-    }
-  }), [])
-
-  return (
-    <div 
-      ref={containerRef} 
-      className="w-full h-full"
-      data-testid="game-canvas"
-    />
-  )
-})
-
-export default GameCanvas 
+// Use dynamic import with ssr disabled for the component
+export const GameCanvas = dynamic(() => Promise.resolve(GameCanvasComponent), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-gray-900" />
+}) 
