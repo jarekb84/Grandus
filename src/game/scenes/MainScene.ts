@@ -1,13 +1,22 @@
 import * as Phaser from 'phaser'
-import { GameEntity, EntityType } from '../entities.types'
+import { GameEntity, EntityType, Shape } from '../entities.types'
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void
 }
 
+interface EntitySprites {
+  main: Phaser.GameObjects.Sprite;
+  outline: Phaser.GameObjects.Sprite;
+}
+
 export class MainScene extends Phaser.Scene {
-  private entities: Map<string, Phaser.GameObjects.Sprite> = new Map()
+  private entities: Map<string, EntitySprites> = new Map()
   private sceneEvents: MainSceneEvents
+  private static readonly SHAPE_KEYS = {
+    [Shape.CIRCLE]: 'circle',
+    [Shape.SQUARE]: 'square'
+  }
 
   constructor(events: MainSceneEvents) {
     super({ key: 'MainScene' })
@@ -15,54 +24,100 @@ export class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('placeholder', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=')
+    // We'll create textures in create() instead
   }
 
   create() {
-    // Scene is now ready to add entities
+    this.createShapeTextures()    
+  }
+
+  private createShapeTextures() {
+    // Only create textures if they don't exist
+    if (!this.textures.exists(MainScene.SHAPE_KEYS[Shape.SQUARE])) {
+      // Create square texture (32x32)
+      const squareGraphics = this.add.graphics()
+      squareGraphics.fillStyle(0xFFFFFF)
+      squareGraphics.fillRect(0, 0, 32, 32)
+      squareGraphics.generateTexture(MainScene.SHAPE_KEYS[Shape.SQUARE], 32, 32)
+      squareGraphics.destroy()
+    }
+
+    if (!this.textures.exists(MainScene.SHAPE_KEYS[Shape.CIRCLE])) {
+      // Create circle texture (32x32)
+      const circleGraphics = this.add.graphics()
+      circleGraphics.fillStyle(0xFFFFFF)
+      circleGraphics.beginPath()
+      circleGraphics.arc(16, 16, 16, 0, Math.PI * 2)
+      circleGraphics.closePath()
+      circleGraphics.fill()
+      circleGraphics.generateTexture(MainScene.SHAPE_KEYS[Shape.CIRCLE], 32, 32)
+      circleGraphics.destroy()      
+    }
+  }
+
+  // Helper method to verify texture exists
+  private ensureTexture(shape: Shape): boolean {
+    const key = MainScene.SHAPE_KEYS[shape]
+    const exists = this.textures.exists(key)
+    if (!exists) {      
+      this.createShapeTextures() // Attempt to recreate
+    }
+    return this.textures.exists(key)
   }
 
   addEntity(entity: GameEntity) {
-    const sprite = this.createSpriteForEntity(entity)
-    this.entities.set(entity.id, sprite)
+    // Verify texture exists before creating sprite
+    if (!this.ensureTexture(entity.properties.shape)) {
+      console.error('Failed to create entity - missing texture')
+      return
+    }
+    
+    const sprites = this.createSpritesForEntity(entity)
+    this.entities.set(entity.id, sprites)
     
     // Make resources interactive
     if (entity.type === EntityType.RESOURCE) {
-      sprite.setInteractive()
-      sprite.on('pointerdown', () => {
+      sprites.main.setInteractive()
+      sprites.main.on('pointerdown', () => {
         this.sceneEvents.onEntityInteraction(entity.id, entity.type)
       })
     }
   }
 
   removeEntity(entityId: string) {
-    const sprite = this.entities.get(entityId)
-    if (sprite) {
-      sprite.destroy()
+    const sprites = this.entities.get(entityId)
+    if (sprites) {
+      sprites.main.destroy()
+      sprites.outline.destroy()
       this.entities.delete(entityId)
     }
   }
 
-  private createSpriteForEntity(entity: GameEntity) {
-    const sprite = this.add.sprite(
-      entity.position.x,
-      entity.position.y,
-      entity.properties.spriteKey || 'placeholder'
-    )
+  private createSpritesForEntity(entity: GameEntity): EntitySprites {
+    const { shape, size, color } = entity.properties
+    const { x, y } = entity.position
+
+    const textureKey = MainScene.SHAPE_KEYS[shape]
     
-    sprite.setDisplaySize(entity.properties.size, entity.properties.size)
-    sprite.setTint(entity.properties.color)
-    
-    return sprite
+    // Create outline first so it's behind the main sprite
+    const outline = this.add.sprite(x, y, textureKey)
+    outline.setDisplaySize(size + 2, size + 2)
+    outline.setTint(0x000000)
+
+    const main = this.add.sprite(x, y, textureKey)
+    main.setDisplaySize(size, size)
+    main.setTint(color)
+
+    return { main, outline }
   }
 
   async moveEntityTo(entityId: string, x: number, y: number): Promise<void> {
-    const sprite = this.entities.get(entityId)
-    if (!sprite) return Promise.resolve()
+    const sprites = this.entities.get(entityId)
+    if (!sprites) return Promise.resolve()
 
     return new Promise((resolve) => {
       this.tweens.add({
-        targets: sprite,
+        targets: [sprites.main, sprites.outline],
         x,
         y,
         duration: 1000,

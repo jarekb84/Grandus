@@ -3,21 +3,25 @@ import {
   GameEntity, 
   EntityType, 
   ResourceType,
-  ResourceEntity 
+  ResourceEntity,
+  Shape
 } from '../entities.types'
 
 const RESOURCE_CONFIGS = {
   [ResourceType.STONE]: {
     color: 0x94a3b8,
-    size: 8
+    size: 8,
+    shape: Shape.SQUARE
   },
   [ResourceType.WOOD]: {
     color: 0xca8a04,
-    size: 15
+    size: 15,
+    shape: Shape.SQUARE
   },
   [ResourceType.FOOD]: {
     color: 0x22c55e,
-    size: 12
+    size: 12,
+    shape: Shape.SQUARE
   }
 }
 
@@ -31,7 +35,8 @@ export function generateInitialEntities(): GameEntity[] {
     position: { x: 400, y: 300 },
     properties: {
       size: 20,
-      color: 0x4ade80
+      color: 0x4ade80,
+      shape: Shape.SQUARE
     }
   })
 
@@ -42,7 +47,8 @@ export function generateInitialEntities(): GameEntity[] {
     position: { x: 400, y: 400 },
     properties: {
       size: 40,
-      color: 0x60a5fa
+      color: 0x60a5fa,
+      shape: Shape.CIRCLE
     }
   })
 
