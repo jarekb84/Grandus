@@ -102,7 +102,8 @@ export const useGameState = create<GameState>((set, get) => ({
         entities.resourcesByType.get(resourceEntity.resourceType)?.delete(entityId)
 
         // Update available resources cache
-        const hasResourcesLeft = entities.resourcesByType.get(resourceEntity.resourceType)?.size ?? 0 > 0
+        const resourceCount = entities.resourcesByType.get(resourceEntity.resourceType)?.size ?? 0
+        const hasResourcesLeft = resourceCount > 0
         newState.availableResources.set(resourceEntity.resourceType, hasResourcesLeft)
       }
 
@@ -118,8 +119,8 @@ export const useGameState = create<GameState>((set, get) => ({
       const newState = { ...state }
       const { entities } = newState
 
-      // Create updated entity
-      const updatedEntity = { ...entity, ...updates }
+      // Create updated entity with type assertion
+      const updatedEntity = { ...entity, ...updates } as Entity
       entities.byId.set(entityId, updatedEntity)
 
       // Handle type changes if needed

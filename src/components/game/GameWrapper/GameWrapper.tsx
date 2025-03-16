@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useGameState } from '@/game/state/GameState'
-import { EntityType, ResourceType } from '@/game/entities.types'
+import { ResourceType } from '@/game/entities.types'
 import type { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
 import Inventory from './components/Inventory/Inventory'
 

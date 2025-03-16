@@ -1,6 +1,6 @@
 import { MainScene } from '../scenes/MainScene'
 import { useGameState } from '../state/GameState'
-import { ResourceEntity, EntityType } from '../entities.types'
+import { ResourceEntity } from '../entities.types'
 
 export class ResourceSystem {
   private scene: MainScene

@@ -17,13 +17,13 @@ export interface GameCanvasHandle {
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
-  ({ onResourceCollected }, ref) => {
+  ({ }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const gameRef = useRef<Phaser.Game | null>(null)
     const sceneRef = useRef<MainScene | null>(null)
     const systemsRef = useRef<{ resource: ResourceSystem } | null>(null)
     const initialEntitiesRef = useRef<ReturnType<typeof generateInitialEntities> | null>(null)
-    const { entities, addEntity } = useGameState()
+    const { addEntity } = useGameState()
 
     useImperativeHandle(ref, () => ({
       gatherResource: async (resourceId: string) => {
