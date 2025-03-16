@@ -77,10 +77,7 @@ export class MainScene extends Phaser.Scene {
     
     // Make resources interactive
     if (entity.type === EntityType.RESOURCE) {
-      sprites.main.setInteractive()
-      sprites.main.on('pointerdown', () => {
-        this.sceneEvents.onEntityInteraction(entity.id, entity.type)
-      })
+      sprites.main.setInteractive()      
     }
   }
 
