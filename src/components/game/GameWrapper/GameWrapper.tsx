@@ -1,10 +1,17 @@
 'use client'
 
 import { useRef } from 'react'
-import { GameCanvas, GameCanvasHandle } from './components/GameCanvas/GameCanvas'
+import dynamic from 'next/dynamic'
 import { useGameState } from '@/game/state/GameState'
 import { EntityType, ResourceType } from '@/game/types/entities.types'
+import type { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
 import Inventory from './components/Inventory/Inventory'
+
+// Import GameCanvas with no SSR
+const GameCanvas = dynamic(
+  () => import('./components/GameCanvas/GameCanvas').then(mod => mod.GameCanvas),
+  { ssr: false }
+)
 
 const GameWrapper = () => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
@@ -29,11 +36,11 @@ const GameWrapper = () => {
     <div className="relative w-full h-screen bg-gray-900">
       <GameCanvas 
         ref={gameCanvasRef}
-        onResourceCollected={(type: ResourceType) => {
+        onResourceCollected={(type) => {
           useGameState.getState().incrementResource(type)
         }}
-      />
-  <Inventory 
+      />      
+      <Inventory 
         stoneCount={inventory.stone} 
         woodCount={inventory.wood} 
         foodCount={inventory.food}
