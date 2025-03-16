@@ -1,6 +1,7 @@
-import * as Phaser from 'phaser'
+import { Scene } from 'phaser'
+import type * as Phaser from 'phaser'
 
-export default class MainScene extends Phaser.Scene {
+export default class MainScene extends Scene {
   private player!: Phaser.GameObjects.Sprite
   private base!: Phaser.GameObjects.Sprite
   private stones: Phaser.GameObjects.Sprite[] = []

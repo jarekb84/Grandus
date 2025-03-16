@@ -2,7 +2,8 @@
 
 import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react'
 import { GameEntity } from './types/game.types'
-import * as Phaser from 'phaser'
+import dynamic from 'next/dynamic'
+import type * as Phaser from 'phaser'
 import MainScene from './scenes/MainScene'
 
 interface GameCanvasProps {
@@ -34,32 +35,40 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCa
   useEffect(() => {
     if (!containerRef.current) return
 
-    const config: Phaser.Types.Core.GameConfig = {
-      type: Phaser.AUTO,
-      parent: containerRef.current,
-      backgroundColor: '#1e293b', // slate-800
-      scene: MainScene,
-      scale: {
-        mode: Phaser.Scale.RESIZE,
-        width: '100%',
-        height: '100%'
+    let game: Phaser.Game | undefined
+
+    const initPhaser = async () => {
+      const Phaser = (await import('phaser')).default
+
+      const config: Phaser.Types.Core.GameConfig = {
+        type: Phaser.AUTO,
+        parent: containerRef.current,
+        backgroundColor: '#1e293b', // slate-800
+        scene: MainScene,
+        scale: {
+          mode: Phaser.Scale.RESIZE,
+          width: '100%',
+          height: '100%'
+        }
       }
+
+      // Create the game instance
+      game = new Phaser.Game(config)
+
+      // Get reference to the main scene
+      game.events.once('ready', () => {
+        sceneRef.current = game?.scene.getScene('MainScene') as MainScene
+        sceneRef.current?.init({ 
+          onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
+          onWoodCollected: () => callbacksRef.current.onWoodCollected?.()
+        })
+      })
     }
 
-    // Create the game instance
-    gameRef.current = new Phaser.Game(config)
-
-    // Get reference to the main scene
-    gameRef.current.events.once('ready', () => {
-      sceneRef.current = gameRef.current?.scene.getScene('MainScene') as MainScene
-      sceneRef.current?.init({ 
-        onStoneCollected: () => callbacksRef.current.onStoneCollected?.(),
-        onWoodCollected: () => callbacksRef.current.onWoodCollected?.()
-      })
-    })
+    initPhaser()
 
     return () => {
-      gameRef.current?.destroy(true)
+      game?.destroy(true)
     }
   }, []) // Remove callbacks from dependencies
 
