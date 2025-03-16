@@ -1,10 +1,10 @@
 import { create } from 'zustand'
-import { EntityType, ResourceType, Entity, ResourceEntity } from '../entities.types'
+import { EntityType, ResourceType, Entity, ResourceNodeEntity, ResourceNodeType } from '../entities.types'
 
 interface EntityCollections {
   byId: Map<string, Entity>
   byType: Map<EntityType, Set<string>>
-  resourcesByType: Map<ResourceType, Set<string>>
+  nodesByType: Map<ResourceNodeType, Set<string>>
 }
 
 interface GameState {
@@ -17,7 +17,7 @@ interface GameState {
   }
 
   // Computed state (cached values)
-  availableResources: Map<ResourceType, boolean>
+  availableNodes: Map<ResourceNodeType, boolean>
 
   // Entity Operations
   addEntity: (entity: Entity) => void
@@ -29,16 +29,18 @@ interface GameState {
 
   // Query Methods
   getEntitiesByType: (type: EntityType) => Entity[]
-  getResourceEntitiesByType: (type: ResourceType) => ResourceEntity[]
-  hasAvailableResource: (type: ResourceType) => boolean
+  getNodesByType: (type: ResourceNodeType) => ResourceNodeEntity[]
+  hasAvailableNodeType: (type: ResourceNodeType) => boolean
 }
 
 const createEntityCollections = (): EntityCollections => ({
   byId: new Map<string, Entity>(),
   byType: new Map<EntityType, Set<string>>(),
-  resourcesByType: new Map<ResourceType, Set<string>>()
+  nodesByType: new Map<ResourceNodeType, Set<string>>()
 })
 
+
+// todo this file needs to be simplified, tons of duplicate code and saftey handling
 export const useGameState = create<GameState>((set, get) => ({
   entities: createEntityCollections(),
   inventory: {
@@ -46,10 +48,12 @@ export const useGameState = create<GameState>((set, get) => ({
     wood: 0,
     food: 0
   },
-  availableResources: new Map([
-    [ResourceType.STONE, false],
-    [ResourceType.WOOD, false],
-    [ResourceType.FOOD, false]
+  availableNodes: new Map([
+    [ResourceNodeType.STONE_DEPOSIT, false],
+    [ResourceNodeType.IRON_DEPOSIT, false],
+    [ResourceNodeType.BERRY_BUSH, false],
+    [ResourceNodeType.FALLEN_BRANCHES, false],
+    [ResourceNodeType.TREE, false]
   ]),
 
   addEntity: (entity: Entity) => {
@@ -66,16 +70,16 @@ export const useGameState = create<GameState>((set, get) => ({
       }
       entities.byType.get(entity.type)!.add(entity.id)
 
-      // Add to resourcesByType index if it's a resource
-      if (entity.type === EntityType.RESOURCE && 'resourceType' in entity) {
-        const resourceEntity = entity as ResourceEntity
-        if (!entities.resourcesByType.has(resourceEntity.resourceType)) {
-          entities.resourcesByType.set(resourceEntity.resourceType, new Set())
+      // Add to nodesByType index if it's a resource node
+      if (entity.type === EntityType.RESOURCE_NODE && 'nodeType' in entity) {
+        const nodeEntity = entity as ResourceNodeEntity
+        if (!entities.nodesByType.has(nodeEntity.nodeType)) {
+          entities.nodesByType.set(nodeEntity.nodeType, new Set())
         }
-        entities.resourcesByType.get(resourceEntity.resourceType)!.add(entity.id)
+        entities.nodesByType.get(nodeEntity.nodeType)!.add(entity.id)
 
-        // Update available resources cache
-        newState.availableResources.set(resourceEntity.resourceType, true)
+        // Update available nodes cache
+        newState.availableNodes.set(nodeEntity.nodeType, true)
       }
 
       return newState
@@ -96,15 +100,15 @@ export const useGameState = create<GameState>((set, get) => ({
       // Remove from byType index
       entities.byType.get(entity.type)?.delete(entityId)
 
-      // Remove from resourcesByType index if it's a resource
-      if (entity.type === EntityType.RESOURCE && 'resourceType' in entity) {
-        const resourceEntity = entity as ResourceEntity
-        entities.resourcesByType.get(resourceEntity.resourceType)?.delete(entityId)
+      // Remove from nodesByType index if it's a resource node
+      if (entity.type === EntityType.RESOURCE_NODE && 'nodeType' in entity) {
+        const nodeEntity = entity as ResourceNodeEntity
+        entities.nodesByType.get(nodeEntity.nodeType)?.delete(entityId)
 
-        // Update available resources cache
-        const resourceCount = entities.resourcesByType.get(resourceEntity.resourceType)?.size ?? 0
-        const hasResourcesLeft = resourceCount > 0
-        newState.availableResources.set(resourceEntity.resourceType, hasResourcesLeft)
+        // Update available nodes cache
+        const nodeCount = entities.nodesByType.get(nodeEntity.nodeType)?.size ?? 0
+        const hasNodesLeft = nodeCount > 0
+        newState.availableNodes.set(nodeEntity.nodeType, hasNodesLeft)
       }
 
       return newState
@@ -135,6 +139,31 @@ export const useGameState = create<GameState>((set, get) => ({
         entities.byType.get(updates.type)!.add(entityId)
       }
 
+      // Handle node type changes if needed
+      if (
+        entity.type === EntityType.RESOURCE_NODE &&
+        'nodeType' in updates &&
+        updates.nodeType !== (entity as ResourceNodeEntity).nodeType
+      ) {
+        const oldNodeType = (entity as ResourceNodeEntity).nodeType
+        const newNodeType = updates.nodeType as ResourceNodeType
+
+        // Remove from old nodeType index
+        entities.nodesByType.get(oldNodeType)?.delete(entityId)
+        
+        // Add to new nodeType index
+        if (!entities.nodesByType.has(newNodeType)) {
+          entities.nodesByType.set(newNodeType, new Set())
+        }
+        entities.nodesByType.get(newNodeType)!.add(entityId)
+
+        // Update available nodes cache
+        const oldNodeCount = entities.nodesByType.get(oldNodeType)?.size ?? 0
+        const newNodeCount = entities.nodesByType.get(newNodeType)?.size ?? 1
+        newState.availableNodes.set(oldNodeType, oldNodeCount > 0)
+        newState.availableNodes.set(newNodeType, newNodeCount > 0)
+      }
+
       return newState
     })
   },
@@ -155,19 +184,19 @@ export const useGameState = create<GameState>((set, get) => ({
     return Array.from(entityIds).map(id => state.entities.byId.get(id)!).filter(Boolean)
   },
 
-  getResourceEntitiesByType: (type: ResourceType) => {
+  getNodesByType: (type: ResourceNodeType) => {
     const state = get()
-    const entityIds = state.entities.resourcesByType.get(type) ?? new Set()
+    const entityIds = state.entities.nodesByType.get(type) ?? new Set()
     return Array.from(entityIds)
       .map(id => state.entities.byId.get(id))
-      .filter((entity): entity is ResourceEntity => 
+      .filter((entity): entity is ResourceNodeEntity => 
         entity !== undefined && 
-        entity.type === EntityType.RESOURCE && 
-        'resourceType' in entity
+        entity.type === EntityType.RESOURCE_NODE && 
+        'nodeType' in entity
       )
   },
 
-  hasAvailableResource: (type: ResourceType) => {
-    return get().availableResources.get(type) ?? false
+  hasAvailableNodeType: (type: ResourceNodeType) => {
+    return get().availableNodes.get(type) ?? false
   }
 })) 

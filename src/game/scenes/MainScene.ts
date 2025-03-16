@@ -75,8 +75,8 @@ export class MainScene extends Phaser.Scene {
     const sprites = this.createSpritesForEntity(entity)
     this.entities.set(entity.id, sprites)
     
-    // Make resources interactive
-    if (entity.type === EntityType.RESOURCE) {
+    // Make resource nodes interactive
+    if (entity.type === EntityType.RESOURCE_NODE) {
       sprites.main.setInteractive()      
     }
   }
@@ -108,7 +108,7 @@ export class MainScene extends Phaser.Scene {
     // Set depths based on entity type
     // Buildings (base) at depth 0
     // Character (player) at depth 1
-    // Resources at depth 0 initially, will be raised to 2 when being carried
+    // Resource nodes at depth 0
     switch (entity.type) {
       case EntityType.BUILDING:
         outline.setDepth(0)
@@ -118,9 +118,11 @@ export class MainScene extends Phaser.Scene {
         outline.setDepth(1)
         main.setDepth(1)
         break
-      case EntityType.RESOURCE:
-        outline.setDepth(2)
-        main.setDepth(2)
+
+        // todo maybe add resrouce back in as en tity that only exists when it is carreid back to the base
+      case EntityType.RESOURCE_NODE:
+        outline.setDepth(0)
+        main.setDepth(0)
         break
     }
 

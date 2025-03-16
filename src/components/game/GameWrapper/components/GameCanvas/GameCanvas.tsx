@@ -13,11 +13,11 @@ export interface GameCanvasProps {
 }
 
 export interface GameCanvasHandle {
-  gatherResource: (resourceId: string) => Promise<void>
+  gatherFromNode: (nodeId: string) => Promise<void>
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
-  ({ }, ref) => {
+  ({ onResourceCollected }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const gameRef = useRef<Phaser.Game | null>(null)
     const sceneRef = useRef<MainScene | null>(null)
@@ -26,9 +26,9 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     const { addEntity } = useGameState()
 
     useImperativeHandle(ref, () => ({
-      gatherResource: async (resourceId: string) => {
+      gatherFromNode: async (nodeId: string) => {
         if (!systemsRef.current) return
-        await systemsRef.current.resource.gatherResource(resourceId, 'player1')
+        await systemsRef.current.resource.gatherResource(nodeId, 'player1')
       }
     }))
 
@@ -50,7 +50,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
           constructor() {
             super({
               onEntityInteraction: (entityId: string, type: EntityType) => {
-                if (type === EntityType.RESOURCE) {
+                if (type === EntityType.RESOURCE_NODE) {
                   systemsRef.current?.resource.gatherResource(entityId, 'player1')
                 }
               }

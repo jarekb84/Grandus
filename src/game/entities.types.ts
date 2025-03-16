@@ -13,7 +13,7 @@ export enum Shape {
 }
 
 export enum EntityType {
-  RESOURCE = 'RESOURCE',
+  RESOURCE_NODE = 'RESOURCE_NODE',
   CHARACTER = 'CHARACTER',
   BUILDING = 'BUILDING'
 }
@@ -22,6 +22,20 @@ export enum ResourceType {
   STONE = 'STONE',
   WOOD = 'WOOD',
   FOOD = 'FOOD'
+}
+
+export enum ResourceNodeType {
+  STONE_DEPOSIT = 'STONE_DEPOSIT',
+  IRON_DEPOSIT = 'IRON_DEPOSIT',
+  BERRY_BUSH = 'BERRY_BUSH',
+  FALLEN_BRANCHES = 'FALLEN_BRANCHES',
+  TREE = 'TREE'
+}
+
+export interface ResourceYield {
+  resourceType: ResourceType
+  baseAmount: number
+  chance: number // 0-1, represents probability of getting this resource
 }
 
 interface BaseEntity {
@@ -38,9 +52,16 @@ interface BaseEntity {
   }
 }
 
-export interface ResourceEntity extends BaseEntity {
-  type: EntityType.RESOURCE
-  resourceType: ResourceType
+// TODO add a quantity property somewhere to this node, maybe per yield?
+export interface ResourceNodeEntity extends BaseEntity {
+  type: EntityType.RESOURCE_NODE
+  nodeType: ResourceNodeType
+  yields: ResourceYield[]
+  gatheringProperties: {
+    baseGatherTime: number // in milliseconds
+    gatheringSpeedMultiplier: number // multiplier for gathering speed
+    yieldMultiplier: number // multiplier for resource amounts
+  }
 }
 
 export interface CharacterEntity extends BaseEntity {
@@ -53,4 +74,4 @@ export interface BuildingEntity extends BaseEntity {
   buildingType: string
 }
 
-export type Entity = ResourceEntity | CharacterEntity | BuildingEntity 
+export type Entity = ResourceNodeEntity | CharacterEntity | BuildingEntity 

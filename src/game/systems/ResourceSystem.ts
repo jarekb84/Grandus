@@ -1,6 +1,6 @@
 import { MainScene } from '../scenes/MainScene'
 import { useGameState } from '../state/GameState'
-import { ResourceEntity } from '../entities.types'
+import { ResourceNodeEntity, ResourceType } from '../entities.types'
 
 export class ResourceSystem {
   private scene: MainScene
@@ -11,30 +11,55 @@ export class ResourceSystem {
     this.scene = scene
   }
 
-  async gatherResource(resourceId: string, gatherId: string) {
+  private calculateResourceYields(node: ResourceNodeEntity): ResourceType[] {
+    const yields: ResourceType[] = []
+    
+    node.yields.forEach(resourceYield => {
+      // Apply yield multiplier to chance
+      const effectiveChance = resourceYield.chance * node.gatheringProperties.yieldMultiplier
+      
+      // TODO this right now rolls if you can gathger the resrouce or not, but it should roll how much you get as well
+
+      // Roll for each potential resource yield
+      for (let i = 0; i < resourceYield.baseAmount; i++) {
+        if (Math.random() < effectiveChance) {
+          yields.push(resourceYield.resourceType)
+        }
+      }
+    })
+
+    return yields
+  }
+
+  async gatherResource(nodeId: string, gatherId: string) {
     const state = this.gameState.getState()
-    const resource = state.entities.byId.get(resourceId) as ResourceEntity | undefined
+    const node = state.entities.byId.get(nodeId) as ResourceNodeEntity | undefined
     const gatherer = state.entities.byId.get(gatherId)
     
-    if (!resource || !gatherer) return
+    if (!node || !gatherer) return
 
-    // Store resource position before removing it
-    const resourcePosition = { ...resource.position }
+    // Store node position
+    const nodePosition = { ...node.position }
 
-    // First movement: Move gatherer to resource
-    await this.scene.moveEntityTo(gatherId, resourcePosition.x, resourcePosition.y)
+    // First movement: Move gatherer to node
+    await this.scene.moveEntityTo(gatherId, nodePosition.x, nodePosition.y)
     
-    // Second movement: Move both gatherer and resource back to base simultaneously
-    await Promise.all([
-      this.scene.moveEntityTo(gatherId, this.BASE_POSITION.x, this.BASE_POSITION.y),
-      this.scene.moveEntityTo(resourceId, this.BASE_POSITION.x, this.BASE_POSITION.y)
-    ])
+    // Apply gathering time with speed multiplier
+    const gatherTime = node.gatheringProperties.baseGatherTime / 
+                      node.gatheringProperties.gatheringSpeedMultiplier
+    await new Promise(resolve => setTimeout(resolve, gatherTime))
+
+    // Calculate resource yields
+    const yields = this.calculateResourceYields(node)
     
-    // Now that both movements are complete, remove the resource and update inventory
-    this.gameState.getState().removeEntity(resourceId)
-    this.scene.removeEntity(resourceId)
+    // TODO: create a resource entity that is created when the resource is gathered and then moves back to the base then destroy it
+
+    // Second movement: Move gatherer back to base
+    await this.scene.moveEntityTo(gatherId, this.BASE_POSITION.x, this.BASE_POSITION.y)
     
-    // Only increment inventory after returning to base
-    this.gameState.getState().incrementResource(resource.resourceType)
+    // Update inventory for each yielded resource
+    yields.forEach(resourceType => {
+      this.gameState.getState().incrementResource(resourceType)
+    })
   }
 } 
