@@ -22,6 +22,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     const gameRef = useRef<Phaser.Game | null>(null)
     const sceneRef = useRef<MainScene | null>(null)
     const systemsRef = useRef<{ resource: ResourceSystem } | null>(null)
+    const initialEntitiesRef = useRef<ReturnType<typeof generateInitialEntities> | null>(null)
     const { entities, addEntity } = useGameState()
 
     useImperativeHandle(ref, () => ({
@@ -32,6 +33,11 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
 
     useEffect(() => {
       if (!containerRef.current) return
+
+      // Generate entities only once
+      if (!initialEntitiesRef.current) {
+        initialEntitiesRef.current = generateInitialEntities()
+      }
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -60,8 +66,9 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
               resource: new ResourceSystem(this)
             }
 
-            const initialEntities = generateInitialEntities()
-            initialEntities.forEach(entity => {
+            // Use stored entities instead of generating new ones
+            const entities = initialEntitiesRef.current!
+            entities.forEach(entity => {
               addEntity(entity)
               this.addEntity(entity)
             })
@@ -77,6 +84,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
         gameRef.current = null
         sceneRef.current = null
         systemsRef.current = null
+        // Don't clear initialEntitiesRef so we keep the same entities
       }
     }, [addEntity])
 
