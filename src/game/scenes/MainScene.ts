@@ -108,6 +108,25 @@ export class MainScene extends Phaser.Scene {
     main.setDisplaySize(size, size)
     main.setTint(color)
 
+    // Set depths based on entity type
+    // Buildings (base) at depth 0
+    // Character (player) at depth 1
+    // Resources at depth 0 initially, will be raised to 2 when being carried
+    switch (entity.type) {
+      case EntityType.BUILDING:
+        outline.setDepth(0)
+        main.setDepth(0)
+        break
+      case EntityType.CHARACTER:
+        outline.setDepth(1)
+        main.setDepth(1)
+        break
+      case EntityType.RESOURCE:
+        outline.setDepth(2)
+        main.setDepth(2)
+        break
+    }
+
     return { main, outline }
   }
 

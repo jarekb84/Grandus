@@ -21,15 +21,18 @@ export class ResourceSystem {
     // Store resource position before removing it
     const resourcePosition = { ...resource.position }
 
-    // Move gatherer to resource
+    // First movement: Move gatherer to resource
     await this.scene.moveEntityTo(gatherId, resourcePosition.x, resourcePosition.y)
     
-    // Remove resource from game
+    // Second movement: Move both gatherer and resource back to base simultaneously
+    await Promise.all([
+      this.scene.moveEntityTo(gatherId, this.BASE_POSITION.x, this.BASE_POSITION.y),
+      this.scene.moveEntityTo(resourceId, this.BASE_POSITION.x, this.BASE_POSITION.y)
+    ])
+    
+    // Now that both movements are complete, remove the resource and update inventory
     this.gameState.getState().removeEntity(resourceId)
     this.scene.removeEntity(resourceId)
-
-    // Move gatherer back to base
-    await this.scene.moveEntityTo(gatherId, this.BASE_POSITION.x, this.BASE_POSITION.y)
     
     // Only increment inventory after returning to base
     this.gameState.getState().incrementResource(resource.resourceType)
