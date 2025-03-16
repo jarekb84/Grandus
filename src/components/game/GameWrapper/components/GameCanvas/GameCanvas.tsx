@@ -2,7 +2,6 @@
 
 import { forwardRef, useEffect, useRef, useImperativeHandle } from 'react'
 import { GameEntity } from './types/game.types'
-import dynamic from 'next/dynamic'
 import type * as Phaser from 'phaser'
 import MainScene from './scenes/MainScene'
 
@@ -21,8 +20,7 @@ export interface GameCanvasHandle {
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(function GameCanvas(
   { onStoneCollected, onWoodCollected }, 
   ref
-) {
-  const gameRef = useRef<Phaser.Game | null>(null)
+) {  
   const containerRef = useRef<HTMLDivElement | null>(null)
   const sceneRef = useRef<MainScene | null>(null)
   const callbacksRef = useRef({ onStoneCollected, onWoodCollected })

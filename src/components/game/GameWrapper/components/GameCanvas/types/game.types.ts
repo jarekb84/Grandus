@@ -9,5 +9,4 @@ export interface GameEntity {
   type: string
   size: number
   color: string
-  isCarried?: boolean
 } 
