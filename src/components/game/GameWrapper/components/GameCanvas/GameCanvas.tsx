@@ -13,7 +13,7 @@ export interface GameCanvasProps {
 }
 
 export interface GameCanvasHandle {
-  gatherResource: (resourceId: string) => void
+  gatherResource: (resourceId: string) => Promise<void>
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
@@ -26,8 +26,9 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     const { entities, addEntity } = useGameState()
 
     useImperativeHandle(ref, () => ({
-      gatherResource: (resourceId: string) => {
-        systemsRef.current?.resource.gatherResource(resourceId, 'player1')
+      gatherResource: async (resourceId: string) => {
+        if (!systemsRef.current) return
+        await systemsRef.current.resource.gatherResource(resourceId, 'player1')
       }
     }))
 

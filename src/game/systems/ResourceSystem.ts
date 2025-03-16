@@ -13,8 +13,8 @@ export class ResourceSystem {
 
   async gatherResource(resourceId: string, gatherId: string) {
     const state = this.gameState.getState()
-    const resource = state.entities.get(resourceId) as ResourceEntity | undefined
-    const gatherer = state.entities.get(gatherId)
+    const resource = state.entities.byId.get(resourceId) as ResourceEntity | undefined
+    const gatherer = state.entities.byId.get(gatherId)
     
     if (!resource || !gatherer) return
 

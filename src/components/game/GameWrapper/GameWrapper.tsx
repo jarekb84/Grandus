@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useGameState } from '@/game/state/GameState'
 import { EntityType, ResourceType } from '@/game/entities.types'
@@ -15,20 +15,20 @@ const GameCanvas = dynamic(
 
 const GameWrapper = () => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
-  const { entities, inventory } = useGameState()
+  const { inventory, getResourceEntitiesByType, hasAvailableResource } = useGameState()
+  const [isGathering, setIsGathering] = useState(false)
 
-  const handleGatherResource = (type: ResourceType) => {
-    if (!gameCanvasRef.current) return
+  const handleGatherResource = async (type: ResourceType) => {
+    if (!gameCanvasRef.current || isGathering || !hasAvailableResource(type)) return
     
-    const resources = Array.from(entities.values())
-      .filter(entity => 
-        entity.type === EntityType.RESOURCE && 
-        'resourceType' in entity && 
-        entity.resourceType === type
-      )
-
+    const resources = getResourceEntitiesByType(type)
     if (resources.length > 0) {
-      gameCanvasRef.current.gatherResource(resources[0].id)
+      setIsGathering(true)
+      try {
+        await gameCanvasRef.current.gatherResource(resources[0].id)
+      } finally {
+        setIsGathering(false)
+      }
     }
   }
 
@@ -48,19 +48,28 @@ const GameWrapper = () => {
       <div className="fixed bottom-4 left-4 space-y-2">
         <button
           onClick={() => handleGatherResource(ResourceType.STONE)}
-          className="block px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+          disabled={isGathering || !hasAvailableResource(ResourceType.STONE)}
+          className={`block px-4 py-2 bg-gray-700 text-white rounded min-w-[120px] ${
+            isGathering || !hasAvailableResource(ResourceType.STONE) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-600'
+          }`}
         >
           Gather Stone
         </button>
         <button
           onClick={() => handleGatherResource(ResourceType.WOOD)}
-          className="block px-4 py-2 bg-yellow-700 text-white rounded hover:bg-yellow-600"
+          disabled={isGathering || !hasAvailableResource(ResourceType.WOOD)}
+          className={`block px-4 py-2 bg-yellow-700 text-white rounded min-w-[120px] ${
+            isGathering || !hasAvailableResource(ResourceType.WOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-600'
+          }`}
         >
           Gather Wood
         </button>
         <button
           onClick={() => handleGatherResource(ResourceType.FOOD)}
-          className="block px-4 py-2 bg-green-700 text-white rounded hover:bg-green-600"
+          disabled={isGathering || !hasAvailableResource(ResourceType.FOOD)}
+          className={`block px-4 py-2 bg-green-700 text-white rounded min-w-[120px] ${
+            isGathering || !hasAvailableResource(ResourceType.FOOD) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-600'
+          }`}
         >
           Gather Food
         </button>
