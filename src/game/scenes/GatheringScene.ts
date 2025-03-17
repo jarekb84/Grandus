@@ -10,7 +10,7 @@ interface EntitySprites {
   outline: Phaser.GameObjects.Sprite;
 }
 
-export class MainScene extends Phaser.Scene {
+export class GatheringScene extends Phaser.Scene {
   private entities: Map<string, EntitySprites> = new Map()
   private sceneEvents: MainSceneEvents
   private static readonly SHAPE_KEYS = {
@@ -33,16 +33,16 @@ export class MainScene extends Phaser.Scene {
 
   private createShapeTextures() {
     // Only create textures if they don't exist
-    if (!this.textures.exists(MainScene.SHAPE_KEYS[Shape.SQUARE])) {
+    if (!this.textures.exists(GatheringScene.SHAPE_KEYS[Shape.SQUARE])) {
       // Create square texture (32x32)
       const squareGraphics = this.add.graphics()
       squareGraphics.fillStyle(0xFFFFFF)
       squareGraphics.fillRect(0, 0, 32, 32)
-      squareGraphics.generateTexture(MainScene.SHAPE_KEYS[Shape.SQUARE], 32, 32)
+      squareGraphics.generateTexture(GatheringScene.SHAPE_KEYS[Shape.SQUARE], 32, 32)
       squareGraphics.destroy()
     }
 
-    if (!this.textures.exists(MainScene.SHAPE_KEYS[Shape.CIRCLE])) {
+    if (!this.textures.exists(GatheringScene.SHAPE_KEYS[Shape.CIRCLE])) {
       // Create circle texture (32x32)
       const circleGraphics = this.add.graphics()
       circleGraphics.fillStyle(0xFFFFFF)
@@ -50,14 +50,14 @@ export class MainScene extends Phaser.Scene {
       circleGraphics.arc(16, 16, 16, 0, Math.PI * 2)
       circleGraphics.closePath()
       circleGraphics.fill()
-      circleGraphics.generateTexture(MainScene.SHAPE_KEYS[Shape.CIRCLE], 32, 32)
+      circleGraphics.generateTexture(GatheringScene.SHAPE_KEYS[Shape.CIRCLE], 32, 32)
       circleGraphics.destroy()      
     }
   }
 
   // Helper method to verify texture exists
   private ensureTexture(shape: Shape): boolean {
-    const key = MainScene.SHAPE_KEYS[shape]
+    const key = GatheringScene.SHAPE_KEYS[shape]
     const exists = this.textures.exists(key)
     if (!exists) {      
       this.createShapeTextures() // Attempt to recreate
@@ -94,7 +94,7 @@ export class MainScene extends Phaser.Scene {
     const { shape, size, color } = entity.properties
     const { x, y } = entity.position
 
-    const textureKey = MainScene.SHAPE_KEYS[shape]
+    const textureKey = GatheringScene.SHAPE_KEYS[shape]
     
     // Create outline first so it's behind the main sprite
     const outline = this.add.sprite(x, y, textureKey)

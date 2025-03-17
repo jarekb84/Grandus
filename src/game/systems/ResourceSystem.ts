@@ -1,13 +1,13 @@
-import { MainScene } from '../scenes/MainScene'
+import { GatheringScene } from '../scenes/GatheringScene'
 import { useGameState } from '../state/GameState'
 import { ResourceNodeEntity, ResourceType } from '../entities.types'
 
 export class ResourceSystem {
-  private scene: MainScene
+  private scene: GatheringScene
   private gameState = useGameState
   private readonly BASE_POSITION = { x: 400, y: 400 } // Base position from entityGenerator
 
-  constructor(scene: MainScene) {
+  constructor(scene: GatheringScene) {
     this.scene = scene
   }
 
