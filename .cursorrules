@@ -5,6 +5,42 @@
 - Visual feedback is crucial - players should see their progress
 - Future plans for multiplayer/cooperative gameplay
 
+# Change Management Guidelines
+## Incremental Changes
+- Break large refactors into smaller, working commits
+- Each commit should be a complete, working vertical slice
+- No "preparatory" commits that just add unused files
+- Changes should be immediately usable after each commit
+
+## Commit Structure
+- Identify the full scope of changes needed
+- Break changes into logical, independent steps
+- Each step should:
+  1. Be small enough to easily verify
+  2. Result in a working application
+  3. Not break existing functionality
+  4. Be independently reviewable
+
+## Example Change Flow
+1. Start with smallest complete unit of change
+   - Extract a component + use it immediately
+   - Move logic to a new file + wire it up
+   - Create a new system + integrate it
+2. Verify the change works completely
+3. Commit the working change
+4. Move to next logical unit
+5. Repeat until full refactor is complete
+
+## Change Size Guidelines
+- Prefer multiple small commits over one large commit
+- Each commit should change max 3-5 files
+- If creating new files, they must be used in same commit
+- When refactoring:
+  1. Extract one concern at a time
+  2. Verify it works
+  3. Commit
+  4. Move to next concern
+
 # Core Architecture Principles (SOLID)
 
 ## Single Responsibility
