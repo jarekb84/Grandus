@@ -30,6 +30,8 @@ export class CombatScene extends Phaser.Scene {
   private readonly ARC_HEIGHT = 75; // Height of the spawning arc
   private readonly MIN_Y = 50; // Minimum Y position for enemies
   private readonly STAGGER_RANGE = 40; // Range for random Y offset
+  private readonly SHOOT_INTERVAL = 1000; // Shoot every 1000ms (1 second)
+  private nextShootTime: number = 0;
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -69,11 +71,6 @@ export class CombatScene extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(centerX, this.PLAYER_Y, 'player');
     
-    // Setup input handling for mouse shooting
-    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      this.shootProjectile(pointer.x, pointer.y);
-    });
-
     // Create enemy textures
     this.createEnemyTextures();
 
@@ -88,6 +85,22 @@ export class CombatScene extends Phaser.Scene {
     dotGraphics.fillCircle(0, 0, 8);
     dotGraphics.generateTexture('enemy_dot', 16, 16);
     dotGraphics.destroy();
+  }
+
+  private findNearestEnemy(): Enemy | null {
+    if (this.enemies.length === 0) return null;
+
+    return this.enemies.reduce((nearest, current) => {
+      const nearestDist = Phaser.Math.Distance.Between(
+        this.player.x, this.player.y,
+        nearest.sprite.x, nearest.sprite.y
+      );
+      const currentDist = Phaser.Math.Distance.Between(
+        this.player.x, this.player.y,
+        current.sprite.x, current.sprite.y
+      );
+      return currentDist < nearestDist ? current : nearest;
+    });
   }
 
   private shootProjectile(targetX: number, targetY: number) {
@@ -161,7 +174,16 @@ export class CombatScene extends Phaser.Scene {
     });
   }
 
-  override update() {
+  override update(time: number) {
+    // Handle automatic shooting
+    if (time > this.nextShootTime) {
+      const nearestEnemy = this.findNearestEnemy();
+      if (nearestEnemy) {
+        this.shootProjectile(nearestEnemy.sprite.x, nearestEnemy.sprite.y);
+        this.nextShootTime = time + this.SHOOT_INTERVAL;
+      }
+    }
+
     // Update enemy positions and movement
     this.enemies.forEach(enemy => {
       // Update enemy velocity to track player
