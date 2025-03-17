@@ -1,5 +1,3 @@
-# Cursor Rules for Project Structure
-
 # Project Vision
 - Incremental game focusing on visual scale and automation
 - Start with manual resource gathering, evolve into automated systems
@@ -7,76 +5,50 @@
 - Visual feedback is crucial - players should see their progress
 - Future plans for multiplayer/cooperative gameplay
 
-# SOLID Principles Implementation
+# Core Architecture Principles (SOLID)
 
-## Single Responsibility Principle (SRP)
-- Each component, hook, or service should have one reason to change
+## Single Responsibility
+- Each file should have one primary purpose, one main reason to change
 - Break down complex components when they handle multiple concerns
 - Examples of separate concerns:
   - UI rendering
   - State management
   - Event handling
   - Data transformation
-  - Business logic
+  - Business logic (Game Systems: Core game mechanics)
   - API communication
   - Game mechanics
 
-## Open/Closed Principle
-- Design components and systems to be extended without modification
-- Use composition and strategy patterns for varying behaviors
+## Open/Closed & Extension
+- Design for extension without modification
+- Use composition over inheritance
 - Implement plugin-like architectures for game systems
+- Define clear interfaces between components
 
-## Liskov Substitution Principle
-- Keep interfaces consistent and substitutable
-- Use TypeScript interfaces to define clear contracts
-- Ensure derived classes don't break base class behavior
+# Project Structure
+```typescript
+src/
+  app/                          # Next.js pages
+  components/                   # React UI components
+    common/                     # Shared components
+    ui/                        # Game UI components
+    game/                      # Game-specific components
+      ${ComponentName}/        # Component directory
+        ${ComponentName}.tsx   # Main component
+        ${ComponentName}.types.ts
+        components/           # Child components
+        hooks/               # Component-specific hooks
+  game/                       # Phaser game code
+    scenes/                   # Scene definitions
+    systems/                  # Game mechanics
+    objects/                  # Game entities
+  stores/                     # State management
+    ${domain}/               # Domain-specific stores
+      ${domain}Store.ts
+      ${domain}Store.types.ts
+```
 
-## Interface Segregation
-- Keep component props focused and minimal
-- Split large interfaces into smaller, focused ones
-- Create specific hooks for different aspects of functionality
-
-## Dependency Inversion
-- Depend on abstractions, not concrete implementations
-- Use dependency injection for services and game systems
-- Define clear interfaces between layers
-
-# State Management Architecture
-
-## Global State (Zustand)
-- Game-wide persistent state
-  - Player inventory
-  - Global progression
-  - Unlocked features
-  - Game settings
-- Define clear state slices with specific responsibilities
-- Use separate stores for different domains when beneficial
-- Example organization:
-  ```typescript
-  /stores
-    /inventory
-      inventoryStore.ts
-      inventoryStore.types.ts
-    /progression
-      progressionStore.ts
-      progressionStore.types.ts
-    /settings
-      settingsStore.ts
-      settingsStore.types.ts
-  ```
-
-## Local Component State
-- Temporary UI state (e.g., modal open/closed)
-- Form input values
-- Visual feedback states
-- Component-specific animations
-
-## Game Session State
-- Current run/mode specific state
-- Temporary combat/gathering statistics
-- Active effects or modifiers
-- Consider using a dedicated store for active session
-
+# State Management
 ## State Management Guidelines
 - Keep state as close as possible to where it's used
 - Lift state up only when necessary
@@ -85,237 +57,69 @@
 - Document state shape and mutations
 - Consider using state machines for complex flows
 
-# Component Organization
+## Global State (Zustand)
+- Persistent game data (inventory, progression, settings)
+- Domain-specific stores (inventory, progression, settings)
+- Clear boundaries between stores
 
-## Presentation Components
-- Focus solely on rendering and user interaction
-- Receive data and callbacks via props
-- No direct state management
-- Example structure:
-  ```typescript
-  /components
-    /combat
-      CombatUI/
-        CombatUI.tsx           # Main UI layout
-        components/
-          StatDisplay.tsx      # Pure presentation
-          ActionButtons.tsx    # Interaction handling
-          WaveProgress.tsx     # Progress display
-  ```
+## Local State
+- Component UI state only
+- Temporary visual feedback
+- Form inputs
 
-## Container Components
-- Handle state management and data flow
-- Coordinate between stores and presentation
-- Minimal direct DOM manipulation
-- Example:
-  ```typescript
-  /containers
-    /combat
-      CombatContainer/
-        CombatContainer.tsx    # State and coordination
-        hooks/
-          useCombatState.ts   # Combat-specific state
-          useCombatActions.ts # Combat actions
-  ```
+## Game State
+- Active session data
+- Temporary run statistics
+- Scene-specific state in Phaser
 
-## Game Systems
-- Separate core game logic from UI
-- Use TypeScript classes for complex systems
-- Implement clear interfaces
-- Example:
-  ```typescript
-  /game
-    /systems
-      /combat
-        CombatSystem.ts       # Core combat logic
-        WaveManager.ts        # Wave progression
-        TargetingSystem.ts    # Enemy targeting
-        ProjectileManager.ts  # Projectile handling
-    /scenes
-      CombatScene/
-        CombatScene.ts        # Scene orchestration
-        systems/              # Scene-specific systems
-  ```
+# Component Guidelines
+- Pure presentation in React components
+- Business logic in hooks or systems
+- Maximum 200 lines per file
+- Maximum 3 levels of JSX nesting
+- Extract complex logic to dedicated files
+- Use TypeScript interfaces for all props
 
-# Development Philosophy
-- Start simple, add complexity only when needed
-- Prefer composition over inheritance
-- Keep components focused and single-purpose
-- Extract reusable logic into hooks
-- Maintain clear visual hierarchy in UI components
-- Consider performance implications early
-- Separate Phaser game logic from React UI components
+# Naming Conventions
+- PascalCase: Components, Classes, Types
+- camelCase: Functions, Variables, Files
+- Prefix: 'use' for hooks
+- Suffix: 'Props' for prop types, 'Scene' for scenes
+- No index.tsx files - explicit names only
 
-# Code Complexity Guidelines
-- If a component exceeds 200 lines, consider splitting it
-- If a component has more than 3 levels of nested JSX, extract components
-- If a hook manages multiple concerns, split it
-- If you're passing more than 4-5 props, consider composition or context
-- Avoid prop drilling more than 2 levels deep
-- Keep functions focused: if a function needs more than 2-3 parameters, use an options object
-- If a component handles more than one major concern, split it
-- If a file exceeds 200 lines, evaluate for separation of concerns
-- If a component needs data from multiple sources, consider a container
-- If state logic becomes complex, move to dedicated store or system
-- If changes frequently require updates to multiple files, evaluate coupling
+# Development Environment
+- Windows 10/11
+- PowerShell commands
+- Use backslashes in paths
+- Commands must be Windows-compatible
 
-# State Management
-- Use local state for React UI components
-- Use context for shared UI state that spans multiple components
-- Use Phaser's built-in state management for game state
-- Use a bridge pattern to sync game state with UI when needed
-- Document state shape and mutations
+# Technology Responsibilities
 
-# Performance Considerations
-- Use React.memo() for expensive UI renders
+## Phaser (Game Engine)
+- Game world elements
+- Physics and collision
+- Resource mechanics
+- Combat systems
+- Particle effects and visual feedback
+- Scene management
+- Asset loading
+
+## React (UI Layer)
+- User interface
+- Stats display
+- Menus and settings
+- Configuration
+- Visual feedback
+
+# Performance Guidelines
+- React.memo() for expensive renders
+- Object pooling in Phaser
+- Batch state updates
+- Minimize React-Phaser communication
+- Profile early and often 
 - Keep Phaser game operations efficient
   - Use proper scene management
   - Implement object pooling for frequently created/destroyed game objects
   - Use sprite sheets and texture atlases
   - Implement proper physics group management
   - Consider using multiple scenes for different game areas
-- Batch React state updates when possible
-- Consider using web workers for heavy computations
-- Profile early and often
-- Minimize unnecessary communication between Phaser and React
-
-# Game Architecture Guidelines
-- Use Phaser for:
-  - All game world elements (stones, resources, characters, etc.)
-  - Game physics and collision detection
-  - Character/entity movement and animations
-  - Resource collection mechanics
-  - Combat and projectile systems
-  - Particle effects and visual feedback
-  - Game world interactions
-  - Scene management
-  - Asset loading and management
-
-- Use React for:
-  - UI controls (buttons, menus, settings)
-  - Stats displays and resource counters
-  - Tooltips and information panels
-  - Configuration interfaces
-  - Management screens
-  - Modal dialogs and notifications
-  - Forms and input controls
-  - Game settings and preferences
-
-# Component Organization for Phaser Integration
-- Separate Phaser scenes into dedicated files
-- Keep game logic in Phaser scenes and systems
-- Use TypeScript classes for game objects and systems
-- Implement proper cleanup in scene shutdown methods
-- Use event emitters to communicate between Phaser and React
-- Create typed interfaces for all game objects and systems
-
-# Root-level directories
-src/                            # Source code
-  app/                          # Next.js app router pages
-  components/                   # React components
-    common/                     # Shared/reusable components
-    ui/                        # Game UI components
-  game/                        # Phaser game code
-    scenes/                    # Phaser scenes
-    objects/                   # Game object classes
-    systems/                   # Game systems
-    assets/                    # Game assets
-    config/                    # Game configuration
-    utils/                     # Game utilities
-  components/                   # React components
-    game/                       # Game-specific components
-      ${ComponentName}/         # Main component directory (PascalCase)
-        ${ComponentName}.tsx    # Main component file
-        ${ComponentName}.types.ts  # Types for this component
-        components/            # Child components specific to this component
-          ${ChildComponent}/   # Child component directory
-            ${ChildComponent}.tsx  # Child component file
-            ${ChildComponent}.types.ts  # Types for this child component
-            components/       # Nested components (if needed)
-              ${Name}.tsx    # Simple child components
-        hooks/                # Custom hooks specific to this component
-          use${Name}.ts      # Hook naming convention
-        utils/                # Utility functions specific to this component
-          ${name}.ts         # Utility file naming convention
-        constants/           # Constants specific to this component
-          ${name}.constants.ts
-
-# File naming conventions
-- Use PascalCase for component directories and component files
-- Use camelCase for utility files, hooks, and other non-component files
-- Use kebab-case for CSS module files
-- Always use .tsx extension for files containing JSX
-- Use .ts extension for files containing only TypeScript
-- Component files should be named exactly the same as their directory (if in a directory)
-- Prefix hooks with 'use'
-- Suffix type files with '.types.ts'
-- Suffix constant files with '.constants.ts'
-- Never use index.tsx as a default export - always name files explicitly
-
-# Component structure conventions
-- Each major component should have its own directory
-- Component file should be named the same as its directory
-- Keep related files (hooks, utils, types) close to the component
-- Nest child components in a components/ subdirectory
-- If a child component becomes complex, promote it to its own directory with matching filename
-
-# Import conventions
-- Use '@/' alias for imports from src directory
-- Use relative imports for files within the same component directory
-- Group imports in the following order:
-  1. React and external libraries
-  2. Components
-  3. Hooks
-  4. Utils/Helpers
-  5. Types
-  6. Constants
-  7. Styles
-
-# Type conventions
-- Suffix component prop interfaces with 'Props'
-- Suffix handler prop names with 'Handler'
-- Use 'Handle' prefix for event handler functions
-
-# Example structure:
-src/
-  components/
-    game/
-      GameWrapper/           # Main game component
-        GameWrapper.tsx      # Main component file
-        GameWrapper.types.ts # Types for GameWrapper
-        components/
-          GameCanvas/      # Complex child component
-            GameCanvas.tsx
-            GameCanvas.types.ts
-            components/   
-          ManagementUI/    # Complex child component
-            ManagementUI.tsx
-            ManagementUI.types.ts
-            components/
-              ActionButton.tsx   # Simple child component
-              StoneInventory.tsx # Simple child component
-        hooks/
-          useGameState.ts
-        utils/
-          animation.ts
-        constants/
-          game.constants.ts
-
-# Additional Phaser-specific Conventions
-- Scene files should be suffixed with 'Scene'
-- Game object classes should be suffixed with relevant type (e.g., 'Sprite', 'Container')
-- Use Phaser's built-in types where available
-- Implement proper preload methods in scenes
-- Use TypeScript enums for game states and constants
-- Follow Phaser's lifecycle methods (preload, create, update)
-
-# Development Environment
-- Windows 10/11 development environment
-- Use PowerShell commands instead of Bash
-  - Use `rmdir /s /q` instead of `rm -rf`
-  - Use `mkdir` without the `-p` flag
-  - Use `copy` instead of `cp`
-  - Use backslashes `\` in paths instead of forward slashes
-  - Use `; ` for command chaining instead of `&&`
-- Terminal commands should be Windows-compatible
-- File paths should use Windows conventions 
