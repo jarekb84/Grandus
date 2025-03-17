@@ -25,6 +25,11 @@ export class CombatScene extends Phaser.Scene {
   private player!: Phaser.Physics.Arcade.Sprite;
   private currentWave: number = 0;
   private sceneEvents: CombatSceneEvents;
+  private readonly PLAYER_Y = 700; // Player's fixed Y position near bottom
+  private readonly ENEMY_SPEED = 50; // Speed at which enemies move
+  private readonly ARC_HEIGHT = 75; // Height of the spawning arc
+  private readonly MIN_Y = 50; // Minimum Y position for enemies
+  private readonly STAGGER_RANGE = 40; // Range for random Y offset
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -52,9 +57,8 @@ export class CombatScene extends Phaser.Scene {
       runChildUpdate: true
     });
     
-    // Create player in center
+    // Create player at the bottom center
     const centerX = this.cameras.main.centerX;
-    const centerY = this.cameras.main.centerY;
     
     // Create a simple circle for the player
     const graphics = this.add.graphics();
@@ -63,10 +67,9 @@ export class CombatScene extends Phaser.Scene {
     graphics.generateTexture('player', 32, 32);
     graphics.destroy();
 
-    this.player = this.physics.add.sprite(centerX, centerY, 'player');
-    this.player.setCollideWorldBounds(true);
+    this.player = this.physics.add.sprite(centerX, this.PLAYER_Y, 'player');
     
-    // Setup input handling
+    // Setup input handling for mouse shooting
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.shootProjectile(pointer.x, pointer.y);
     });
@@ -97,14 +100,14 @@ export class CombatScene extends Phaser.Scene {
     const projectile = this.physics.add.sprite(this.player.x, this.player.y, 'projectile');
     this.projectiles.add(projectile);
 
-    // Calculate direction
+    // Calculate direction to target
     const angle = Phaser.Math.Angle.Between(
       this.player.x, this.player.y,
       targetX, targetY
     );
 
-    // Set velocity
-    const speed = 300;
+    // Set velocity directly towards click position
+    const speed = 400;
     this.physics.velocityFromRotation(angle, speed, projectile.body.velocity);
 
     // Destroy projectile after 2 seconds if it hasn't hit anything
@@ -123,35 +126,71 @@ export class CombatScene extends Phaser.Scene {
     // Spawn 3 enemies for wave 1, add 2 more for each subsequent wave
     const numEnemies = Math.min(3 + (this.currentWave - 1) * 2, 20);
     
+    // Calculate arc parameters
+    const screenWidth = 1024;
+    const centerX = screenWidth / 2;
+    const arcWidth = screenWidth * 0.8; // Use 80% of screen width for the arc
+    const startX = centerX - arcWidth / 2;
+    
     for (let i = 0; i < numEnemies; i++) {
-      // Random position along the edges of the screen
-      const edge = Math.floor(Math.random() * 4);
-      let x, y;
+      // Calculate position along the arc
+      const progress = i / (numEnemies - 1);
+      const x = startX + arcWidth * progress;
       
-      switch (edge) {
-        case 0: // Top
-          x = Math.random() * 1024;
-          y = 50;
-          break;
-        case 1: // Right
-          x = 974;
-          y = Math.random() * 768;
-          break;
-        case 2: // Bottom
-          x = Math.random() * 1024;
-          y = 718;
-          break;
-        default: // Left
-          x = 50;
-          y = Math.random() * 768;
-          break;
-      }
+      // Calculate base Y position using a parabolic arc
+      const normalizedX = (x - startX) / arcWidth - 0.5; // -0.5 to 0.5
+      const baseY = this.MIN_Y + this.ARC_HEIGHT * (4 * normalizedX * normalizedX); // Parabola: 4x²
+      
+      // Add random stagger to Y position
+      const staggerY = Phaser.Math.Between(-this.STAGGER_RANGE, this.STAGGER_RANGE);
+      const y = baseY + staggerY;
 
       this.spawnEnemy(EnemyType.DOT, x, y);
     }
+
+    // Set initial velocities for enemies to move towards player
+    this.enemies.forEach(enemy => {
+      const angle = Phaser.Math.Angle.Between(
+        enemy.sprite.x, enemy.sprite.y,
+        this.player.x, this.player.y
+      );
+      const sprite = enemy.sprite as Phaser.Physics.Arcade.Sprite;
+      if (sprite.body) {
+        this.physics.velocityFromRotation(angle, this.ENEMY_SPEED, sprite.body.velocity);
+      }
+    });
   }
 
   override update() {
+    // Update enemy positions and movement
+    this.enemies.forEach(enemy => {
+      // Update enemy velocity to track player
+      const angle = Phaser.Math.Angle.Between(
+        enemy.sprite.x, enemy.sprite.y,
+        this.player.x, this.player.y
+      );
+      
+      const sprite = enemy.sprite as Phaser.Physics.Arcade.Sprite;
+      if (sprite.body) {
+        // Gradually adjust velocity towards player
+        const currentVelocity = sprite.body.velocity;
+        const targetVelocity = new Phaser.Math.Vector2();
+        this.physics.velocityFromRotation(angle, this.ENEMY_SPEED, targetVelocity);
+        
+        // Lerp between current and target velocity for smoother movement
+        const lerpFactor = 0.05;
+        currentVelocity.x = Phaser.Math.Linear(currentVelocity.x, targetVelocity.x, lerpFactor);
+        currentVelocity.y = Phaser.Math.Linear(currentVelocity.y, targetVelocity.y, lerpFactor);
+      }
+
+      // Check if enemy has reached the player's level
+      if (enemy.sprite.y >= this.PLAYER_Y - 32) {
+        // Game over when enemies reach the bottom
+        this.sceneEvents.onGameOver(this.currentWave);
+        this.scene.restart();
+      }
+    });
+
     // Check for collisions between projectiles and enemies
     this.projectiles.getChildren().forEach((gameObject: Phaser.GameObjects.GameObject) => {
       const projectile = gameObject as Phaser.Physics.Arcade.Sprite;
