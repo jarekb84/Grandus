@@ -1,14 +1,14 @@
 'use client'
 
-import { forwardRef, useImperativeHandle, useRef, useEffect } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react'
 import * as Phaser from 'phaser'
 import { GatheringScene } from '@/game/scenes/GatheringScene'
-import { CombatScene } from '@/game/scenes/CombatScene'
 import { ResourceSystem } from '@/game/systems/ResourceSystem'
 import { useGameState } from '@/game/state/GameState'
 import { EntityType, ResourceType } from '@/game/entities.types'
 import { GameMode } from '@/game/types/GameMode'
 import { generateInitialEntities } from '@/game/utils/entityGenerator'
+import { CombatContainer } from '@/components/combat/CombatContainer/CombatContainer'
 
 export interface GameCanvasProps {
   onResourceCollected: (type: ResourceType) => void
@@ -23,10 +23,11 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
   ({ onResourceCollected }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const gameRef = useRef<Phaser.Game | null>(null)
-    const sceneRef = useRef<GatheringScene | CombatScene | null>(null)
+    const sceneRef = useRef<GatheringScene | null>(null)
     const systemsRef = useRef<{ resource: ResourceSystem } | null>(null)
     const initialEntitiesRef = useRef<ReturnType<typeof generateInitialEntities> | null>(null)
     const { addEntity } = useGameState()
+    const [currentMode, setCurrentMode] = useState<GameMode>(GameMode.GATHERING)
 
     useImperativeHandle(ref, () => ({
       gatherFromNode: async (nodeId: string) => {
@@ -34,28 +35,12 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
         await systemsRef.current.resource.gatherResource(nodeId, 'player1')
       },
       switchMode: (mode: GameMode) => {
-        if (!gameRef.current) return
-
-        // Stop all current scenes
-        gameRef.current.scene.scenes.forEach(scene => {
-          gameRef.current?.scene.stop(scene.scene.key)
-        })
-
-        // Start the appropriate scene
-        switch (mode) {
-          case GameMode.GATHERING:
-            gameRef.current.scene.start('MainScene')
-            break
-          case GameMode.COMBAT:
-            gameRef.current.scene.start('CombatScene')
-            break
-          // Management mode is handled by React
-        }
+        setCurrentMode(mode)
       }
     }))
 
     useEffect(() => {
-      if (!containerRef.current) return
+      if (!containerRef.current || currentMode !== GameMode.GATHERING) return
 
       // Generate entities only once
       if (!initialEntitiesRef.current) {
@@ -97,34 +82,6 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 this.addEntity(entity)
               })
             }
-          },
-          class extends CombatScene {
-            constructor() {
-              super({
-                onWaveComplete: (waveNumber, rewards) => {
-                  // TODO: Handle wave completion rewards
-                  console.log(`Wave ${waveNumber} complete! Rewards:`, rewards);
-                },
-                onGameOver: (score) => {
-                  // TODO: Handle game over
-                  console.log('Game Over! Score:', score);
-                  // Restart the scene after a short delay
-                  setTimeout(() => {
-                    this.scene.restart();
-                  }, 1000);
-                },
-                onStatsUpdate: (stats) => {
-                  // Stats are handled by the CombatMode component
-                  console.log('Stats update:', stats);
-                }
-              })
-            }
-
-            override create() {
-              super.create();
-              // Set auto-shooting to false initially
-              this.setAutoShooting(false);
-            }
           }
         ]
       }
@@ -139,7 +96,11 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
         systemsRef.current = null
         // Don't clear initialEntitiesRef so we keep the same entities
       }
-    }, [addEntity])
+    }, [addEntity, currentMode])
+
+    if (currentMode === GameMode.COMBAT) {
+      return <CombatContainer />
+    }
 
     return <div ref={containerRef} className="w-full h-full bg-gray-900" />
   }

@@ -1,0 +1,88 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.gameContainer {
+  width: 100%;
+  height: 768px;
+  background-color: #1e293b;
+}
+
+.statsContainer {
+  padding: 1rem;
+  background-color: #1e293b;
+  color: white;
+}
+
+.waveStats,
+.playerStats {
+  margin-bottom: 1rem;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.shootButton {
+  position: relative;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.shootButton:hover {
+  background-color: #4338ca;
+}
+
+.shootButton.active {
+  background-color: #dc2626;
+}
+
+.shootButton.active:hover {
+  background-color: #b91c1c;
+}
+
+.cooldownOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: width 100ms linear;
+}
+
+.gameOver {
+  text-align: center;
+  padding: 2rem;
+}
+
+.gameOver h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.retryButton {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #4f46e5;
+  color: white;
+  border-radius: 0.375rem;
+}
+
+.retryButton:hover {
+  background-color: #4338ca;
+} 
