@@ -6,9 +6,17 @@ export interface CombatSceneEvents {
 }
 
 interface Enemy {
-  sprite: Phaser.GameObjects.Sprite;
+  sprite: Phaser.Physics.Arcade.Sprite;
   health: number;
   type: string;
+}
+
+enum EnemyType {
+  DOT = 'DOT',
+  LINE = 'LINE',
+  TRIANGLE = 'TRIANGLE',
+  SQUARE = 'SQUARE',
+  PENTAGON = 'PENTAGON'
 }
 
 export class CombatScene extends Phaser.Scene {
@@ -63,8 +71,20 @@ export class CombatScene extends Phaser.Scene {
       this.shootProjectile(pointer.x, pointer.y);
     });
 
+    // Create enemy textures
+    this.createEnemyTextures();
+
     // Start first wave
     this.startNextWave();
+  }
+
+  private createEnemyTextures() {
+    // Create dot enemy texture
+    const dotGraphics = this.add.graphics();
+    dotGraphics.fillStyle(0xff0000);
+    dotGraphics.fillCircle(0, 0, 8);
+    dotGraphics.generateTexture('enemy_dot', 16, 16);
+    dotGraphics.destroy();
   }
 
   private shootProjectile(targetX: number, targetY: number) {
@@ -86,22 +106,89 @@ export class CombatScene extends Phaser.Scene {
     // Set velocity
     const speed = 300;
     this.physics.velocityFromRotation(angle, speed, projectile.body.velocity);
+
+    // Destroy projectile after 2 seconds if it hasn't hit anything
+    this.time.delayedCall(2000, () => {
+      projectile.destroy();
+    });
   }
 
   private startNextWave() {
     this.currentWave++;
-    // TODO: Implement wave spawning logic based on currentWave
-    // This will use the geometric progression described in the gameplan
+    
+    // Clear any remaining enemies
+    this.enemies.forEach(enemy => enemy.sprite.destroy());
+    this.enemies = [];
+
+    // Spawn 3 enemies for wave 1, add 2 more for each subsequent wave
+    const numEnemies = Math.min(3 + (this.currentWave - 1) * 2, 20);
+    
+    for (let i = 0; i < numEnemies; i++) {
+      // Random position along the edges of the screen
+      const edge = Math.floor(Math.random() * 4);
+      let x, y;
+      
+      switch (edge) {
+        case 0: // Top
+          x = Math.random() * 1024;
+          y = 50;
+          break;
+        case 1: // Right
+          x = 974;
+          y = Math.random() * 768;
+          break;
+        case 2: // Bottom
+          x = Math.random() * 1024;
+          y = 718;
+          break;
+        default: // Left
+          x = 50;
+          y = Math.random() * 768;
+          break;
+      }
+
+      this.spawnEnemy(EnemyType.DOT, x, y);
+    }
   }
 
   override update() {
-    // TODO: Implement collision detection between projectiles and enemies
-    // TODO: Update enemy movement patterns
-    // TODO: Check for wave completion
+    // Check for collisions between projectiles and enemies
+    this.projectiles.getChildren().forEach((gameObject: Phaser.GameObjects.GameObject) => {
+      const projectile = gameObject as Phaser.Physics.Arcade.Sprite;
+      this.enemies.forEach((enemy, index) => {
+        if (Phaser.Geom.Intersects.RectangleToRectangle(
+          projectile.getBounds(),
+          enemy.sprite.getBounds()
+        )) {
+          // Destroy projectile
+          projectile.destroy();
+
+          // Damage enemy
+          enemy.health--;
+          if (enemy.health <= 0) {
+            enemy.sprite.destroy();
+            this.enemies.splice(index, 1);
+          }
+        }
+      });
+    });
+
+    // Check if wave is complete
+    if (this.enemies.length === 0) {
+      this.sceneEvents.onWaveComplete(this.currentWave, {
+        coins: this.currentWave * 10
+      });
+      this.startNextWave();
+    }
   }
 
   private spawnEnemy(type: string, x: number, y: number) {
-    // TODO: Implement enemy spawning with different geometric shapes
-    // based on the type parameter
+    const sprite = this.physics.add.sprite(x, y, 'enemy_dot');
+    const enemy: Enemy = {
+      sprite,
+      health: 1, // For now, all enemies have 1 health
+      type
+    };
+    this.enemies.push(enemy);
   }
 } 
