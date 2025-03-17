@@ -103,9 +103,15 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
               super({
                 onWaveComplete: (waveNumber, rewards) => {
                   // TODO: Handle wave completion rewards
+                  console.log(`Wave ${waveNumber} complete! Rewards:`, rewards);
                 },
                 onGameOver: (score) => {
                   // TODO: Handle game over
+                  console.log('Game Over! Score:', score);
+                },
+                onStatsUpdate: (stats) => {
+                  // Stats are handled by the CombatMode component
+                  console.log('Stats update:', stats);
                 }
               })
             }

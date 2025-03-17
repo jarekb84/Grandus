@@ -9,9 +9,14 @@ import type { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
 import Inventory from './components/Inventory/Inventory'
 import { ManagementMode } from '../ManagementMode/ManagementMode'
 
-// Import GameCanvas with no SSR
+// Import GameCanvas and CombatMode with no SSR
 const GameCanvas = dynamic(
   () => import('./components/GameCanvas/GameCanvas').then(mod => mod.GameCanvas),
+  { ssr: false }
+)
+
+const CombatMode = dynamic(
+  () => import('../CombatMode/CombatMode').then(mod => mod.CombatMode),
   { ssr: false }
 )
 
@@ -94,7 +99,7 @@ const GameWrapper = () => {
       </div>
 
       {/* Main game area with inventory */}
-      <div className="relative flex gap-4 mb-4">
+      <div className="relative flex gap-4">
         {/* Left sidebar with inventory */}
         <div className="w-64">
           <Inventory 
@@ -105,9 +110,11 @@ const GameWrapper = () => {
         </div>
         
         {/* Main content area */}
-        <div className="w-[1024px] h-[768px] bg-gray-800 rounded-lg overflow-hidden">
+        <div className="w-[1024px] bg-gray-800 rounded-lg">
           {currentMode === GameMode.MANAGEMENT ? (
             <ManagementMode />
+          ) : currentMode === GameMode.COMBAT ? (
+            <CombatMode />
           ) : (
             <GameCanvas 
               ref={gameCanvasRef}
@@ -121,7 +128,7 @@ const GameWrapper = () => {
 
       {/* Action panel below game */}
       {currentMode === GameMode.GATHERING && (
-        <div className="w-[1288px] bg-gray-800 rounded-lg p-4">
+        <div className="w-[1288px] bg-gray-800 rounded-lg p-4 mt-4">
           <div className="flex flex-col gap-4">
             {/* Action categories */}
             <div className="flex gap-4">

@@ -3,6 +3,13 @@ import * as Phaser from 'phaser';
 export interface CombatSceneEvents {
   onWaveComplete: (waveNumber: number, rewards: any) => void;
   onGameOver: (score: number) => void;
+  onStatsUpdate: (stats: {
+    wave: number;
+    enemiesRemaining: number;
+    enemyHealth: number;
+    enemyDamage: number;
+    enemySpeed: number;
+  }) => void;
 }
 
 interface Enemy {
@@ -32,6 +39,7 @@ export class CombatScene extends Phaser.Scene {
   private readonly STAGGER_RANGE = 40; // Range for random Y offset
   private readonly SHOOT_INTERVAL = 1000; // Shoot every 1000ms (1 second)
   private nextShootTime: number = 0;
+  private isAutoShooting: boolean = false;
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -44,6 +52,10 @@ export class CombatScene extends Phaser.Scene {
       }
     });
     this.sceneEvents = events;
+  }
+
+  setAutoShooting(enabled: boolean) {
+    this.isAutoShooting = enabled;
   }
 
   preload() {
@@ -172,11 +184,24 @@ export class CombatScene extends Phaser.Scene {
         this.physics.velocityFromRotation(angle, this.ENEMY_SPEED, sprite.body.velocity);
       }
     });
+
+    // Update stats
+    this.updateStats();
+  }
+
+  private updateStats() {
+    this.sceneEvents.onStatsUpdate({
+      wave: this.currentWave,
+      enemiesRemaining: this.enemies.length,
+      enemyHealth: 1, // For now, all enemies have 1 health
+      enemyDamage: 1, // For now, all enemies do 1 damage
+      enemySpeed: this.ENEMY_SPEED,
+    });
   }
 
   override update(time: number) {
     // Handle automatic shooting
-    if (time > this.nextShootTime) {
+    if (this.isAutoShooting && time > this.nextShootTime) {
       const nearestEnemy = this.findNearestEnemy();
       if (nearestEnemy) {
         this.shootProjectile(nearestEnemy.sprite.x, nearestEnemy.sprite.y);
@@ -229,6 +254,8 @@ export class CombatScene extends Phaser.Scene {
           if (enemy.health <= 0) {
             enemy.sprite.destroy();
             this.enemies.splice(index, 1);
+            // Update stats when enemy is destroyed
+            this.updateStats();
           }
         }
       });
