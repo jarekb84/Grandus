@@ -7,6 +7,136 @@
 - Visual feedback is crucial - players should see their progress
 - Future plans for multiplayer/cooperative gameplay
 
+# SOLID Principles Implementation
+
+## Single Responsibility Principle (SRP)
+- Each component, hook, or service should have one reason to change
+- Break down complex components when they handle multiple concerns
+- Examples of separate concerns:
+  - UI rendering
+  - State management
+  - Event handling
+  - Data transformation
+  - Business logic
+  - API communication
+  - Game mechanics
+
+## Open/Closed Principle
+- Design components and systems to be extended without modification
+- Use composition and strategy patterns for varying behaviors
+- Implement plugin-like architectures for game systems
+
+## Liskov Substitution Principle
+- Keep interfaces consistent and substitutable
+- Use TypeScript interfaces to define clear contracts
+- Ensure derived classes don't break base class behavior
+
+## Interface Segregation
+- Keep component props focused and minimal
+- Split large interfaces into smaller, focused ones
+- Create specific hooks for different aspects of functionality
+
+## Dependency Inversion
+- Depend on abstractions, not concrete implementations
+- Use dependency injection for services and game systems
+- Define clear interfaces between layers
+
+# State Management Architecture
+
+## Global State (Zustand)
+- Game-wide persistent state
+  - Player inventory
+  - Global progression
+  - Unlocked features
+  - Game settings
+- Define clear state slices with specific responsibilities
+- Use separate stores for different domains when beneficial
+- Example organization:
+  ```typescript
+  /stores
+    /inventory
+      inventoryStore.ts
+      inventoryStore.types.ts
+    /progression
+      progressionStore.ts
+      progressionStore.types.ts
+    /settings
+      settingsStore.ts
+      settingsStore.types.ts
+  ```
+
+## Local Component State
+- Temporary UI state (e.g., modal open/closed)
+- Form input values
+- Visual feedback states
+- Component-specific animations
+
+## Game Session State
+- Current run/mode specific state
+- Temporary combat/gathering statistics
+- Active effects or modifiers
+- Consider using a dedicated store for active session
+
+## State Management Guidelines
+- Keep state as close as possible to where it's used
+- Lift state up only when necessary
+- Use context for intermediate state sharing
+- Prefer composition over prop drilling
+- Document state shape and mutations
+- Consider using state machines for complex flows
+
+# Component Organization
+
+## Presentation Components
+- Focus solely on rendering and user interaction
+- Receive data and callbacks via props
+- No direct state management
+- Example structure:
+  ```typescript
+  /components
+    /combat
+      CombatUI/
+        CombatUI.tsx           # Main UI layout
+        components/
+          StatDisplay.tsx      # Pure presentation
+          ActionButtons.tsx    # Interaction handling
+          WaveProgress.tsx     # Progress display
+  ```
+
+## Container Components
+- Handle state management and data flow
+- Coordinate between stores and presentation
+- Minimal direct DOM manipulation
+- Example:
+  ```typescript
+  /containers
+    /combat
+      CombatContainer/
+        CombatContainer.tsx    # State and coordination
+        hooks/
+          useCombatState.ts   # Combat-specific state
+          useCombatActions.ts # Combat actions
+  ```
+
+## Game Systems
+- Separate core game logic from UI
+- Use TypeScript classes for complex systems
+- Implement clear interfaces
+- Example:
+  ```typescript
+  /game
+    /systems
+      /combat
+        CombatSystem.ts       # Core combat logic
+        WaveManager.ts        # Wave progression
+        TargetingSystem.ts    # Enemy targeting
+        ProjectileManager.ts  # Projectile handling
+    /scenes
+      CombatScene/
+        CombatScene.ts        # Scene orchestration
+        systems/              # Scene-specific systems
+  ```
+
 # Development Philosophy
 - Start simple, add complexity only when needed
 - Prefer composition over inheritance
@@ -23,6 +153,11 @@
 - If you're passing more than 4-5 props, consider composition or context
 - Avoid prop drilling more than 2 levels deep
 - Keep functions focused: if a function needs more than 2-3 parameters, use an options object
+- If a component handles more than one major concern, split it
+- If a file exceeds 200 lines, evaluate for separation of concerns
+- If a component needs data from multiple sources, consider a container
+- If state logic becomes complex, move to dedicated store or system
+- If changes frequently require updates to multiple files, evaluate coupling
 
 # State Management
 - Use local state for React UI components
