@@ -108,12 +108,22 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 onGameOver: (score) => {
                   // TODO: Handle game over
                   console.log('Game Over! Score:', score);
+                  // Restart the scene after a short delay
+                  setTimeout(() => {
+                    this.scene.restart();
+                  }, 1000);
                 },
                 onStatsUpdate: (stats) => {
                   // Stats are handled by the CombatMode component
                   console.log('Stats update:', stats);
                 }
               })
+            }
+
+            override create() {
+              super.create();
+              // Set auto-shooting to false initially
+              this.setAutoShooting(false);
             }
           }
         ]

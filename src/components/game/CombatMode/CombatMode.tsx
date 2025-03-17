@@ -24,6 +24,8 @@ export const CombatMode: React.FC = () => {
   const sceneRef = useRef<CombatScene | null>(null);
   const [isAutoShooting, setIsAutoShooting] = useState(false);
   const [shootingCooldown, setShootingCooldown] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [finalScore, setFinalScore] = useState(0);
   const [combatStats, setCombatStats] = useState<CombatStats>({
     wave: 0,
     enemiesRemaining: 0,
@@ -46,6 +48,9 @@ export const CombatMode: React.FC = () => {
       },
       onGameOver: (score) => {
         console.log('Game Over! Score:', score);
+        setIsGameOver(true);
+        setFinalScore(score);
+        setIsAutoShooting(false);
       },
       onStatsUpdate: (stats) => {
         setCombatStats(stats);
@@ -95,6 +100,8 @@ export const CombatMode: React.FC = () => {
   }, [isAutoShooting]);
 
   const handleToggleAutoShoot = useCallback(() => {
+    if (isGameOver) return;
+    
     setIsAutoShooting((prev) => {
       const newValue = !prev;
       if (sceneRef.current) {
@@ -102,47 +109,73 @@ export const CombatMode: React.FC = () => {
       }
       return newValue;
     });
+  }, [isGameOver]);
+
+  const handleRetry = useCallback(() => {
+    if (sceneRef.current) {
+      setIsGameOver(false);
+      setFinalScore(0);
+      setIsAutoShooting(false);
+      sceneRef.current.scene.restart();
+    }
   }, []);
 
   return (
     <div className={styles.container}>
       <div ref={gameRef} className={styles.gameContainer} />
+      
       <div className={styles.statsContainer}>
-        <div className={styles.waveStats}>
-          <h3>Wave Stats</h3>
-          <div className={styles.statGrid}>
-            <div>Wave: {combatStats.wave}</div>
-            <div>Enemies: {combatStats.enemiesRemaining}</div>
-            <div>Enemy Health: {combatStats.enemyHealth}</div>
-            <div>Enemy Damage: {combatStats.enemyDamage}</div>
-            <div>Enemy Speed: {combatStats.enemySpeed}</div>
+        {isGameOver ? (
+          <div className={styles.gameOver}>
+            <h2>Game Over!</h2>
+            <p>You reached wave {combatStats.wave}</p>
+            <p>Final score: {finalScore}</p>
+            <button 
+              className={styles.retryButton}
+              onClick={handleRetry}
+            >
+              Retry
+            </button>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className={styles.waveStats}>
+              <h3>Wave Stats</h3>
+              <div className={styles.statGrid}>
+                <div>Wave: {combatStats.wave}</div>
+                <div>Enemies: {combatStats.enemiesRemaining}</div>
+                <div>Enemy Health: {combatStats.enemyHealth}</div>
+                <div>Enemy Damage: {combatStats.enemyDamage}</div>
+                <div>Enemy Speed: {combatStats.enemySpeed}</div>
+              </div>
+            </div>
 
-        <div className={styles.playerStats}>
-          <h3>Player Stats</h3>
-          <div className={styles.statGrid}>
-            <div>Health: {playerStats.health}</div>
-            <div>Damage: {playerStats.damage}</div>
-            <div>Shooting Speed: {playerStats.shootingSpeed}/s</div>
-          </div>
-        </div>
+            <div className={styles.playerStats}>
+              <h3>Player Stats</h3>
+              <div className={styles.statGrid}>
+                <div>Health: {playerStats.health}</div>
+                <div>Damage: {playerStats.damage}</div>
+                <div>Shooting Speed: {playerStats.shootingSpeed}/s</div>
+              </div>
+            </div>
 
-        <div className={styles.controls}>
-          <button 
-            className={`${styles.shootButton} ${isAutoShooting ? styles.active : ''}`}
-            onClick={handleToggleAutoShoot}
-          >
-            {isAutoShooting ? 'Stop Shooting' : 'Start Shooting'}
-            <div 
-              className={styles.cooldownOverlay} 
-              style={{ 
-                width: `${shootingCooldown}%`,
-                display: isAutoShooting ? 'block' : 'none'
-              }} 
-            />
-          </button>
-        </div>
+            <div className={styles.controls}>
+              <button 
+                className={`${styles.shootButton} ${isAutoShooting ? styles.active : ''}`}
+                onClick={handleToggleAutoShoot}
+              >
+                {isAutoShooting ? 'Stop Shooting' : 'Start Shooting'}
+                <div 
+                  className={styles.cooldownOverlay} 
+                  style={{ 
+                    width: `${shootingCooldown}%`,
+                    display: isAutoShooting ? 'block' : 'none'
+                  }} 
+                />
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
