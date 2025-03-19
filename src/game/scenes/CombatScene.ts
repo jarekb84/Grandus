@@ -25,6 +25,7 @@ export class CombatScene extends Phaser.Scene {
   private readonly SHOOT_INTERVAL = 1000; // Shoot every 1000ms (1 second)
   private nextShootTime: number = 0;
   private isAutoShooting: boolean = false;
+  private isGameOver: boolean = false; // Track game over state
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -48,8 +49,14 @@ export class CombatScene extends Phaser.Scene {
   }
 
   create() {
+    // Reset game over state when scene is created
+    this.isGameOver = false;
+    
     // Initialize physics
     this.physics.world.setBounds(0, 0, 1024, 768);
+    
+    // Ensure physics is running
+    this.physics.resume();
     
     // Initialize systems
     this.enemySystem = new EnemySystem(this);
@@ -122,6 +129,9 @@ export class CombatScene extends Phaser.Scene {
   }
 
   override update(time: number) {
+    // Skip all updates if game is over
+    if (this.isGameOver) return;
+
     // Handle automatic shooting
     if (this.isAutoShooting && time > this.nextShootTime) {
       const nearestEnemy = this.enemySystem.findNearestEnemy(this.player.x, this.player.y);
@@ -142,8 +152,16 @@ export class CombatScene extends Phaser.Scene {
     for (const enemy of enemies) {
       if (enemy.sprite.y >= this.PLAYER_Y - 32) {
         // Game over when enemies reach the bottom
+        this.isGameOver = true; // Set game over flag
+        this.setAutoShooting(false); // Stop shooting
+        
+        // Freeze all enemies and projectiles
+        this.physics.pause();
+        
+        // Notify game over
         this.sceneEvents.onGameOver(this.currentWave);
-        this.scene.restart();
+        
+        // Don't restart the scene - let the UI handle this
         return;
       }
     }

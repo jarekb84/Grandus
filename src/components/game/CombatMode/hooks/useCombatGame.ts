@@ -98,10 +98,27 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
 
   const handleRetry = useCallback(() => {
     if (sceneRef.current) {
+      // Reset React state
       setIsGameOver(false);
       setFinalScore(0);
       setIsAutoShooting(false);
-      sceneRef.current.scene.restart();
+      
+      // Reset Phaser scene
+      const scene = sceneRef.current;
+      
+      // First, restart the scene to get a fresh state
+      scene.scene.restart();
+      
+      // After restart, we need to resume physics (it will be running by default in the new scene)
+      // and we may need to reset isGameOver flag if it's persisted across scene restarts
+      scene.scene.get('CombatScene').physics.resume();
+      
+      // Additional safety to ensure the scene is active and ready
+      requestAnimationFrame(() => {
+        if (scene.scene && typeof scene.scene.setActive === 'function') {
+          scene.scene.setActive(true);
+        }
+      });
     }
   }, []);
 
