@@ -4,7 +4,7 @@ import { ResourcesState } from './resourcesStore.types';
 
 export const useResourcesStore = create<ResourcesState>((set, get) => ({
   resources: {
-    [ResourceType.STONE]: 100,
+    [ResourceType.STONE]: 20,
     [ResourceType.WOOD]: 0,
     [ResourceType.FOOD]: 0,
   },
