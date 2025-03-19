@@ -32,10 +32,21 @@ export class EnemySystem {
   }
   
   private createEnemyTextures() {
-    // Create dot enemy texture
+    // Create dot enemy texture - use a cleaner circle without a box
     const dotGraphics = this.scene.add.graphics();
+    
+    // Clear fill to ensure no background rectangle
+    dotGraphics.clear();
+    
+    // Draw a filled circle with a subtle border
     dotGraphics.fillStyle(0xff0000);
-    dotGraphics.fillCircle(0, 0, 8);
+    dotGraphics.fillCircle(8, 8, 6);
+    
+    // Add a slight glow effect
+    dotGraphics.lineStyle(1, 0xff3333, 0.8);
+    dotGraphics.strokeCircle(8, 8, 7);
+    
+    // Generate texture and clean up
     dotGraphics.generateTexture('enemy_dot', 16, 16);
     dotGraphics.destroy();
   }

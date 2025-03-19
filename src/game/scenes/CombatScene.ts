@@ -95,6 +95,32 @@ export class CombatScene extends Phaser.Scene {
     });
   }
 
+  // Create a floating text that shows the cash earned
+  private createCashFloatingText(x: number, y: number, amount: number) {
+    // Create text object with improved styling
+    const text = this.add.text(x, y, `$${amount}`, {
+      fontFamily: 'monospace', // More game-like font
+      fontSize: '14px', // Smaller size
+      color: '#7FFF7F', // Softer green
+      stroke: '#000000',
+      strokeThickness: 1.5
+    });
+    text.setOrigin(0.5);
+    
+    // More dynamic animation
+    this.tweens.add({
+      targets: text,
+      y: y - 35, // Float up a bit less
+      alpha: 0, // Fade out
+      scale: 0.8, // Slightly shrink
+      duration: 800, // Faster animation
+      ease: 'Sine.Out',
+      onComplete: () => {
+        text.destroy(); // Remove when animation completes
+      }
+    });
+  }
+
   override update(time: number) {
     // Handle automatic shooting
     if (this.isAutoShooting && time > this.nextShootTime) {
@@ -127,6 +153,9 @@ export class CombatScene extends Phaser.Scene {
       // Damage enemy
       const destroyed = this.enemySystem.damageEnemy(enemy);
       if (destroyed) {
+        // Show floating cash text at enemy position
+        this.createCashFloatingText(enemy.sprite.x, enemy.sprite.y, 1);
+        
         // Add cash when enemy is destroyed ($1 per kill)
         useCurrencyStore.getState().addCash(1);
         // Update stats when enemy is destroyed
