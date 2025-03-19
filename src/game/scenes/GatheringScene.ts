@@ -3,6 +3,7 @@ import { Entity, EntityType, Shape } from '../entities.types'
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void
+  onPlayerHealthChanged?: (health: number) => void
 }
 
 interface EntitySprites {

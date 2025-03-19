@@ -17,6 +17,7 @@ export interface CombatSceneEvents {
   }) => void;
   onAmmoChanged: (ammo: number) => void;
   onOutOfAmmo: () => void;
+  onPlayerHealthChanged: (health: number) => void;
 }
 
 export class CombatScene extends Phaser.Scene {
@@ -31,6 +32,7 @@ export class CombatScene extends Phaser.Scene {
   private isAutoShooting: boolean = false;
   private isGameOver: boolean = false; // Track game over state
   private resourcesStore = useResourcesStore; // Add ResourcesStore reference
+  private playerHealth: number = 100; // Add player health
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -58,6 +60,8 @@ export class CombatScene extends Phaser.Scene {
     this.isGameOver = false;
     // Reset wave counter to restart from wave 1
     this.currentWave = 0;
+    // Reset player health
+    this.playerHealth = 100;
     
     // Initialize physics
     this.physics.world.setBounds(0, 0, 1024, 768);
@@ -80,6 +84,9 @@ export class CombatScene extends Phaser.Scene {
     graphics.destroy();
 
     this.player = this.physics.add.sprite(centerX, this.PLAYER_Y, 'player');
+    
+    // Notify listeners about initial player health
+    this.sceneEvents.onPlayerHealthChanged(this.playerHealth);
     
     // Start first wave
     this.startNextWave();
@@ -171,18 +178,15 @@ export class CombatScene extends Phaser.Scene {
     const enemies = this.enemySystem.getEnemies();
     for (const enemy of enemies) {
       if (enemy.sprite.y >= this.PLAYER_Y - 32) {
-        // Game over when enemies reach the bottom
-        this.isGameOver = true; // Set game over flag
-        this.setAutoShooting(false); // Stop shooting
+        // Apply damage to player when enemy reaches them
+        const enemyDamage = 10; // Each enemy does 10 damage
+        this.updatePlayerHealth(enemyDamage);
         
-        // Freeze all enemies and projectiles
-        this.physics.pause();
+        // Remove the enemy that hit the player
+        this.enemySystem.removeEnemy(enemy);
         
-        // Notify game over
-        this.sceneEvents.onGameOver(this.currentWave);
-        
-        // Don't restart the scene - let the UI handle this
-        return;
+        // Update stats after enemy is removed
+        this.updateStats();
       }
     }
 
@@ -208,5 +212,75 @@ export class CombatScene extends Phaser.Scene {
       });
       this.startNextWave();
     }
+  }
+
+  // Update the player's health
+  private updatePlayerHealth(damage: number) {
+    this.playerHealth -= damage;
+    
+    // Notify listeners about health change
+    this.sceneEvents.onPlayerHealthChanged(this.playerHealth);
+    
+    // Visual effect when player takes damage
+    this.showDamageEffect(damage);
+    
+    // Check if player is dead
+    if (this.playerHealth <= 0) {
+      this.handlePlayerDeath();
+    }
+  }
+  
+  // Visual effect when player takes damage
+  private showDamageEffect(damage: number) {
+    // Flash the player red
+    this.player.setTint(0xff0000);
+    
+    // Create a damage number floating up
+    this.createDamageText(this.player.x, this.player.y - 20, damage);
+    
+    // Shake the camera slightly
+    this.cameras.main.shake(100, 0.01);
+    
+    // Reset tint after a short delay
+    this.time.delayedCall(200, () => {
+      this.player.clearTint();
+    });
+  }
+  
+  // Create floating damage text
+  private createDamageText(x: number, y: number, amount: number) {
+    const text = this.add.text(x, y, `-${amount}`, {
+      fontFamily: 'monospace',
+      fontSize: '16px',
+      color: '#ff0000',
+      stroke: '#000000',
+      strokeThickness: 2
+    });
+    text.setOrigin(0.5);
+    
+    this.tweens.add({
+      targets: text,
+      y: y - 30,
+      alpha: 0,
+      scale: 1.5,
+      duration: 800,
+      ease: 'Cubic.Out',
+      onComplete: () => {
+        text.destroy();
+      }
+    });
+  }
+  
+  // Handle player death
+  private handlePlayerDeath() {
+    // Game over when player health reaches 0
+    this.isGameOver = true;
+    this.setAutoShooting(false);
+    
+    // Freeze all enemies and projectiles
+    this.physics.pause();
+    
+    // Notify game over
+    this.sceneEvents.onGameOver(this.currentWave);
   }
 } 

@@ -76,7 +76,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                   if (type === EntityType.RESOURCE_NODE) {
                     systemsRef.current?.resource.gatherResource(entityId, 'player1')
                   }
-                }
+                },
+                onPlayerHealthChanged: () => {}
               })
             }
 
@@ -124,6 +125,10 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 onOutOfAmmo: () => {
                   // Handled by CombatMode component
                   console.log('Out of ammo!');
+                },
+                onPlayerHealthChanged: (health) => {
+                  // Handled by CombatMode component
+                  console.log('Player health changed:', health);
                 }
               })
             }

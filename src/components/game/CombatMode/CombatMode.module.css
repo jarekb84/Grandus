@@ -160,4 +160,25 @@
 
 .retryButton:hover {
   background-color: #45a049;
+}
+
+.healthContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  grid-column: span 2;
+}
+
+.healthBar {
+  height: 10px;
+  background-color: #4b5563;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.healthBarFill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease-out, background-color 0.3s ease-out;
 } 

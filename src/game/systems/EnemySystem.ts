@@ -147,6 +147,17 @@ export class EnemySystem {
     return this.enemies;
   }
   
+  removeEnemy(enemy: Enemy): void {
+    // Find index of the enemy in the array
+    const index = this.enemies.findIndex(e => e === enemy);
+    if (index !== -1) {
+      // Remove from the array
+      this.enemies.splice(index, 1);
+      // Destroy the sprite
+      enemy.sprite.destroy();
+    }
+  }
+  
   findNearestEnemy(x: number, y: number): Enemy | null {
     if (this.enemies.length === 0) {
       return null;

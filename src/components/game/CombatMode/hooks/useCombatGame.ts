@@ -23,7 +23,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     enemySpeed: 0,
     ammo: resourcesStore.resources[ResourceType.STONE],
   });
-  const [playerStats] = useState<PlayerStats>({
+  const [playerStats, setPlayerStats] = useState<PlayerStats>({
     health: 100,
     damage: 1,
     shootingSpeed: 1,
@@ -70,6 +70,12 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       },
       onWaveComplete: (waveNumber, rewards) => {
         console.log(`Wave ${waveNumber} complete with rewards:`, rewards);
+      },
+      onPlayerHealthChanged: (health) => {
+        setPlayerStats(prev => ({
+          ...prev,
+          health
+        }));
       }
     };
 
@@ -113,43 +119,20 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
   }, [isAutoShooting, sceneRef, combatStats.ammo]);
 
   const handleRetry = useCallback(() => {
+    setIsGameOver(false);
+    setFinalScore(0);
+    setPlayerStats({
+      health: 100,
+      damage: 1,
+      shootingSpeed: 1,
+    });
+    
+    // Reset the scene
     if (sceneRef.current) {
-      // Reset React state
-      setIsGameOver(false);
-      setFinalScore(0);
-      setIsAutoShooting(false);
-      
-      // Reset combat stats to initial state
-      setCombatStats({
-        wave: 0,
-        enemiesRemaining: 0,
-        enemyHealth: 0,
-        enemyDamage: 0,
-        enemySpeed: 0,
-        ammo: resourcesStore.resources[ResourceType.STONE],
-      });
-      
-      // Reset cash to 0 for new run
-      useCurrencyStore.getState().resetCash();
-      
-      // Reset Phaser scene
-      const scene = sceneRef.current;
-      
-      // First, restart the scene to get a fresh state
-      scene.scene.restart();
-      
-      // After restart, we need to resume physics (it will be running by default in the new scene)
-      // and we may need to reset isGameOver flag if it's persisted across scene restarts
-      scene.scene.get('CombatScene').physics.resume();
-      
-      // Additional safety to ensure the scene is active and ready
-      requestAnimationFrame(() => {
-        if (scene.scene && typeof scene.scene.setActive === 'function') {
-          scene.scene.setActive(true);
-        }
-      });
+      // The scene's restart is handled internally
+      sceneRef.current.scene.restart();
     }
-  }, [resourcesStore]);
+  }, [sceneRef]);
 
   // Reset out of ammo state when ammo changes from 0 to a positive value
   useEffect(() => {
