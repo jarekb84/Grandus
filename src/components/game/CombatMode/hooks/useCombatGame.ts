@@ -127,6 +127,9 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       shootingSpeed: 1,
     });
     
+    // Reset cash to 0 for new run
+    useCurrencyStore.getState().resetCash();
+    
     // Reset the scene
     if (sceneRef.current) {
       // The scene's restart is handled internally

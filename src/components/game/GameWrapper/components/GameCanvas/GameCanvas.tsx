@@ -109,6 +109,11 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 onGameOver: (score) => {
                   // TODO: Handle game over
                   console.log('Game Over! Score:', score);
+                  
+                  // Reset cash before restarting scene
+                  const { resetCash } = require('@/stores/currency/currencyStore').useCurrencyStore.getState();
+                  resetCash();
+                  
                   // Restart the scene after a short delay
                   setTimeout(() => {
                     this.scene.restart();
