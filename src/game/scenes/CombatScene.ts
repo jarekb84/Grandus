@@ -51,6 +51,8 @@ export class CombatScene extends Phaser.Scene {
   create() {
     // Reset game over state when scene is created
     this.isGameOver = false;
+    // Reset wave counter to restart from wave 1
+    this.currentWave = 0;
     
     // Initialize physics
     this.physics.world.setBounds(0, 0, 1024, 768);

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
 import { CombatScene, CombatSceneEvents } from '@/game/scenes/CombatScene';
 import { CombatStats, PlayerStats } from '../CombatMode.types';
+import { useCurrencyStore } from '@/stores/currency/currencyStore';
 
 export const useCombatGame = (onGameOver?: (score: number) => void) => {
   const gameRef = useRef<HTMLDivElement>(null);
@@ -102,6 +103,18 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       setIsGameOver(false);
       setFinalScore(0);
       setIsAutoShooting(false);
+      
+      // Reset combat stats to initial state
+      setCombatStats({
+        wave: 0,
+        enemiesRemaining: 0,
+        enemyHealth: 0,
+        enemyDamage: 0,
+        enemySpeed: 0,
+      });
+      
+      // Reset cash to 0 for new run
+      useCurrencyStore.getState().resetCash();
       
       // Reset Phaser scene
       const scene = sceneRef.current;

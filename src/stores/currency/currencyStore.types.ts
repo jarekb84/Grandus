@@ -4,4 +4,5 @@ export interface CurrencyState {
   // Actions
   addCash: (amount: number) => void;
   getCash: () => number;
+  resetCash: () => void; // Reset cash to 0
 } 

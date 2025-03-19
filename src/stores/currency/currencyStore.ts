@@ -13,5 +13,12 @@ export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   
   getCash: () => {
     return get().cash;
+  },
+  
+  resetCash: () => {
+    set(state => ({
+      ...state,
+      cash: 0
+    }));
   }
 })); 
