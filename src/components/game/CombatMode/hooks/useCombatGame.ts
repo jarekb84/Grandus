@@ -42,6 +42,8 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       }
     };
 
+    let combatScene = new CombatScene(events);
+    
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       width: 1024,
@@ -55,14 +57,14 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
           debug: false
         }
       },
-      scene: new CombatScene(events)
+      scene: combatScene
     });
 
-    const scene = game.scene.getScene('CombatScene') as CombatScene;
-    sceneRef.current = scene;
-
+    sceneRef.current = combatScene;
+    
     return () => {
       game.destroy(true);
+      sceneRef.current = null;
     };
   }, [onGameOver]);
 
@@ -92,7 +94,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       }
       return newValue;
     });
-  }, [isGameOver]);
+  }, [isGameOver, isAutoShooting]);
 
   const handleRetry = useCallback(() => {
     if (sceneRef.current) {

@@ -137,18 +137,27 @@ export class EnemySystem {
   }
   
   findNearestEnemy(x: number, y: number): Enemy | null {
-    if (this.enemies.length === 0) return null;
-
-    return this.enemies.reduce((nearest, current) => {
-      const nearestDist = Phaser.Math.Distance.Between(
+    if (this.enemies.length === 0) {
+      return null;
+    }
+    
+    let nearestEnemy: Enemy | null = null;
+    let nearestDistance = Number.MAX_VALUE;
+    
+    for (const enemy of this.enemies) {
+      if (!enemy || !enemy.sprite) continue;
+      
+      const distance = Phaser.Math.Distance.Between(
         x, y,
-        nearest.sprite.x, nearest.sprite.y
+        enemy.sprite.x, enemy.sprite.y
       );
-      const currentDist = Phaser.Math.Distance.Between(
-        x, y,
-        current.sprite.x, current.sprite.y
-      );
-      return currentDist < nearestDist ? current : nearest;
-    });
+      
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestEnemy = enemy;
+      }
+    }
+    
+    return nearestEnemy;
   }
 } 
