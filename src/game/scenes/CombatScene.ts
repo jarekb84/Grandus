@@ -2,6 +2,8 @@ import * as Phaser from 'phaser';
 import { EnemySystem, Enemy } from '../systems/EnemySystem';
 import { ProjectileSystem } from '../systems/ProjectileSystem';
 import { useCurrencyStore } from '@/stores/currency/currencyStore';
+import { useResourcesStore } from '@/stores/resources/resourcesStore';
+import { ResourceType } from '../entities.types';
 
 export interface CombatSceneEvents {
   onWaveComplete: (waveNumber: number, rewards: any) => void;
@@ -13,6 +15,8 @@ export interface CombatSceneEvents {
     enemyDamage: number;
     enemySpeed: number;
   }) => void;
+  onAmmoChanged: (ammo: number) => void;
+  onOutOfAmmo: () => void;
 }
 
 export class CombatScene extends Phaser.Scene {
@@ -26,6 +30,7 @@ export class CombatScene extends Phaser.Scene {
   private nextShootTime: number = 0;
   private isAutoShooting: boolean = false;
   private isGameOver: boolean = false; // Track game over state
+  private resourcesStore = useResourcesStore; // Add ResourcesStore reference
 
   constructor(events: CombatSceneEvents) {
     super({ 
@@ -137,12 +142,25 @@ export class CombatScene extends Phaser.Scene {
     // Handle automatic shooting
     if (this.isAutoShooting && time > this.nextShootTime) {
       const nearestEnemy = this.enemySystem.findNearestEnemy(this.player.x, this.player.y);
-      if (nearestEnemy) {
+      // Check if we have stones available to shoot
+      const hasStones = this.resourcesStore.getState().hasResource(ResourceType.STONE, 1);
+      
+      if (nearestEnemy && hasStones) {
+        // Consume a stone when shooting
+        this.resourcesStore.getState().removeResource(ResourceType.STONE, 1);
+        
         this.projectileSystem.shootProjectile(
           this.player.x, this.player.y, 
           nearestEnemy.sprite.x, nearestEnemy.sprite.y
         );
         this.nextShootTime = time + this.SHOOT_INTERVAL;
+        
+        // Notify listeners about ammo change
+        this.sceneEvents.onAmmoChanged(this.resourcesStore.getState().getResource(ResourceType.STONE));
+      } else if (!hasStones) {
+        // No stones left - notify listeners and stop shooting
+        this.sceneEvents.onAmmoChanged(0);
+        this.sceneEvents.onOutOfAmmo();
       }
     }
 

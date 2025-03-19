@@ -4,6 +4,7 @@ export interface CombatStats {
   enemyHealth: number;
   enemyDamage: number;
   enemySpeed: number;
+  ammo: number;
 }
 
 export interface PlayerStats {
@@ -24,6 +25,8 @@ export interface GameStatsProps {
 export interface GameControlsProps {
   isAutoShooting: boolean;
   shootingCooldown: number;
+  ammo: number;
+  outOfAmmo: boolean;
   onToggleAutoShoot: () => void;
   isGameOver: boolean;
 }

@@ -5,15 +5,22 @@ import styles from '../CombatMode.module.css';
 export const GameControls: React.FC<GameControlsProps> = ({
   isAutoShooting,
   shootingCooldown,
+  ammo,
+  outOfAmmo,
   onToggleAutoShoot,
   isGameOver
 }) => {
   return (
     <div className={styles.controls}>
+      <div className={styles.ammoDisplay}>
+        <span className={`${styles.ammoLabel} ${outOfAmmo ? styles.outOfAmmo : ''}`}>
+          {outOfAmmo ? 'OUT OF AMMO' : `Ammo: ${ammo}`}
+        </span>
+      </div>
       <button 
-        className={`${styles.shootButton} ${isAutoShooting ? styles.active : ''}`}
+        className={`${styles.shootButton} ${isAutoShooting ? styles.active : ''} ${outOfAmmo ? styles.disabled : ''}`}
         onClick={onToggleAutoShoot}
-        disabled={isGameOver}
+        disabled={isGameOver || outOfAmmo}
       >
         {isAutoShooting ? 'Stop Shooting' : 'Start Shooting'}
         <div 

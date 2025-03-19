@@ -3,6 +3,8 @@ import * as Phaser from 'phaser';
 import { CombatScene, CombatSceneEvents } from '@/game/scenes/CombatScene';
 import { CombatStats, PlayerStats } from '../CombatMode.types';
 import { useCurrencyStore } from '@/stores/currency/currencyStore';
+import { useResourcesStore } from '@/stores/resources/resourcesStore';
+import { ResourceType } from '@/game/entities.types';
 
 export const useCombatGame = (onGameOver?: (score: number) => void) => {
   const gameRef = useRef<HTMLDivElement>(null);
@@ -11,12 +13,15 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
   const [shootingCooldown, setShootingCooldown] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
   const [finalScore, setFinalScore] = useState(0);
+  const [outOfAmmo, setOutOfAmmo] = useState(false);
+  const resourcesStore = useResourcesStore();
   const [combatStats, setCombatStats] = useState<CombatStats>({
     wave: 0,
     enemiesRemaining: 0,
     enemyHealth: 0,
     enemyDamage: 0,
     enemySpeed: 0,
+    ammo: resourcesStore.resources[ResourceType.STONE],
   });
   const [playerStats] = useState<PlayerStats>({
     health: 100,
@@ -27,24 +32,6 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
   useEffect(() => {
     if (!gameRef.current) return;
 
-    const events: CombatSceneEvents = {
-      onWaveComplete: (wave, rewards) => {
-        console.log(`Wave ${wave} complete! Rewards:`, rewards);
-      },
-      onGameOver: (score) => {
-        console.log('Game Over! Score:', score);
-        setIsGameOver(true);
-        setFinalScore(score);
-        setIsAutoShooting(false);
-        onGameOver?.(score);
-      },
-      onStatsUpdate: (stats) => {
-        setCombatStats(stats);
-      }
-    };
-
-    let combatScene = new CombatScene(events);
-    
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       width: 1024,
@@ -53,16 +40,43 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       backgroundColor: '#1e293b',
       physics: {
         default: 'arcade',
-        arcade: {
-          gravity: { x: 0, y: 0 },
-          debug: false
-        }
       },
-      scene: combatScene
     });
 
+    const sceneEvents: CombatSceneEvents = {
+      onStatsUpdate: (stats) => {
+        setCombatStats(prev => ({
+          ...prev,
+          ...stats,
+        }));
+      },
+      onGameOver: (wave) => {
+        setIsGameOver(true);
+        setFinalScore(wave);
+        setIsAutoShooting(false);
+        if (onGameOver) {
+          onGameOver(wave);
+        }
+      },
+      onAmmoChanged: (ammo) => {
+        setCombatStats(prev => ({
+          ...prev,
+          ammo,
+        }));
+      },
+      onOutOfAmmo: () => {
+        setOutOfAmmo(true);
+        setIsAutoShooting(false);
+      },
+      onWaveComplete: (waveNumber, rewards) => {
+        console.log(`Wave ${waveNumber} complete with rewards:`, rewards);
+      }
+    };
+
+    const combatScene = new CombatScene(sceneEvents);
     sceneRef.current = combatScene;
-    
+    game.scene.add('CombatScene', combatScene, true);
+
     return () => {
       game.destroy(true);
       sceneRef.current = null;
@@ -86,16 +100,17 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
   }, [isAutoShooting]);
 
   const handleToggleAutoShoot = useCallback(() => {
-    if (isGameOver) return;
+    // Only allow auto-shooting if player has ammo
+    if (!isAutoShooting && combatStats.ammo <= 0) {
+      return; // Don't enable shooting if out of ammo
+    }
     
-    setIsAutoShooting((prev) => {
-      const newValue = !prev;
-      if (sceneRef.current) {
-        sceneRef.current.setAutoShooting(newValue);
-      }
-      return newValue;
-    });
-  }, [isGameOver, isAutoShooting]);
+    setIsAutoShooting(prev => !prev);
+    if (sceneRef.current) {
+      const newValue = !isAutoShooting;
+      sceneRef.current.setAutoShooting(newValue);
+    }
+  }, [isAutoShooting, sceneRef, combatStats.ammo]);
 
   const handleRetry = useCallback(() => {
     if (sceneRef.current) {
@@ -111,6 +126,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
         enemyHealth: 0,
         enemyDamage: 0,
         enemySpeed: 0,
+        ammo: resourcesStore.resources[ResourceType.STONE],
       });
       
       // Reset cash to 0 for new run
@@ -133,7 +149,14 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
         }
       });
     }
-  }, []);
+  }, [resourcesStore]);
+
+  // Reset out of ammo state when ammo changes from 0 to a positive value
+  useEffect(() => {
+    if (combatStats.ammo > 0 && outOfAmmo) {
+      setOutOfAmmo(false);
+    }
+  }, [combatStats.ammo, outOfAmmo]);
 
   return {
     gameRef,
@@ -143,7 +166,8 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     finalScore,
     combatStats,
     playerStats,
+    outOfAmmo,
     handleToggleAutoShoot,
-    handleRetry
+    handleRetry,
   };
 }; 

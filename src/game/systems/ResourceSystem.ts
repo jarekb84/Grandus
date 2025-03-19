@@ -1,10 +1,12 @@
 import { GatheringScene } from '../scenes/GatheringScene'
 import { useGameState } from '../state/GameState'
 import { ResourceNodeEntity, ResourceType } from '../entities.types'
+import { useResourcesStore } from '@/stores/resources/resourcesStore'
 
 export class ResourceSystem {
   private scene: GatheringScene
   private gameState = useGameState
+  private resourcesStore = useResourcesStore
   private readonly BASE_POSITION = { x: 400, y: 400 } // Base position from entityGenerator
 
   constructor(scene: GatheringScene) {
@@ -57,9 +59,10 @@ export class ResourceSystem {
     // Second movement: Move gatherer back to base
     await this.scene.moveEntityTo(gatherId, this.BASE_POSITION.x, this.BASE_POSITION.y)
     
-    // Update inventory for each yielded resource
+    // Update inventory for each yielded resource using the ResourceStore
     yields.forEach(resourceType => {
-      this.gameState.getState().incrementResource(resourceType)
+      // Update resource store instead of game state inventory
+      this.resourcesStore.getState().addResource(resourceType, 1)
     })
   }
 } 

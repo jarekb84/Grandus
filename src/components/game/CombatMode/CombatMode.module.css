@@ -51,8 +51,38 @@
 
 .controls {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.ammoDisplay {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.ammoLabel {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  background-color: #2d3748;
+  border-radius: 0.25rem;
+  min-width: 100px;
+  text-align: center;
+}
+
+.ammoLabel.outOfAmmo {
+  color: white;
+  background-color: #e53e3e;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .shootButton {
@@ -79,6 +109,13 @@
 
 .shootButton.active:hover {
   background-color: #da190b;
+}
+
+.shootButton.disabled,
+.shootButton.disabled:hover {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .cooldownOverlay {
