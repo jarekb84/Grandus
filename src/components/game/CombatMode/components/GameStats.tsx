@@ -1,8 +1,12 @@
 import React from 'react';
 import { GameStatsProps } from '../CombatMode.types';
 import styles from '../CombatMode.module.css';
+import { useCurrencyStore } from '@/stores/currency/currencyStore';
 
 export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }) => {
+  // Get current cash from the store
+  const cash = useCurrencyStore(state => state.cash);
+
   return (
     <>
       <div className={styles.waveStats}>
@@ -22,6 +26,7 @@ export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }
           <div>Health: {playerStats.health}</div>
           <div>Damage: {playerStats.damage}</div>
           <div>Shooting Speed: {playerStats.shootingSpeed}/s</div>
+          <div>Cash: ${cash}</div>
         </div>
       </div>
     </>

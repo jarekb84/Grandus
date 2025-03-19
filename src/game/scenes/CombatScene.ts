@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { EnemySystem, Enemy } from '../systems/EnemySystem';
 import { ProjectileSystem } from '../systems/ProjectileSystem';
+import { useCurrencyStore } from '@/stores/currency/currencyStore';
 
 export interface CombatSceneEvents {
   onWaveComplete: (waveNumber: number, rewards: any) => void;
@@ -126,6 +127,8 @@ export class CombatScene extends Phaser.Scene {
       // Damage enemy
       const destroyed = this.enemySystem.damageEnemy(enemy);
       if (destroyed) {
+        // Add cash when enemy is destroyed ($1 per kill)
+        useCurrencyStore.getState().addCash(1);
         // Update stats when enemy is destroyed
         this.updateStats();
       }
