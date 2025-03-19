@@ -10,12 +10,7 @@ interface EntityCollections {
 interface GameState {
   // Entity Collections
   entities: EntityCollections
-  inventory: {
-    stone: number
-    wood: number
-    food: number
-  }
-
+  
   // Computed state (cached values)
   availableNodes: Map<ResourceNodeType, boolean>
 
@@ -24,9 +19,6 @@ interface GameState {
   removeEntity: (entityId: string) => void
   updateEntity: (entityId: string, updates: Partial<Entity>) => void
   
-  // Resource Operations
-  incrementResource: (type: ResourceType) => void
-
   // Query Methods
   getEntitiesByType: (type: EntityType) => Entity[]
   getNodesByType: (type: ResourceNodeType) => ResourceNodeEntity[]
@@ -43,11 +35,6 @@ const createEntityCollections = (): EntityCollections => ({
 // todo this file needs to be simplified, tons of duplicate code and saftey handling
 export const useGameState = create<GameState>((set, get) => ({
   entities: createEntityCollections(),
-  inventory: {
-    stone: 0,
-    wood: 0,
-    food: 0
-  },
   availableNodes: new Map([
     [ResourceNodeType.STONE_DEPOSIT, false],
     [ResourceNodeType.IRON_DEPOSIT, false],
@@ -166,16 +153,6 @@ export const useGameState = create<GameState>((set, get) => ({
 
       return newState
     })
-  },
-
-  incrementResource: (type: ResourceType) => {
-    set(state => ({
-      ...state,
-      inventory: {
-        ...state.inventory,
-        [type.toLowerCase()]: state.inventory[type.toLowerCase() as keyof typeof state.inventory] + 1
-      }
-    }))
   },
 
   getEntitiesByType: (type: EntityType) => {

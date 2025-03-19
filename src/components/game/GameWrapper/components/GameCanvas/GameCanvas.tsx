@@ -6,12 +6,12 @@ import { GatheringScene } from '@/game/scenes/GatheringScene'
 import { CombatScene } from '@/game/scenes/CombatScene'
 import { ResourceSystem } from '@/game/systems/ResourceSystem'
 import { useGameState } from '@/game/state/GameState'
-import { EntityType, ResourceType } from '@/game/entities.types'
+import { EntityType } from '@/game/entities.types'
 import { GameMode } from '@/game/types/GameMode'
 import { generateInitialEntities } from '@/game/utils/entityGenerator'
 
 export interface GameCanvasProps {
-  onResourceCollected: (type: ResourceType) => void
+  // Removed onResourceCollected prop as it's no longer needed
 }
 
 export interface GameCanvasHandle {
@@ -20,7 +20,7 @@ export interface GameCanvasHandle {
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
-  ({ onResourceCollected }, ref) => {
+  (props, ref) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const gameRef = useRef<Phaser.Game | null>(null)
     const sceneRef = useRef<GatheringScene | CombatScene | null>(null)
@@ -116,6 +116,14 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 onStatsUpdate: (stats) => {
                   // Stats are handled by the CombatMode component
                   console.log('Stats update:', stats);
+                },
+                onAmmoChanged: (ammo) => {
+                  // Handled by CombatMode component
+                  console.log('Ammo changed:', ammo);
+                },
+                onOutOfAmmo: () => {
+                  // Handled by CombatMode component
+                  console.log('Out of ammo!');
                 }
               })
             }

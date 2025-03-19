@@ -8,6 +8,7 @@ import { GameMode } from '@/game/types/GameMode'
 import type { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
 import Inventory from './components/Inventory/Inventory'
 import { ManagementMode } from '../ManagementMode/ManagementMode'
+import { useResourcesStore } from '@/stores/resources/resourcesStore'
 
 // Import GameCanvas and CombatMode with no SSR
 const GameCanvas = dynamic(
@@ -29,7 +30,8 @@ const RESOURCE_TO_NODE_TYPE = {
 
 const GameWrapper = () => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
-  const { inventory, getNodesByType, hasAvailableNodeType } = useGameState()
+  const { getNodesByType, hasAvailableNodeType } = useGameState()
+  const resourcesStore = useResourcesStore()
   const [isGathering, setIsGathering] = useState(false)
   const [currentMode, setCurrentMode] = useState<GameMode>(GameMode.GATHERING)
 
@@ -103,9 +105,9 @@ const GameWrapper = () => {
         {/* Left sidebar with inventory */}
         <div className="w-64">
           <Inventory 
-            stoneCount={inventory.stone} 
-            woodCount={inventory.wood} 
-            foodCount={inventory.food}
+            stoneCount={resourcesStore.resources[ResourceType.STONE]} 
+            woodCount={resourcesStore.resources[ResourceType.WOOD]} 
+            foodCount={resourcesStore.resources[ResourceType.FOOD]}
           />
         </div>
         
@@ -116,12 +118,7 @@ const GameWrapper = () => {
           ) : currentMode === GameMode.COMBAT ? (
             <CombatMode />
           ) : (
-            <GameCanvas 
-              ref={gameCanvasRef}
-              onResourceCollected={(type) => {
-                useGameState.getState().incrementResource(type)
-              }}
-            />
+            <GameCanvas ref={gameCanvasRef} />
           )}
         </div>
       </div>
