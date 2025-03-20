@@ -5,6 +5,9 @@ export interface CombatStats {
   enemyDamage: number;
   enemySpeed: number;
   ammo: number;
+  playerHealth?: number;
+  cash?: number;
+  killCount?: number;
 }
 
 export interface PlayerStats {

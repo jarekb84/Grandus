@@ -1,67 +1,89 @@
 import { create } from 'zustand';
-import { useResourcesStore } from '@/features/shared/stores/Resources.store';
-import { ResourceType } from '@/features/shared/types/entities';
 
-interface CombatState {
+interface CombatStats {
+  playerHealth: number;
   wave: number;
   enemiesRemaining: number;
   enemyHealth: number;
   enemyDamage: number;
   enemySpeed: number;
   ammo: number;
-  playerHealth: number;
-  isGameOver: boolean;
-  finalScore: number;
-  isAutoShooting: boolean;
-  shootingCooldown: number;
-  outOfAmmo: boolean;
-  setCombatStats: (stats: Partial<CombatState>) => void;
-  resetCombat: () => void;
-  setIsAutoShooting: (isAutoShooting: boolean) => void;
-  setShootingCooldown: (shootingCooldown: number) => void;
-  setIsGameOver: (isGameOver: boolean) => void;
-  setFinalScore: (finalScore: number) => void;
-  setOutOfAmmo: (outOfAmmo: boolean) => void;
-  setAmmo: (ammo: number) => void;
-  setPlayerHealth: (playerHealth: number) => void;
+  cash: number;
+  killCount: number;
 }
 
-export const useCombatStore = create<CombatState>((set) => ({
-  wave: 0,
-  enemiesRemaining: 0,
-  enemyHealth: 0,
-  enemyDamage: 0,
-  enemySpeed: 0,
-  ammo: useResourcesStore.getState().getResource(ResourceType.STONE), // Initialize ammo from ResourcesStore
+interface CombatState {
+  // UI/Game State (low frequency updates)
+  stats: CombatStats;
+  isGameOver: boolean;
+  isWaveComplete: boolean;
+  isAutoShooting: boolean;
+  
+  // Actions
+  updateStats: (updates: Partial<CombatStats>) => void;
+  setGameOver: (isOver: boolean) => void;
+  setWaveComplete: (isComplete: boolean) => void;
+  setAutoShooting: (enabled: boolean) => void;
+  resetState: () => void;
+}
+
+const initialStats: CombatStats = {
   playerHealth: 100,
+  wave: 1,
+  enemiesRemaining: 0,
+  enemyHealth: 1,
+  enemyDamage: 10,
+  enemySpeed: 50,
+  ammo: 0,
+  cash: 0,
+  killCount: 0
+};
+
+export const useCombatStore = create<CombatState>((set) => ({
+  // Initial state
+  stats: { ...initialStats },
   isGameOver: false,
-  finalScore: 0,
+  isWaveComplete: false,
   isAutoShooting: false,
-  shootingCooldown: 0,
-  outOfAmmo: false,
-  setCombatStats: (stats) => set((state) => {
-     const updatedStats = { ...state, ...stats };
-     return updatedStats;
-  }),
-  resetCombat: () => set({
-    wave: 0,
-    enemiesRemaining: 0,
-    enemyHealth: 0,
-    enemyDamage: 0,
-    enemySpeed: 0,
-    ammo: useResourcesStore.getState().getResource(ResourceType.STONE), // Initialize ammo from ResourcesStore
-    playerHealth: 100,
-    isGameOver: false,
-    finalScore: 0,
-    isAutoShooting: false,
-    shootingCooldown: 0,
-    outOfAmmo: false,
-  }),
-  setIsAutoShooting: (isAutoShooting) => set({ isAutoShooting }),
-  setShootingCooldown: (shootingCooldown) => set({ shootingCooldown }),
-  setIsGameOver: (isGameOver) => set({ isGameOver }),
-  setFinalScore: (finalScore) => set({ finalScore }),
-  setOutOfAmmo: (outOfAmmo) => set({ outOfAmmo }),
-  setAmmo: (ammo) => set({ ammo }),
-  setPlayerHealth: (playerHealth) => set({ playerHealth }),
+  
+  // Actions
+  updateStats: (updates: Partial<CombatStats>) => {
+    set(state => ({
+      ...state,
+      stats: {
+        ...state.stats,
+        ...updates
+      }
+    }));
+  },
+  
+  setGameOver: (isOver: boolean) => {
+    set(state => ({
+      ...state,
+      isGameOver: isOver
+    }));
+  },
+  
+  setWaveComplete: (isComplete: boolean) => {
+    set(state => ({
+      ...state,
+      isWaveComplete: isComplete
+    }));
+  },
+  
+  setAutoShooting: (enabled: boolean) => {
+    set(state => ({
+      ...state,
+      isAutoShooting: enabled
+    }));
+  },
+  
+  resetState: () => {
+    set(state => ({
+      ...state,
+      stats: { ...initialStats },
+      isGameOver: false,
+      isWaveComplete: false
+    }));
+  }
 }));

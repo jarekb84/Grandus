@@ -6,9 +6,9 @@ This document outlines a phased approach to optimizing the game for large-scale 
 
 Before implementing any optimizations, add these monitoring tools to establish baselines and track improvements:
 
-- [ ] Add FPS counter to combat scene
-- [ ] Add entity counter display (enemies, projectiles, particles)
-- [ ] Add simple performance logging to console during development
+- [x] Add FPS counter to combat scene
+- [x] Add entity counter display (enemies, projectiles, particles)
+- [x] Add simple performance logging to console during development
 
 ```typescript
 // Simple performance monitor
@@ -49,9 +49,9 @@ Implement these improvements immediately to establish the right architectural pa
 
 ### State Separation
 
-- [ ] Establish clear boundaries between Phaser and React state
-  - [ ] Keep high-frequency state in Phaser (entity positions, health, etc.)
-  - [ ] Only sync summary data to React/Zustand at reduced frequency
+- [x] Establish clear boundaries between Phaser and React state
+  - [x] Keep high-frequency state in Phaser (entity positions, health, etc.)
+  - [x] Only sync summary data to React/Zustand at reduced frequency
 
 ```typescript
 // In your combat scene
@@ -82,10 +82,10 @@ class CombatScene extends Phaser.Scene {
 
 ### Update Frequency Management
 
-- [ ] Implement tiered update frequencies for different systems
-  - [ ] Every frame: Physics, collisions, movement (60fps)
-  - [ ] Every 3-5 frames: Entity stats, AI decisions (12-20fps)
-  - [ ] Every 10-15 frames: UI updates, resource counts (4-6fps)
+- [x] Implement tiered update frequencies for different systems
+  - [x] Every frame: Physics, collisions, movement (60fps)
+  - [x] Every 3-5 frames: Entity stats, AI decisions (12-20fps)
+  - [x] Every 10-15 frames: UI updates, resource counts (4-6fps)
 
 ```typescript
 update(time, delta) {

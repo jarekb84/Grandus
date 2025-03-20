@@ -14,21 +14,29 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
 
   // Use Zustand store for combat state
   const isAutoShooting = useCombatStore(state => state.isAutoShooting);
-  const shootingCooldown = useCombatStore(state => state.shootingCooldown);
   const isGameOver = useCombatStore(state => state.isGameOver);
-  const finalScore = useCombatStore(state => state.finalScore);
-  const outOfAmmo = useCombatStore(state => state.outOfAmmo);
-  const wave = useCombatStore(state => state.wave);
-  const enemiesRemaining = useCombatStore(state => state.enemiesRemaining);
-  const enemyHealth = useCombatStore(state => state.enemyHealth);
-  const enemyDamage = useCombatStore(state => state.enemyDamage);
-  const enemySpeed = useCombatStore(state => state.enemySpeed);
-  const ammo = useCombatStore(state => state.ammo);
-  const playerHealth = useCombatStore(state => state.playerHealth);
-
+  const isWaveComplete = useCombatStore(state => state.isWaveComplete);
+  
+  // Get combat stats from the store
+  const stats = useCombatStore(state => state.stats);
+  const { 
+    wave, 
+    enemiesRemaining, 
+    enemyHealth, 
+    enemyDamage, 
+    enemySpeed, 
+    ammo, 
+    playerHealth,
+    cash,
+    killCount
+  } = stats;
 
   useEffect(() => {
     if (!gameRef.current) return;
+
+    // Initialize ammo from stone count
+    const stoneCount = resourcesStore.getResource(ResourceType.STONE);
+    useCombatStore.getState().updateStats({ ammo: stoneCount });
 
     const game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -43,28 +51,34 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
 
     const sceneEvents: CombatSceneEvents = {
       onStatsUpdate: (stats) => {
-        useCombatStore.getState().setCombatStats(stats);
+        useCombatStore.getState().updateStats({
+          wave: stats.wave,
+          enemiesRemaining: stats.enemiesRemaining,
+          enemyHealth: stats.enemyHealth,
+          enemyDamage: stats.enemyDamage,
+          enemySpeed: stats.enemySpeed
+        });
       },
-      onGameOver: (wave) => {
-        useCombatStore.getState().setIsGameOver(true);
-        useCombatStore.getState().setFinalScore(wave);
-        useCombatStore.getState().setIsAutoShooting(false);
+      onGameOver: (finalScore) => {
+        useCombatStore.getState().setGameOver(true);
+        useCombatStore.getState().updateStats({ wave: finalScore });
+        useCombatStore.getState().setAutoShooting(false);
         if (onGameOver) {
-          onGameOver(wave);
+          onGameOver(finalScore);
         }
       },
-      onAmmoChanged: (ammo) => {
-        useCombatStore.getState().setAmmo(ammo); // Use setAmmo directly
+      onAmmoChanged: (ammoAmount) => {
+        useCombatStore.getState().updateStats({ ammo: ammoAmount });
       },
       onOutOfAmmo: () => {
-        useCombatStore.getState().setOutOfAmmo(true);
-        useCombatStore.getState().setIsAutoShooting(false);
+        useCombatStore.getState().updateStats({ ammo: 0 });
+        useCombatStore.getState().setAutoShooting(false);
       },
       onWaveComplete: (waveNumber, rewards) => {
         console.log(`Wave ${waveNumber} complete with rewards:`, rewards);
       },
       onPlayerHealthChanged: (health) => {
-        useCombatStore.getState().setPlayerHealth(health); // Use setPlayerHealth directly
+        useCombatStore.getState().updateStats({ playerHealth: health });
       }
     };
 
@@ -78,39 +92,22 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     };
   }, [onGameOver]);
 
-  useEffect(() => {
-    if (!isAutoShooting) {
-      useCombatStore.getState().setShootingCooldown(0);
-      return;
-    }
 
-    const interval = setInterval(() => {
-      const currentCooldown = useCombatStore.getState().shootingCooldown;
-      useCombatStore.getState().setShootingCooldown(
-        (currentCooldown >= 100 ? 0 : currentCooldown + 10)
-      );
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [isAutoShooting]); // Dependency on isAutoShooting from store
 
   const handleToggleAutoShoot = useCallback(() => {
     // Only allow auto-shooting if player has ammo
-    if (!isAutoShooting && ammo <= 0) { // Use ammo selector directly
+    if (!isAutoShooting && ammo <= 0) {
       return; // Don't enable shooting if out of ammo
     }
-    useCombatStore.getState().setIsAutoShooting(!isAutoShooting); // Use store setter
+    useCombatStore.getState().setAutoShooting(!isAutoShooting);
     if (sceneRef.current) {
-      const newValue = !isAutoShooting;
-      sceneRef.current.setAutoShooting(newValue);
+      sceneRef.current.setAutoShooting(!isAutoShooting);
     }
-  }, [isAutoShooting, sceneRef, ammo]); // Dependencies updated - use ammo selector
+  }, [isAutoShooting, sceneRef, ammo]);
 
   const handleRetry = useCallback(() => {
-    useCombatStore.getState().setIsGameOver(false);
-    useCombatStore.getState().setFinalScore(0);
-    useCombatStore.getState().setPlayerHealth(100); // Use setPlayerHealth directly
-
+    useCombatStore.getState().resetState();
+    
     // Reset cash to 0 for new run
     useCurrencyStore.getState().resetCash();
 
@@ -121,33 +118,40 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     }
   }, [sceneRef]);
 
-  // Reset out of ammo state when ammo changes from 0 to a positive value
+  // Reset ammo warning when ammo changes from 0 to a positive value
   useEffect(() => {
-    if (ammo > 0 && outOfAmmo) { // Use ammo and outOfAmmo selectors directly
-      useCombatStore.getState().setOutOfAmmo(false);
+    // This is now handled by the scene
+  }, []);
+
+  // Sync ammo with stone count
+  useEffect(() => {
+    const stoneCount = resourcesStore.getResource(ResourceType.STONE);
+    // Only update if the scene isn't mounted yet or the ammo doesn't match
+    if (!sceneRef.current || stoneCount !== ammo) {
+      useCombatStore.getState().updateStats({ ammo: stoneCount });
     }
-  }, [ammo, outOfAmmo]); // Dependencies updated - use ammo and outOfAmmo selectors
+  }, [resourcesStore, ammo]);
 
   return {
     gameRef,
     isAutoShooting,
-    shootingCooldown,
     isGameOver,
-    finalScore,
-    combatStats: { // Keep combatStats for UI - but derive from store selectors
-      wave: wave,
-      enemiesRemaining: enemiesRemaining,
-      enemyHealth: enemyHealth,
-      enemyDamage: enemyDamage,
-      enemySpeed: enemySpeed,
-      ammo: ammo,
+    isWaveComplete,
+    combatStats: {
+      wave,
+      enemiesRemaining,
+      enemyHealth,
+      enemyDamage,
+      enemySpeed,
+      ammo,
+      killCount
     },
-    playerStats: { // Keep playerStats for UI - but derive from store selectors
+    playerStats: {
       health: playerHealth,
-      damage: useCombatStore(state => state.enemyDamage), // Example - damage not in store yet - placeholder
-      shootingSpeed: useCombatStore(state => state.enemySpeed), // Example - shootingSpeed not in store yet - placeholder
+      damage: 10, // Placeholder - we can add these to the store later if needed
+      shootingSpeed: 1, // Placeholder
     },
-    outOfAmmo,
+    cash,
     handleToggleAutoShoot,
     handleRetry,
   };

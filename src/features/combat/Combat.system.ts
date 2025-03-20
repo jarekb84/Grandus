@@ -1,11 +1,11 @@
 import * as Phaser from 'phaser';
-import { EnemySystem, Enemy } from '@/features/combat/Enemy';
+import { EnemySystem } from '@/features/combat/Enemy';
 import { ProjectileSystem } from '@/features/combat/Projectile';
 import { ResourceType } from '@/features/shared/types/entities';
 import { useResourcesStore } from '@/features/shared/stores/Resources.store';
-import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
 import { PlayerSystem } from '@/features/combat/Player';
 import { WaveSystem } from '@/features/combat/Wave';
+import { useCombatStore } from '@/features/combat/Combat.store';
 
 export interface CombatEvents {
   onAmmoChanged: (ammo: number) => void;
@@ -49,6 +49,7 @@ export class CombatSystem {
     return this.isAutoShooting;
   }
   
+  // Modified update to focus only on shooting logic
   update(time: number): boolean {
     const player = this.playerSystem.getPlayer();
     
@@ -62,6 +63,10 @@ export class CombatSystem {
         // Consume a stone when shooting
         this.resourcesStore.getState().removeResource(ResourceType.STONE, 1);
         
+        // Update the ammo in combat store
+        const newAmmoCount = this.resourcesStore.getState().getResource(ResourceType.STONE);
+        useCombatStore.getState().updateStats({ ammo: newAmmoCount });
+        
         this.projectileSystem.shootProjectile(
           player.x, player.y, 
           nearestEnemy.sprite.x, nearestEnemy.sprite.y
@@ -69,54 +74,14 @@ export class CombatSystem {
         this.nextShootTime = time + this.SHOOT_INTERVAL;
         
         // Notify listeners about ammo change
-        this.events.onAmmoChanged(this.resourcesStore.getState().getResource(ResourceType.STONE));
+        this.events.onAmmoChanged(newAmmoCount);
       } else if (!hasStones) {
         // No stones left - notify listeners and stop shooting
+        useCombatStore.getState().updateStats({ ammo: 0 });
         this.events.onAmmoChanged(0);
         this.events.onOutOfAmmo();
       }
     }
-
-    // Update enemy positions and movement
-    this.enemySystem.updateEnemyMovement(player.x, player.y);
-
-    // Check if any enemies have reached the player
-    const enemies = this.enemySystem.getEnemies();
-    const playerY = player.y;
-    let playerDied = false;
-    
-    for (const enemy of enemies) {
-      if (enemy.sprite.y >= playerY - 32) {
-        // Apply damage to player when enemy reaches them
-        const enemyDamage = 10; // Each enemy does 10 damage
-        playerDied = this.playerSystem.updatePlayerHealth(enemyDamage);
-        
-        // Remove the enemy that hit the player
-        this.enemySystem.removeEnemy(enemy);
-        
-        // Update stats after enemy is removed
-        this.waveSystem.updateStats();
-        
-        if (playerDied) {
-          return true; // Game over
-        }
-      }
-    }
-
-    // Check for collisions between projectiles and enemies
-    this.projectileSystem.checkCollisions(enemies, (enemy, projectile) => {
-      // Damage enemy
-      const destroyed = this.enemySystem.damageEnemy(enemy);
-      if (destroyed) {
-        // Show floating cash text at enemy position
-        this.waveSystem.createCashFloatingText(enemy.sprite.x, enemy.sprite.y, 1);
-        
-        // Add cash when enemy is destroyed ($1 per kill)
-        useCurrencyStore.getState().addCash(1);
-        // Update stats when enemy is destroyed
-        this.waveSystem.updateStats();
-      }
-    });
     
     return false; // Game continues
   }

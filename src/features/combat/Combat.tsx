@@ -12,15 +12,15 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
   const {
     gameRef,
     isAutoShooting,
-    shootingCooldown,
     isGameOver,
-    finalScore,
     combatStats,
     playerStats,
-    outOfAmmo,
     handleToggleAutoShoot,
     handleRetry
   } = useCombatGame(onGameOver);
+
+  // Determine if we're out of ammo
+  const outOfAmmo = combatStats.ammo <= 0;
 
   return (
     <div className={styles.container}>
@@ -30,7 +30,7 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
         {isGameOver ? (
           <GameOver
             wave={combatStats.wave}
-            finalScore={finalScore}
+            finalScore={combatStats.wave} // Use wave as final score
             onRetry={handleRetry}
           />
         ) : (
@@ -41,7 +41,7 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
             />
             <GameControls
               isAutoShooting={isAutoShooting}
-              shootingCooldown={shootingCooldown}
+              shootingCooldown={0} // We don't track this in the store anymore
               ammo={combatStats.ammo}
               outOfAmmo={outOfAmmo}
               onToggleAutoShoot={handleToggleAutoShoot}
