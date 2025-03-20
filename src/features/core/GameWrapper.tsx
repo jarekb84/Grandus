@@ -1,43 +1,22 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { useGameState } from '@/features/shared/stores/GameState.store'
-import { ResourceType } from '@/features/shared/types/entities'
 import { GameMode } from '@/features/shared/types/GameMode'
 import type { GameCanvasHandle } from '@/features/game-engine/GameCanvas'
 import Inventory from '@/features/shared/ui/Inventory'
-import { useResourcesStore } from '@/features/shared/stores/Resources.store'
 import ModeSelector from './ModeSelector'
 import GameContent from './GameContent'
 import GatheringActions from '@/features/gathering/GatheringActions'
-import { RESOURCE_TO_NODE_TYPE } from '@/features/shared/utils/resourceMapping'
+import { useInventoryAdapter } from './inventory/useInventoryAdapter'
+import { useGatheringAdapter } from './gathering/useGatheringAdapter'
 
 const GameWrapper = () => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
-  const { getNodesByType, hasAvailableNodeType } = useGameState()
-  const resourcesStore = useResourcesStore()
-  const [isGathering, setIsGathering] = useState(false)
   const [currentMode, setCurrentMode] = useState<GameMode>(GameMode.GATHERING)
-
-  const handleGatherResource = async (type: ResourceType) => {
-    if (!gameCanvasRef.current || isGathering) return
-    
-    // Get the primary node type for this resource
-    const nodeType = RESOURCE_TO_NODE_TYPE[type]
-    if (!hasAvailableNodeType(nodeType)) return
-    
-    // Get available nodes of this type
-    const nodes = getNodesByType(nodeType)
-    const firstNode = nodes[0]
-    if (firstNode) {
-      setIsGathering(true)
-      try {
-        await gameCanvasRef.current.gatherFromNode(firstNode.id)
-      } finally {
-        setIsGathering(false)
-      }
-    }
-  }
+  
+  // Use adapters for cross-feature communication
+  const inventoryData = useInventoryAdapter()
+  const { isGathering, hasAvailableNodeType, gatherResource } = useGatheringAdapter(gameCanvasRef)
 
   const handleModeChange = (mode: GameMode) => {
     setCurrentMode(mode)
@@ -61,9 +40,9 @@ const GameWrapper = () => {
         {/* Left sidebar with inventory */}
         <div className="w-64">
           <Inventory 
-            stoneCount={resourcesStore.resources[ResourceType.STONE]} 
-            woodCount={resourcesStore.resources[ResourceType.WOOD]} 
-            foodCount={resourcesStore.resources[ResourceType.FOOD]}
+            stoneCount={inventoryData.stoneCount} 
+            woodCount={inventoryData.woodCount} 
+            foodCount={inventoryData.foodCount}
           />
         </div>
         
@@ -79,7 +58,7 @@ const GameWrapper = () => {
         <div className="w-[1288px]">
           <GatheringActions 
             isGathering={isGathering}
-            onGather={handleGatherResource}
+            onGather={gatherResource}
             hasAvailableNodeType={hasAvailableNodeType}
           />
         </div>
