@@ -2,6 +2,24 @@
 
 This document outlines a phased approach to optimizing the game for large-scale combat scenarios with hundreds of entities and particle effects.
 
+## Performance Testing Results (Initial Baseline)
+
+High entity count stress tests with 25ms shooting interval produced these results:
+
+| Enemy Count | Performance Impact |
+|-------------|-------------------|
+| 1,000       | Steady 55+ FPS - No noticeable performance impact |
+| 2,500       | Steady 55+ FPS - No noticeable performance impact |
+| 4,000       | Dips to 41 FPS when shooting - Moderate impact |
+| 5,000       | Dips to 33 FPS when shooting - Significant impact |
+| 10,000      | Dips to 10 FPS when shooting - Major performance degradation |
+
+**Key Observations:**
+- Performance is excellent up to 2,500 entities
+- Shooting (creating projectiles) is the primary trigger for performance drops
+- Enemy movement causes temporary FPS dips that quickly recover
+- Likely bottlenecks: collision detection and nearest enemy search (both O(n²) operations)
+
 ## Performance Monitoring
 
 Before implementing any optimizations, add these monitoring tools to establish baselines and track improvements:
@@ -9,6 +27,7 @@ Before implementing any optimizations, add these monitoring tools to establish b
 - [x] Add FPS counter to combat scene
 - [x] Add entity counter display (enemies, projectiles, particles)
 - [x] Add simple performance logging to console during development
+- [x] Add min/max FPS tracking to identify performance spikes
 
 ```typescript
 // Simple performance monitor
@@ -112,7 +131,7 @@ update(time, delta) {
 
 ## Milestone 2: Scaling Optimizations
 
-Implement these when you start adding more enemies or see FPS drops below 45 with 50+ entities:
+Based on our performance testing, these optimizations should be implemented when the game reaches around 2,000-3,000 entities or when the FPS consistently drops below 45.
 
 ### Object Pooling for Projectiles and Particles
 
@@ -156,7 +175,7 @@ class ProjectilePool {
 }
 ```
 
-**Implementation trigger:** When you notice frame rate drops during heavy projectile firing or when debris particles cause stuttering.
+**Implementation trigger:** When you notice frame rate drops during heavy projectile firing, especially with rapid fire rates (25ms intervals). Based on testing, this should be prioritized when regularly having more than 2,000 entities.
 
 ### Group Management for Similar Entities
 
@@ -186,11 +205,11 @@ spawnEnemy(type, x, y) {
 }
 ```
 
-**Implementation trigger:** When you have multiple enemy types or when your enemy count exceeds 30-50.
+**Implementation trigger:** When you have multiple enemy types or when your enemy count regularly exceeds 2,000-3,000.
 
 ## Milestone 3: Large-Scale Optimizations
 
-Implement these when pushing to 100+ entities or when FPS drops below 30:
+Implement these when pushing to 4,000+ entities or when FPS drops below 30:
 
 ### Spatial Partitioning
 
@@ -259,7 +278,7 @@ class SpatialGrid {
 }
 ```
 
-**Implementation trigger:** When collision detection becomes a bottleneck (visible in performance profiling) or when you exceed 100 entities with frequent collisions.
+**Implementation trigger:** When your entity count regularly exceeds 4,000 and collision checks are becoming a bottleneck (visible in performance monitoring). This will dramatically improve nearest enemy searches and collision detection at scale.
 
 ### Rendering Optimizations
 
@@ -290,11 +309,11 @@ updateEntityVisuals(entity) {
 }
 ```
 
-**Implementation trigger:** When you have 200+ entities on screen or when rendering becomes the bottleneck according to browser profiling tools.
+**Implementation trigger:** When you have 5,000+ entities on screen or when rendering becomes the bottleneck according to browser profiling tools.
 
 ## Milestone 4: Advanced Optimizations
 
-Only implement these for very large-scale scenarios (500+ entities) or specific performance issues:
+Only implement these for very large-scale scenarios (5,000+ entities) or specific performance issues:
 
 ### Offload to Web Workers
 
@@ -317,15 +336,28 @@ Only implement these for very large-scale scenarios (500+ entities) or specific 
   - [ ] Adjust enemy count limits
   - [ ] Adjust visual effects
 
+## When to Revisit Performance Optimizations
+
+Based on our stress testing, here are guidelines for when to implement each milestone:
+
+| Milestone | When to Implement |
+|-----------|-------------------|
+| Milestone 1 | ✅ Already implemented |
+| Milestone 2 | When the game regularly features 2,000+ entities<br>When rapid-fire shooting (25ms interval) causes FPS to drop below 45 |
+| Milestone 3 | When the game regularly features 4,000+ entities<br>When FPS drops below 30 during normal gameplay |
+| Milestone 4 | When the game regularly features 5,000+ entities<br>When earlier optimizations aren't sufficient |
+
+**Recommendation:** Continue developing core gameplay features before implementing Milestone 2 optimizations. The current implementation performs well up to 2,500 entities, which provides plenty of headroom for early gameplay development.
+
 ## Performance Thresholds and Monitoring
 
 Use these guidelines to decide when to move to the next optimization milestone:
 
 | Performance Indicator | Threshold | Action |
 |-----------------------|-----------|--------|
-| FPS below 45 | With 50+ entities | Implement Milestone 2 optimizations |
-| FPS below 30 | With 100+ entities | Implement Milestone 3 optimizations |
-| FPS below 20 | With 200+ entities | Implement Milestone 4 optimizations |
+| FPS below 45 | With 2,000+ entities | Implement Milestone 2 optimizations |
+| FPS below 30 | With 4,000+ entities | Implement Milestone 3 optimizations |
+| FPS below 20 | With 5,000+ entities | Implement Milestone 4 optimizations |
 | Entity creation/destruction causing stutters | Any entity count | Implement object pooling immediately |
 | Memory usage growing continuously | Over multiple game sessions | Check for memory leaks and implement object cleanup |
 
