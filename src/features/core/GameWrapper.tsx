@@ -1,28 +1,20 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { GameMode } from '@/features/shared/types/GameMode'
-import type { GameCanvasHandle } from '@/features/game-engine/GameCanvas'
 import Inventory from '@/features/shared/ui/Inventory'
 import ModeSelector from './ModeSelector'
 import GameContent from './GameContent'
-import GatheringActions from '@/features/gathering/GatheringActions'
 import { useInventoryAdapter } from './inventory/useInventoryAdapter'
-import { useGatheringAdapter } from './gathering/useGatheringAdapter'
 
 const GameWrapper = () => {
-  const gameCanvasRef = useRef<GameCanvasHandle>(null)
   const [currentMode, setCurrentMode] = useState<GameMode>(GameMode.GATHERING)
   
-  // Use adapters for cross-feature communication
+  // Use adapter for inventory data only
   const inventoryData = useInventoryAdapter()
-  const { isGathering, hasAvailableNodeType, gatherResource } = useGatheringAdapter(gameCanvasRef)
 
   const handleModeChange = (mode: GameMode) => {
     setCurrentMode(mode)
-    if (gameCanvasRef.current) {
-      gameCanvasRef.current.switchMode(mode)
-    }
   }
 
   return (
@@ -47,22 +39,8 @@ const GameWrapper = () => {
         </div>
         
         {/* Main content area */}
-        <GameContent 
-          currentMode={currentMode} 
-          gameCanvasRef={gameCanvasRef} 
-        />
+        <GameContent currentMode={currentMode} />
       </div>
-
-      {/* Action panel below game */}
-      {currentMode === GameMode.GATHERING && (
-        <div className="w-[1288px]">
-          <GatheringActions 
-            isGathering={isGathering}
-            onGather={gatherResource}
-            hasAvailableNodeType={hasAvailableNodeType}
-          />
-        </div>
-      )}
     </div>
   )
 }
