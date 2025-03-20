@@ -1,4 +1,4 @@
-import { ResourceType } from '@/game/entities.types';
+import { ResourceType } from '@/features/shared/types/entities';
 
 export interface ResourcesState {
   resources: {

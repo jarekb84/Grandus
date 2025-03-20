@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { EntityType, ResourceType, Entity, ResourceNodeEntity, ResourceNodeType } from '../entities.types'
+import { EntityType, ResourceType, Entity, ResourceNodeEntity, ResourceNodeType } from '@/features/shared/types/entities'
 
 interface EntityCollections {
   byId: Map<string, Entity>

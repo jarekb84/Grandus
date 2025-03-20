@@ -6,7 +6,7 @@ import {
   ResourceNodeType,
   ResourceNodeEntity,
   Shape
-} from '../entities.types'
+} from '@/features/shared/types/entities'
 
 // TODO all the chance, multipliers, etc.. should start at 0 (maybe base yield is 1) and be upgradable by the player
 

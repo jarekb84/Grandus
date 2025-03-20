@@ -2,13 +2,14 @@
 
 import { forwardRef, useImperativeHandle, useRef, useEffect } from 'react'
 import * as Phaser from 'phaser'
-import { GatheringScene } from '@/game/scenes/GatheringScene'
-import { CombatScene } from '@/game/scenes/CombatScene'
-import { ResourceSystem } from '@/game/systems/ResourceSystem'
-import { useGameState } from '@/game/state/GameState'
-import { EntityType } from '@/game/entities.types'
-import { GameMode } from '@/game/types/GameMode'
-import { generateInitialEntities } from '@/game/utils/entityGenerator'
+import { GatheringScene } from '@/features/gathering/Gathering.scene'
+import { CombatScene } from '@/features/combat/Combat.scene'
+import { ResourceSystem } from '@/features/gathering/Resource'
+import { useGameState } from '@/features/shared/stores/GameState.store'
+import { EntityType } from '@/features/shared/types/entities'
+import { GameMode } from '@/features/shared/types/GameMode'
+import { generateInitialEntities } from '@/features/shared/utils/entityGenerator'
+import { useCurrencyStore } from '@/features/shared/stores/Currency.store'
 
 export interface GameCanvasProps {
   // Removed onResourceCollected prop as it's no longer needed
@@ -111,7 +112,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                   console.log('Game Over! Score:', score);
                   
                   // Reset cash before restarting scene
-                  const { resetCash } = require('@/stores/currency/currencyStore').useCurrencyStore.getState();
+                  const { resetCash } = useCurrencyStore.getState();
                   resetCash();
                   
                   // Restart the scene after a short delay

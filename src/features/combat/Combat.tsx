@@ -1,12 +1,12 @@
 'use client'
 
 import React from 'react';
-import { CombatModeProps } from './CombatMode.types';
-import { useCombatGame } from './hooks/useCombatGame';
-import { GameStats } from './components/GameStats';
-import { GameControls } from './components/GameControls';
-import { GameOver } from './components/GameOver';
-import styles from './CombatMode.module.css';
+import { CombatModeProps } from '@/features/combat/Combat.types';
+import { useCombatGame } from '@/features/combat/useCombatGame';
+import { GameStats } from '@/features/combat/GameStats';
+import { GameControls } from '@/features/combat/GameControls';
+import { GameOver } from '@/features/combat/GameOver';
+import styles from '@/features/combat/Combat.module.css';
 
 export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
   const {

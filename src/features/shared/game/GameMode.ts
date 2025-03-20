@@ -1,6 +1,4 @@
-import { GameMode, GameModeConfig } from './types/GameMode';
-import { GatheringScene } from './scenes/GatheringScene';
-import { CombatScene } from './scenes/CombatScene';
+import { GameMode, GameModeConfig } from '@/features/shared/types/GameMode';
 
 export interface GameModeManagerEvents {
   onModeChange: (mode: GameMode) => void;

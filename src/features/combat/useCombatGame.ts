@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
-import { CombatScene, CombatSceneEvents } from '@/game/scenes/CombatScene';
+import { CombatScene, CombatSceneEvents } from '@/features/combat/Combat.scene';
 import { CombatStats, PlayerStats } from '../CombatMode.types';
-import { useCurrencyStore } from '@/stores/currency/currencyStore';
-import { useResourcesStore } from '@/stores/resources/resourcesStore';
-import { ResourceType } from '@/game/entities.types';
+import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
+import { useResourcesStore } from '@/features/shared/stores/Resources.store';
+import { ResourceType } from '@/features/shared/types/entities';
 
 export const useCombatGame = (onGameOver?: (score: number) => void) => {
   const gameRef = useRef<HTMLDivElement>(null);

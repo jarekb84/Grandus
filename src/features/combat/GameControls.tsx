@@ -1,6 +1,6 @@
 import React from 'react';
-import { GameControlsProps } from '../CombatMode.types';
-import styles from '../CombatMode.module.css';
+import { GameControlsProps } from '@/features/combat/Combat.types';
+import styles from '@/features/combat/Combat.module.css';
 
 export const GameControls: React.FC<GameControlsProps> = ({
   isAutoShooting,

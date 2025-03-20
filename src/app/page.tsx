@@ -1,7 +1,7 @@
 'use client'
 
-import GameWrapper from '@/components/game/GameWrapper/GameWrapper'
-import { usePageTitle } from '@/hooks/usePageTitle'
+import GameWrapper from '@/features/core/GameWrapper'
+import { usePageTitle } from '@/features/shared/hooks/usePageTitle'
 
 export default function Home() {
   usePageTitle('Grandus - An Incremental Game')

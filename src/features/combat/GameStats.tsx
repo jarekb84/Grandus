@@ -1,7 +1,7 @@
 import React from 'react';
-import { GameStatsProps } from '../CombatMode.types';
-import styles from '../CombatMode.module.css';
-import { useCurrencyStore } from '@/stores/currency/currencyStore';
+import { GameStatsProps } from '@/features/combat/Combat.types';
+import styles from '@/features/combat/Combat.module.css';
+import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
 
 export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }) => {
   // Get current cash from the store

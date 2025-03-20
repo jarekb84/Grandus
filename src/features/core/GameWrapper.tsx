@@ -2,22 +2,22 @@
 
 import { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { useGameState } from '@/game/state/GameState'
-import { ResourceType, ResourceNodeType } from '@/game/entities.types'
-import { GameMode } from '@/game/types/GameMode'
-import type { GameCanvasHandle } from './components/GameCanvas/GameCanvas'
-import Inventory from './components/Inventory/Inventory'
-import { ManagementMode } from '../ManagementMode/ManagementMode'
-import { useResourcesStore } from '@/stores/resources/resourcesStore'
+import { useGameState } from '@/features/shared/stores/GameState.store'
+import { ResourceType, ResourceNodeType } from '@/features/shared/types/entities'
+import { GameMode } from '@/features/shared/types/GameMode'
+import type { GameCanvasHandle } from '@/features/core/GameCanvas'
+import Inventory from '@/features/core/Inventory'
+import { ManagementMode } from '@/features/management/Management'
+import { useResourcesStore } from '@/features/shared/stores/Resources.store'
 
 // Import GameCanvas and CombatMode with no SSR
 const GameCanvas = dynamic(
-  () => import('./components/GameCanvas/GameCanvas').then(mod => mod.GameCanvas),
+  () => import('@/features/core/GameCanvas').then(mod => mod.GameCanvas),
   { ssr: false }
 )
 
 const CombatMode = dynamic(
-  () => import('../CombatMode/CombatMode').then(mod => mod.CombatMode),
+  () => import('@/features/combat/Combat').then(mod => mod.CombatMode),
   { ssr: false }
 )
 

@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { Entity, EntityType, Shape } from '../entities.types'
+import { Entity, EntityType, Shape } from '@/features/shared/types/entities'
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void

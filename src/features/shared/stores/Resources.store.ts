@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { ResourceType } from '@/game/entities.types';
+import { ResourceType } from '@/features/shared/types/entities';
 import { ResourcesState } from './resourcesStore.types';
 
 export const useResourcesStore = create<ResourcesState>((set, get) => ({

@@ -1,6 +1,6 @@
 import React from 'react';
-import { GameOverProps } from '../CombatMode.types';
-import styles from '../CombatMode.module.css';
+import { GameOverProps } from '@/features/combat/Combat.types';
+import styles from '@/features/combat/Combat.module.css';
 
 export const GameOver: React.FC<GameOverProps> = ({ wave, finalScore, onRetry }) => {
   return (

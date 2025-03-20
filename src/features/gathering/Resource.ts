@@ -1,7 +1,7 @@
-import { GatheringScene } from '../scenes/GatheringScene'
-import { useGameState } from '../state/GameState'
-import { ResourceNodeEntity, ResourceType } from '../entities.types'
-import { useResourcesStore } from '@/stores/resources/resourcesStore'
+import { GatheringScene } from '@/features/gathering/Gathering.scene'
+import { useGameState } from '@/features/shared/stores/GameState.store'
+import { ResourceNodeEntity, ResourceType } from '@/features/shared/types/entities'
+import { useResourcesStore } from '@/features/shared/stores/Resources.store'
 
 export class ResourceSystem {
   private scene: GatheringScene

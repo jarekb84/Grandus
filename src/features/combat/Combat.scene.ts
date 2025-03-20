@@ -1,11 +1,11 @@
 import * as Phaser from 'phaser';
-import { EnemySystem } from '../systems/EnemySystem';
-import { ProjectileSystem } from '../systems/ProjectileSystem';
-import { PlayerSystem, PlayerEvents } from '../systems/PlayerSystem';
-import { WaveSystem, WaveEvents } from '../systems/WaveSystem';
-import { CombatSystem, CombatEvents } from '../systems/CombatSystem';
-import { useCurrencyStore } from '@/stores/currency/currencyStore';
-import { ResourceType } from '../entities.types';
+import { EnemySystem } from '@/features/combat/Enemy';
+import { ProjectileSystem } from '@/features/combat/Projectile';
+import { PlayerSystem, PlayerEvents } from '@/features/combat/Player';
+import { WaveSystem, WaveEvents } from '@/features/combat/Wave';
+import { CombatSystem, CombatEvents } from '@/features/combat/Combat.system';
+import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
+
 
 export interface CombatSceneEvents {
   onWaveComplete: (waveNumber: number, rewards: any) => void;
