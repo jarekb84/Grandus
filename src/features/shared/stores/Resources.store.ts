@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { ResourceType } from '@/features/shared/types/entities';
-import { ResourcesState } from './resourcesStore.types';
+import { ResourcesState } from '@/features/shared/stores/Resources.types';
 
 export const useResourcesStore = create<ResourcesState>((set, get) => ({
   resources: {

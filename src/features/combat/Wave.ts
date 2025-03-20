@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { EnemySystem } from './EnemySystem';
+import { EnemySystem } from '@/features/combat/Enemy';
 
 export interface WaveEvents {
   onWaveComplete: (waveNumber: number, rewards: any) => void;

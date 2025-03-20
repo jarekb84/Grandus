@@ -1,11 +1,11 @@
 import * as Phaser from 'phaser';
-import { EnemySystem, Enemy } from './Enemy';
-import { ProjectileSystem } from './Projectile';
+import { EnemySystem, Enemy } from '@/features/combat/Enemy';
+import { ProjectileSystem } from '@/features/combat/Projectile';
 import { ResourceType } from '@/features/shared/types/entities';
 import { useResourcesStore } from '@/features/shared/stores/Resources.store';
 import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
-import { PlayerSystem } from './Player';
-import { WaveSystem } from './Wave';
+import { PlayerSystem } from '@/features/combat/Player';
+import { WaveSystem } from '@/features/combat/Wave';
 
 export interface CombatEvents {
   onAmmoChanged: (ammo: number) => void;

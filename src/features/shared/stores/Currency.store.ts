@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { CurrencyState } from './currencyStore.types';
+import { CurrencyState } from '@/features/shared/stores/Currency.types';
 
 export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   cash: 0,

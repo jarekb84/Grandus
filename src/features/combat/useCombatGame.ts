@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
 import { CombatScene, CombatSceneEvents } from '@/features/combat/Combat.scene';
-import { CombatStats, PlayerStats } from '../CombatMode.types';
+import { CombatStats, PlayerStats } from '@/features/combat/Combat.types';
 import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
 import { useResourcesStore } from '@/features/shared/stores/Resources.store';
 import { ResourceType } from '@/features/shared/types/entities';

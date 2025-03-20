@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { Enemy } from './EnemySystem';
+import { Enemy } from '@/features/combat/Enemy';
 
 export class ProjectileSystem {
   private scene: Phaser.Scene;

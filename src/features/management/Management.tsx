@@ -1,5 +1,5 @@
 import React from 'react';
-import { ManagementModeProps } from './ManagementMode.types';
+import { ManagementModeProps } from '@/features/management/Management.types';
 
 export const ManagementMode: React.FC<ManagementModeProps> = () => {
   return (

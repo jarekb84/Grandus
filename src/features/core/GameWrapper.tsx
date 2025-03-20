@@ -5,14 +5,14 @@ import dynamic from 'next/dynamic'
 import { useGameState } from '@/features/shared/stores/GameState.store'
 import { ResourceType, ResourceNodeType } from '@/features/shared/types/entities'
 import { GameMode } from '@/features/shared/types/GameMode'
-import type { GameCanvasHandle } from '@/features/core/GameCanvas'
+import type { GameCanvasHandle } from '@/features/game-engine/GameCanvas'
 import Inventory from '@/features/core/Inventory'
 import { ManagementMode } from '@/features/management/Management'
 import { useResourcesStore } from '@/features/shared/stores/Resources.store'
 
 // Import GameCanvas and CombatMode with no SSR
 const GameCanvas = dynamic(
-  () => import('@/features/core/GameCanvas').then(mod => mod.GameCanvas),
+  () => import('@/features/game-engine/GameCanvas').then(mod => mod.GameCanvas),
   { ssr: false }
 )
 
