@@ -1,12 +1,14 @@
 'use client'
 
+import { FC } from 'react'
+
 interface InventoryProps {
   stoneCount: number
   woodCount: number
   foodCount: number
 }
 
-const Inventory = ({ stoneCount, woodCount, foodCount }: InventoryProps) => {
+const Inventory: FC<InventoryProps> = ({ stoneCount, woodCount, foodCount }) => {
   return (
     <div className="w-full bg-gray-800 p-4 rounded-lg shadow-lg text-white">
       <h2 className="text-lg font-bold mb-3">Inventory</h2>

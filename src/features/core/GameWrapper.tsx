@@ -6,7 +6,7 @@ import { useGameState } from '@/features/shared/stores/GameState.store'
 import { ResourceType, ResourceNodeType } from '@/features/shared/types/entities'
 import { GameMode } from '@/features/shared/types/GameMode'
 import type { GameCanvasHandle } from '@/features/game-engine/GameCanvas'
-import Inventory from '@/features/core/Inventory'
+import Inventory from '@/features/shared/ui/Inventory'
 import { ManagementMode } from '@/features/management/Management'
 import { useResourcesStore } from '@/features/shared/stores/Resources.store'
 
