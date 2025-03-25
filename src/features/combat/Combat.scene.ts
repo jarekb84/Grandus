@@ -50,17 +50,17 @@ export class CombatScene extends Phaser.Scene {
     this.sceneEvents = events;
   }
 
-  setAutoShooting(enabled: boolean) {
+  setAutoShooting(enabled: boolean): void {
     this.combatSystem.setAutoShooting(enabled);
     // Also update the store for React components
     useCombatStore.getState().setAutoShooting(enabled);
   }
 
-  preload() {
+  preload(): void {
     // We'll create textures in create() instead, similar to MainScene
   }
 
-  create() {
+  create(): void {
     // Reset game over state when scene is created
     this.isGameOver = false;
     this.frameCount = 0;
@@ -129,7 +129,7 @@ export class CombatScene extends Phaser.Scene {
     });
   }
 
-  override update(time: number, delta: number) {
+  override update(time: number, delta: number): void {
     // Skip all updates if game is over
     if (this.isGameOver) return;
     
@@ -227,7 +227,7 @@ export class CombatScene extends Phaser.Scene {
     this.frameCount = (this.frameCount + 1) % 60;
   }
   
-  private handlePlayerDeath() {
+  private handlePlayerDeath(): void {
     // Set game over state
     this.isGameOver = true;
     useCombatStore.getState().setGameOver(true);
@@ -252,4 +252,4 @@ export class CombatScene extends Phaser.Scene {
     // Reset cash when game is over
     useCurrencyStore.getState().resetCash();
   }
-} 
+}

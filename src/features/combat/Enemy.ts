@@ -102,7 +102,7 @@ export class EnemySystem {
         playerX, playerY
       );
       
-      const sprite = enemy.sprite as Phaser.Physics.Arcade.Sprite;
+      const sprite = enemy.sprite;
       if (sprite.body) {
         // Gradually adjust velocity towards player
         const currentVelocity = sprite.body.velocity;
@@ -136,7 +136,7 @@ export class EnemySystem {
         enemy.sprite.x, enemy.sprite.y,
         playerX, playerY
       );
-      const sprite = enemy.sprite as Phaser.Physics.Arcade.Sprite;
+      const sprite = enemy.sprite;
       if (sprite.body) {
         this.physics.velocityFromRotation(angle, this.ENEMY_SPEED, sprite.body.velocity);
       }

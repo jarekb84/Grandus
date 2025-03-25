@@ -59,7 +59,7 @@ export const useGameState = create<GameState>((set, get) => ({
 
       // Add to nodesByType index if it's a resource node
       if (entity.type === EntityType.RESOURCE_NODE && 'nodeType' in entity) {
-        const nodeEntity = entity as ResourceNodeEntity
+        const nodeEntity = entity
         if (!entities.nodesByType.has(nodeEntity.nodeType)) {
           entities.nodesByType.set(nodeEntity.nodeType, new Set())
         }
@@ -89,7 +89,7 @@ export const useGameState = create<GameState>((set, get) => ({
 
       // Remove from nodesByType index if it's a resource node
       if (entity.type === EntityType.RESOURCE_NODE && 'nodeType' in entity) {
-        const nodeEntity = entity as ResourceNodeEntity
+        const nodeEntity = entity
         entities.nodesByType.get(nodeEntity.nodeType)?.delete(entityId)
 
         // Update available nodes cache
@@ -130,10 +130,10 @@ export const useGameState = create<GameState>((set, get) => ({
       if (
         entity.type === EntityType.RESOURCE_NODE &&
         'nodeType' in updates &&
-        updates.nodeType !== (entity as ResourceNodeEntity).nodeType
+        updates.nodeType !== (entity).nodeType
       ) {
-        const oldNodeType = (entity as ResourceNodeEntity).nodeType
-        const newNodeType = updates.nodeType as ResourceNodeType
+        const oldNodeType = (entity).nodeType
+        const newNodeType = updates.nodeType
 
         // Remove from old nodeType index
         entities.nodesByType.get(oldNodeType)?.delete(entityId)

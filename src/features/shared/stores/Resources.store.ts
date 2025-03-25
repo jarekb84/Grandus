@@ -9,7 +9,7 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
     [ResourceType.FOOD]: 0,
   },
   
-  addResource: (type: ResourceType, amount: number) => {
+  addResource: (type: ResourceType, amount: number): void => {
     set(state => ({
       ...state,
       resources: {
@@ -19,7 +19,7 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
     }));
   },
   
-  removeResource: (type: ResourceType, amount: number) => {
+  removeResource: (type: ResourceType, amount: number): void => {
     set(state => {
       const currentAmount = state.resources[type];
       const newAmount = Math.max(0, currentAmount - amount);
@@ -34,11 +34,11 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
     });
   },
   
-  getResource: (type: ResourceType) => {
+  getResource: (type: ResourceType): number => {
     return get().resources[type];
   },
   
-  hasResource: (type: ResourceType, amount: number) => {
+  hasResource: (type: ResourceType, amount: number): boolean => {
     return get().resources[type] >= amount;
   }
-})); 
+}));
