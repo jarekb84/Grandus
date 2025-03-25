@@ -2,13 +2,36 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useCombatStore } from '@/features/combat/Combat.store';
 import * as Phaser from 'phaser';
 import { CombatScene, CombatSceneEvents } from '@/features/combat/Combat.scene';
-import { CombatStats, PlayerStats } from '@/features/combat/Combat.types';
 import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
 import { useResourcesStore } from '@/features/shared/stores/Resources.store';
 import { ResourceType } from '@/features/shared/types/entities';
 
-export const useCombatGame = (onGameOver?: (score: number) => void) => {
-  const gameRef = useRef<HTMLDivElement>(null);
+interface CombatGameReturn {
+  gameRef: React.RefObject<HTMLDivElement | null>;
+  isAutoShooting: boolean;
+  isGameOver: boolean;
+  isWaveComplete: boolean;
+  combatStats: {
+    wave: number;
+    enemiesRemaining: number;
+    enemyHealth: number;
+    enemyDamage: number;
+    enemySpeed: number;
+    ammo: number;
+    killCount: number;
+  };
+  playerStats: {
+    health: number;
+    damage: number;
+    shootingSpeed: number;
+  };
+  cash: number;
+  handleToggleAutoShoot: () => void;
+  handleRetry: () => void;
+}
+
+export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameReturn => {
+  const gameRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<CombatScene | null>(null);
   const resourcesStore = useResourcesStore();
 
@@ -29,10 +52,20 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     playerHealth,
     cash,
     killCount
+  }: {
+    wave: number;
+    enemiesRemaining: number;
+    enemyHealth: number;
+    enemyDamage: number;
+    enemySpeed: number;
+    ammo: number;
+    playerHealth?: number;
+    cash?: number;
+    killCount?: number;
   } = stats;
 
-  useEffect(() => {
-    if (!gameRef.current) return;
+  useEffect((): (() => void) => {
+    if (!gameRef.current) return () => {};
 
     // Initialize ammo from stone count
     const stoneCount = resourcesStore.getResource(ResourceType.STONE);
@@ -50,7 +83,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     });
 
     const sceneEvents: CombatSceneEvents = {
-      onStatsUpdate: (stats) => {
+      onStatsUpdate: (stats): void => {
         useCombatStore.getState().updateStats({
           wave: stats.wave,
           enemiesRemaining: stats.enemiesRemaining,
@@ -59,7 +92,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
           enemySpeed: stats.enemySpeed
         });
       },
-      onGameOver: (finalScore) => {
+      onGameOver: (finalScore): void => {
         useCombatStore.getState().setGameOver(true);
         useCombatStore.getState().updateStats({ wave: finalScore });
         useCombatStore.getState().setAutoShooting(false);
@@ -67,17 +100,17 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
           onGameOver(finalScore);
         }
       },
-      onAmmoChanged: (ammoAmount) => {
+      onAmmoChanged: (ammoAmount): void => {
         useCombatStore.getState().updateStats({ ammo: ammoAmount });
       },
-      onOutOfAmmo: () => {
+      onOutOfAmmo: (): void => {
         useCombatStore.getState().updateStats({ ammo: 0 });
         useCombatStore.getState().setAutoShooting(false);
       },
-      onWaveComplete: (waveNumber, rewards) => {
+      onWaveComplete: (waveNumber, rewards): void => {
         console.log(`Wave ${waveNumber} complete with rewards:`, rewards);
       },
-      onPlayerHealthChanged: (health) => {
+      onPlayerHealthChanged: (health): void => {
         useCombatStore.getState().updateStats({ playerHealth: health });
       }
     };
@@ -90,11 +123,9 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       game.destroy(true);
       sceneRef.current = null;
     };
-  }, [onGameOver]);
+  }, [onGameOver, resourcesStore]);
 
-
-
-  const handleToggleAutoShoot = useCallback(() => {
+  const handleToggleAutoShoot = useCallback((): void => {
     // Only allow auto-shooting if player has ammo
     if (!isAutoShooting && ammo <= 0) {
       return; // Don't enable shooting if out of ammo
@@ -103,9 +134,9 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
     if (sceneRef.current) {
       sceneRef.current.setAutoShooting(!isAutoShooting);
     }
-  }, [isAutoShooting, sceneRef, ammo]);
+  }, [isAutoShooting, ammo]);
 
-  const handleRetry = useCallback(() => {
+  const handleRetry = useCallback((): void => {
     useCombatStore.getState().resetState();
     
     // Reset cash to 0 for new run
@@ -116,11 +147,6 @@ export const useCombatGame = (onGameOver?: (score: number) => void) => {
       // The scene's restart is handled internally
       sceneRef.current.scene.restart();
     }
-  }, [sceneRef]);
-
-  // Reset ammo warning when ammo changes from 0 to a positive value
-  useEffect(() => {
-    // This is now handled by the scene
   }, []);
 
   // Sync ammo with stone count

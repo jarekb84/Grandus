@@ -58,7 +58,7 @@ export class PlayerSystem {
   }
   
   // Visual effect when player takes damage
-  private showDamageEffect(damage: number) {
+  private showDamageEffect(damage: number): void {
     // Flash the player red
     this.player.setTint(0xff0000);
     
@@ -75,7 +75,7 @@ export class PlayerSystem {
   }
   
   // Create floating damage text
-  private createDamageText(x: number, y: number, amount: number) {
+  private createDamageText(x: number, y: number, amount: number): void {
     const text = this.scene.add.text(x, y, `-${amount}`, {
       fontFamily: 'Arial',
       fontSize: '16px',

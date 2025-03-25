@@ -1,5 +1,6 @@
 export interface ManagementModeProps {
-  // We'll add props as needed, such as:
+  className?: string; // Optional className for styling
+  // We'll add more props as needed, such as:
   // resources: GameResources;
   // onUpgrade: (upgradeType: string, level: number) => void;
   // onResearch: (researchId: string) => void;

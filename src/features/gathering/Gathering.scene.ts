@@ -24,15 +24,15 @@ export class GatheringScene extends Phaser.Scene {
     this.sceneEvents = events
   }
 
-  preload() {
+  preload(): void {
     // We'll create textures in create() instead
   }
 
-  create() {
+  create(): void {
     this.createShapeTextures()    
   }
 
-  private createShapeTextures() {
+  private createShapeTextures(): void {
     // Only create textures if they don't exist
     if (!this.textures.exists(GatheringScene.SHAPE_KEYS[Shape.SQUARE])) {
       // Create square texture (32x32)
@@ -66,7 +66,7 @@ export class GatheringScene extends Phaser.Scene {
     return this.textures.exists(key)
   }
 
-  addEntity(entity: Entity) {
+  addEntity(entity: Entity): void {
     // Verify texture exists before creating sprite
     if (!this.ensureTexture(entity.properties.shape)) {
       console.error('Failed to create entity - missing texture')
@@ -82,7 +82,7 @@ export class GatheringScene extends Phaser.Scene {
     }
   }
 
-  removeEntity(entityId: string) {
+  removeEntity(entityId: string): void {
     const sprites = this.entities.get(entityId)
     if (sprites) {
       sprites.main.destroy()

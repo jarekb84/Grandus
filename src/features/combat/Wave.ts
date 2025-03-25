@@ -1,8 +1,12 @@
 import * as Phaser from 'phaser';
 import { EnemySystem } from '@/features/combat/Enemy';
 
+export interface WaveRewards {
+  coins: number;
+}
+
 export interface WaveEvents {
-  onWaveComplete: (waveNumber: number, rewards: any) => void;
+  onWaveComplete: (waveNumber: number, rewards: WaveRewards) => void;
   onStatsUpdate: (stats: {
     wave: number;
     enemiesRemaining: number;

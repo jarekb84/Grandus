@@ -47,7 +47,7 @@ export const useCombatStore = create<CombatState>((set) => ({
   isAutoShooting: false,
   
   // Actions
-  updateStats: (updates: Partial<CombatStats>) => {
+  updateStats: (updates: Partial<CombatStats>): void => {
     set(state => ({
       ...state,
       stats: {
@@ -57,28 +57,28 @@ export const useCombatStore = create<CombatState>((set) => ({
     }));
   },
   
-  setGameOver: (isOver: boolean) => {
+  setGameOver: (isOver: boolean): void => {
     set(state => ({
       ...state,
       isGameOver: isOver
     }));
   },
   
-  setWaveComplete: (isComplete: boolean) => {
+  setWaveComplete: (isComplete: boolean): void => {
     set(state => ({
       ...state,
       isWaveComplete: isComplete
     }));
   },
   
-  setAutoShooting: (enabled: boolean) => {
+  setAutoShooting: (enabled: boolean): void => {
     set(state => ({
       ...state,
       isAutoShooting: enabled
     }));
   },
   
-  resetState: () => {
+  resetState: (): void => {
     set(state => ({
       ...state,
       stats: { ...initialStats },

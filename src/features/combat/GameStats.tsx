@@ -11,7 +11,7 @@ export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }
   const healthPercentage = Math.max(0, Math.min(100, (playerStats.health / 100) * 100));
   
   // Determine health bar color based on current health
-  const getHealthBarColor = () => {
+  const getHealthBarColor = (): string => {
     if (healthPercentage > 60) return '#4ade80'; // Green
     if (healthPercentage > 30) return '#facc15'; // Yellow
     return '#ef4444'; // Red

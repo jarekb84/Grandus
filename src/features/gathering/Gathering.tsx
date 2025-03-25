@@ -13,10 +13,10 @@ const DynamicGameCanvas = dynamic(
 )
 
 export interface GatheringModeProps {
-  // Props here if needed
+  className?: string; // Optional className for styling
 }
 
-export const GatheringMode: React.FC<GatheringModeProps> = () => {
+export const GatheringMode: React.FC<GatheringModeProps> = ({ className }) => {
   // Create local ref for the game canvas
   const gameCanvasRef = useRef<GameCanvasHandle>(null)
   
@@ -24,7 +24,7 @@ export const GatheringMode: React.FC<GatheringModeProps> = () => {
   const { isGathering, hasAvailableNodeType, gatherResource } = useGatheringAdapter(gameCanvasRef)
 
   return (
-    <div className="flex flex-col w-full">
+    <div className={`flex flex-col w-full${typeof className === 'string' && className !== '' ? ` ${className}` : ''}`}>
       {/* Game canvas area */}
       <div className="w-full h-[768px]">
         <DynamicGameCanvas ref={gameCanvasRef} />

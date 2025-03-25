@@ -12,7 +12,7 @@ import { generateInitialEntities } from '@/features/shared/utils/entityGenerator
 import { useCurrencyStore } from '@/features/shared/stores/Currency.store'
 
 export interface GameCanvasProps {
-  // Removed onResourceCollected prop as it's no longer needed
+  className?: string;
 }
 
 export interface GameCanvasHandle {
@@ -30,11 +30,11 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
     const { addEntity } = useGameState()
 
     useImperativeHandle(ref, () => ({
-      gatherFromNode: async (nodeId: string) => {
+      gatherFromNode: async (nodeId: string): Promise<void> => {
         if (!systemsRef.current) return
         await systemsRef.current.resource.gatherResource(nodeId, 'player1')
       },
-      switchMode: (mode: GameMode) => {
+      switchMode: (mode: GameMode): void => {
         if (!gameRef.current) return
 
         // Stop all current scenes
@@ -73,16 +73,20 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
           class extends GatheringScene {
             constructor() {
               super({
-                onEntityInteraction: (entityId: string, type: EntityType) => {
+                onEntityInteraction: async (entityId: string, type: EntityType): Promise<void> => {
                   if (type === EntityType.RESOURCE_NODE) {
-                    systemsRef.current?.resource.gatherResource(entityId, 'player1')
+                    try {
+                      await systemsRef.current?.resource.gatherResource(entityId, 'player1')
+                    } catch (error) {
+                      console.error('Error gathering resource:', error)
+                    }
                   }
                 },
-                onPlayerHealthChanged: () => {}
+                onPlayerHealthChanged: (): void => {}
               })
             }
 
-            override create() {
+            override create(): void {
               super.create()
               
               // Store scene reference after it's fully initialized
@@ -92,57 +96,59 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
                 resource: new ResourceSystem(this)
               }
 
-              // Use stored entities instead of generating new ones
-              const entities = initialEntitiesRef.current!
-              entities.forEach(entity => {
-                addEntity(entity)
-                this.addEntity(entity)
-              })
+              // Use stored entities if available
+              const entities = initialEntitiesRef.current
+              if (entities) {
+                entities.forEach(entity => {
+                  addEntity(entity)
+                  this.addEntity(entity)
+                })
+              }
             }
           },
           class extends CombatScene {
             constructor() {
               super({
-                onWaveComplete: (waveNumber, rewards) => {
+                onWaveComplete: (waveNumber: number, rewards: { [key: string]: number }): void => {
                   // TODO: Handle wave completion rewards
-                  console.log(`Wave ${waveNumber} complete! Rewards:`, rewards);
+                  console.log(`Wave ${waveNumber} complete! Rewards:`, rewards)
                 },
-                onGameOver: (score) => {
+                onGameOver: (score: number): void => {
                   // TODO: Handle game over
-                  console.log('Game Over! Score:', score);
+                  console.log('Game Over! Score:', score)
                   
                   // Reset cash before restarting scene
-                  const { resetCash } = useCurrencyStore.getState();
-                  resetCash();
+                  const { resetCash } = useCurrencyStore.getState()
+                  resetCash()
                   
                   // Restart the scene after a short delay
                   setTimeout(() => {
-                    this.scene.restart();
-                  }, 1000);
+                    this.scene.restart()
+                  }, 1000)
                 },
-                onStatsUpdate: (stats) => {
+                onStatsUpdate: (stats): void => {
                   // Stats are handled by the CombatMode component
-                  console.log('Stats update:', stats);
+                  console.log('Stats update:', stats)
                 },
-                onAmmoChanged: (ammo) => {
+                onAmmoChanged: (ammo: number): void => {
                   // Handled by CombatMode component
-                  console.log('Ammo changed:', ammo);
+                  console.log('Ammo changed:', ammo)
                 },
-                onOutOfAmmo: () => {
+                onOutOfAmmo: (): void => {
                   // Handled by CombatMode component
-                  console.log('Out of ammo!');
+                  console.log('Out of ammo!')
                 },
-                onPlayerHealthChanged: (health) => {
+                onPlayerHealthChanged: (health: number): void => {
                   // Handled by CombatMode component
-                  console.log('Player health changed:', health);
+                  console.log('Player health changed:', health)
                 }
               })
             }
 
-            override create() {
-              super.create();
+            override create(): void {
+              super.create()
               // Set auto-shooting to false initially
-              this.setAutoShooting(false);
+              this.setAutoShooting(false)
             }
           }
         ]
@@ -151,7 +157,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
       const game = new Phaser.Game(config)
       gameRef.current = game
 
-      return () => {
+      return (): void => {
         game.destroy(true)
         gameRef.current = null
         sceneRef.current = null
@@ -160,7 +166,7 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
       }
     }, [addEntity])
 
-    return <div ref={containerRef} className="w-full h-full bg-gray-900" />
+    return <div ref={containerRef} className={`w-full h-full bg-gray-900 ${props.className ?? ''}`} />
   }
 )
 

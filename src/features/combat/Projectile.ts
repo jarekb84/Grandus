@@ -18,7 +18,7 @@ export class ProjectileSystem {
     this.createProjectileTextures();
   }
   
-  private createProjectileTextures() {
+  private createProjectileTextures(): void {
     const graphics = this.scene.add.graphics();
     graphics.fillStyle(0xffff00);
     graphics.fillCircle(0, 0, 4);
@@ -26,7 +26,7 @@ export class ProjectileSystem {
     graphics.destroy();
   }
   
-  shootProjectile(sourceX: number, sourceY: number, targetX: number, targetY: number) {
+  shootProjectile(sourceX: number, sourceY: number, targetX: number, targetY: number): Phaser.Physics.Arcade.Sprite {
     const projectile = this.physics.add.sprite(sourceX, sourceY, 'projectile');
     this.projectiles.add(projectile);
 
@@ -48,7 +48,7 @@ export class ProjectileSystem {
     return projectile;
   }
   
-  checkCollisions(enemies: Enemy[], onEnemyHit: (enemy: Enemy, projectile: Phaser.Physics.Arcade.Sprite) => void) {
+  checkCollisions(enemies: Enemy[], onEnemyHit: (enemy: Enemy, projectile: Phaser.Physics.Arcade.Sprite) => void): void {
     this.projectiles.getChildren().forEach((gameObject: Phaser.GameObjects.GameObject) => {
       const projectile = gameObject as Phaser.Physics.Arcade.Sprite;
       enemies.forEach(enemy => {

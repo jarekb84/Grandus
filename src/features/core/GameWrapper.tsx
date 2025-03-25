@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useState } from 'react'
 import { GameMode } from '@/features/shared/types/GameMode'
 import Inventory from '@/features/shared/ui/Inventory'
@@ -7,13 +8,13 @@ import ModeSelector from './ModeSelector'
 import GameContent from './GameContent'
 import { useInventoryAdapter } from './inventory/useInventoryAdapter'
 
-const GameWrapper = () => {
+const GameWrapper = (): React.ReactElement => {
   const [currentMode, setCurrentMode] = useState<GameMode>(GameMode.GATHERING)
   
   // Use adapter for inventory data only
   const inventoryData = useInventoryAdapter()
 
-  const handleModeChange = (mode: GameMode) => {
+  const handleModeChange = (mode: GameMode): void => {
     setCurrentMode(mode)
   }
 

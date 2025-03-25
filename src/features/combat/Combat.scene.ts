@@ -11,7 +11,7 @@ import { useResourcesStore } from '@/features/shared/stores/Resources.store';
 import { ResourceType } from '@/features/shared/types/entities';
 
 export interface CombatSceneEvents {
-  onWaveComplete: (waveNumber: number, rewards: any) => void;
+  onWaveComplete: (waveNumber: number, rewards: { [key: string]: number }) => void;
   onGameOver: (score: number) => void;
   onStatsUpdate: (stats: {
     wave: number;
@@ -129,12 +129,12 @@ export class CombatScene extends Phaser.Scene {
     });
   }
 
-  override update(time: number, delta: number): void {
+  override update(time: number): void {
     // Skip all updates if game is over
-    if (this.isGameOver) return;
+    if (this.isGameOver === true) return;
     
     // Ensure all systems are initialized
-    if (!this.combatSystem || !this.waveSystem || !this.playerSystem) return;
+    if (this.combatSystem === null || this.waveSystem === null || this.playerSystem === null) return;
     
     // === HIGH FREQUENCY UPDATES (EVERY FRAME) ===
     
@@ -145,7 +145,7 @@ export class CombatScene extends Phaser.Scene {
     );
     
     // Check for collisions between projectiles and enemies
-    this.projectileSystem.checkCollisions(this.enemySystem.getEnemies(), (enemy, projectile) => {
+    this.projectileSystem.checkCollisions(this.enemySystem.getEnemies(), (enemy) => {
       // Damage enemy
       const destroyed = this.enemySystem.damageEnemy(enemy);
       if (destroyed) {

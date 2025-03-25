@@ -33,7 +33,7 @@ export class ResourceSystem {
     return yields
   }
 
-  async gatherResource(nodeId: string, gatherId: string) {
+  async gatherResource(nodeId: string, gatherId: string): Promise<void> {
     const state = this.gameState.getState()
     const node = state.entities.byId.get(nodeId) as ResourceNodeEntity | undefined
     const gatherer = state.entities.byId.get(gatherId)

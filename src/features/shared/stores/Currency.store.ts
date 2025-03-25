@@ -4,18 +4,18 @@ import { CurrencyState } from '@/features/shared/stores/Currency.types';
 export const useCurrencyStore = create<CurrencyState>((set, get) => ({
   cash: 0,
   
-  addCash: (amount: number) => {
+  addCash: (amount: number): void => {
     set(state => ({
       ...state,
       cash: state.cash + amount
     }));
   },
   
-  getCash: () => {
+  getCash: (): number => {
     return get().cash;
   },
   
-  resetCash: () => {
+  resetCash: (): void => {
     set(state => ({
       ...state,
       cash: 0

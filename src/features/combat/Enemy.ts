@@ -31,7 +31,7 @@ export class EnemySystem {
     this.createEnemyTextures();
   }
   
-  private createEnemyTextures() {
+  private createEnemyTextures(): void {
     // Create dot enemy texture - use a cleaner circle without a box
     const dotGraphics = this.scene.add.graphics();
     
@@ -62,7 +62,7 @@ export class EnemySystem {
     return enemy;
   }
   
-  spawnWaveEnemies(waveNumber: number, screenWidth: number) {
+  spawnWaveEnemies(waveNumber: number, screenWidth: number): Enemy[] {
     // Clear any remaining enemies
     this.enemies.forEach(enemy => enemy.sprite.destroy());
     this.enemies = [];
@@ -94,7 +94,7 @@ export class EnemySystem {
     return this.enemies;
   }
   
-  updateEnemyMovement(playerX: number, playerY: number) {
+  updateEnemyMovement(playerX: number, playerY: number): void {
     this.enemies.forEach(enemy => {
       // Update enemy velocity to track player
       const angle = Phaser.Math.Angle.Between(
@@ -103,7 +103,7 @@ export class EnemySystem {
       );
       
       const sprite = enemy.sprite;
-      if (sprite.body) {
+      if (sprite.body !== null) {
         // Gradually adjust velocity towards player
         const currentVelocity = sprite.body.velocity;
         const targetVelocity = new Phaser.Math.Vector2();
@@ -130,14 +130,14 @@ export class EnemySystem {
     return false; // Enemy still alive
   }
   
-  setInitialVelocities(playerX: number, playerY: number) {
+  setInitialVelocities(playerX: number, playerY: number): void {
     this.enemies.forEach(enemy => {
       const angle = Phaser.Math.Angle.Between(
         enemy.sprite.x, enemy.sprite.y,
         playerX, playerY
       );
       const sprite = enemy.sprite;
-      if (sprite.body) {
+      if (sprite.body !== null) {
         this.physics.velocityFromRotation(angle, this.ENEMY_SPEED, sprite.body.velocity);
       }
     });
@@ -167,7 +167,7 @@ export class EnemySystem {
     let nearestDistance = Number.MAX_VALUE;
     
     for (const enemy of this.enemies) {
-      if (!enemy || !enemy.sprite) continue;
+      if (enemy === null || enemy.sprite === null) continue;
       
       const distance = Phaser.Math.Distance.Between(
         x, y,

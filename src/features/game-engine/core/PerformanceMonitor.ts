@@ -20,7 +20,7 @@ export class PerformanceMonitor {
     this.fpsText.setDepth(1000);
   }
   
-  update(time: number, entityCount: number) {
+  update(time: number, entityCount: number): void {
     if (this.lastTime > 0) {
       this.frameTime = time - this.lastTime;
       this.fps = Math.round(1000 / this.frameTime);
