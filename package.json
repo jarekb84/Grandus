@@ -10,7 +10,7 @@
     "find-dead-code": "ts-prune",
     "find-unused-deps": "depcheck",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
