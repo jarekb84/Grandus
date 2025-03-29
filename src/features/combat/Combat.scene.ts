@@ -119,8 +119,7 @@ export class CombatScene extends Phaser.Scene {
     // Start first wave
     this.waveSystem.startNextWave(player.x, player.y);
 
-    // Reset the combat store with initial state
-    useCombatStore.getState().resetState();
+    // State reset should be handled externally (e.g., on retry or mode change)
 
     // Immediately sync the complete state to prevent render delay
     useCombatStore.getState().updateStats({

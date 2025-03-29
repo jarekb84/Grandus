@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { useCombatStore } from '@/features/combat/Combat.store';
-import * as Phaser from 'phaser';
-import { CombatScene, CombatSceneEvents } from '@/features/combat/Combat.scene';
-import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
-import { useResourcesStore } from '@/features/shared/stores/Resources.store';
-import { ResourceType } from '@/features/shared/types/entities';
+import { useCallback, useEffect, useRef } from "react";
+import { useCombatStore } from "@/features/combat/Combat.store";
+import * as Phaser from "phaser";
+import { CombatScene, CombatSceneEvents } from "@/features/combat/Combat.scene";
+import { useCurrencyStore } from "@/features/shared/stores/Currency.store";
+import { useResourcesStore } from "@/features/shared/stores/Resources.store";
+import { ResourceType } from "@/features/shared/types/entities";
 
 interface CombatGameReturn {
   gameRef: React.RefObject<HTMLDivElement | null>;
@@ -30,28 +30,30 @@ interface CombatGameReturn {
   handleRetry: () => void;
 }
 
-export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameReturn => {
+export const useCombatGame = (
+  onGameOver?: (score: number) => void,
+): CombatGameReturn => {
   const gameRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<CombatScene | null>(null);
   const resourcesStore = useResourcesStore();
 
   // Use Zustand store for combat state
-  const isAutoShooting = useCombatStore(state => state.isAutoShooting);
-  const isGameOver = useCombatStore(state => state.isGameOver);
-  const isWaveComplete = useCombatStore(state => state.isWaveComplete);
-  
+  const isAutoShooting = useCombatStore((state) => state.isAutoShooting);
+  const isGameOver = useCombatStore((state) => state.isGameOver);
+  const isWaveComplete = useCombatStore((state) => state.isWaveComplete);
+
   // Get combat stats from the store
-  const stats = useCombatStore(state => state.stats);
-  const { 
-    wave, 
-    enemiesRemaining, 
-    enemyHealth, 
-    enemyDamage, 
-    enemySpeed, 
-    ammo, 
+  const stats = useCombatStore((state) => state.stats);
+  const {
+    wave,
+    enemiesRemaining,
+    enemyHealth,
+    enemyDamage,
+    enemySpeed,
+    ammo,
     playerHealth,
     cash,
-    killCount
+    killCount,
   }: {
     wave: number;
     enemiesRemaining: number;
@@ -68,17 +70,16 @@ export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameR
     if (!gameRef.current) return () => {};
 
     // Initialize ammo from stone count
-    const stoneCount = resourcesStore.getResource(ResourceType.STONE);
-    useCombatStore.getState().updateStats({ ammo: stoneCount });
+    // Ammo initialization is now handled within CombatScene.create
 
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       width: 1024,
       height: 768,
       parent: gameRef.current,
-      backgroundColor: '#1e293b',
+      backgroundColor: "#1e293b",
       physics: {
-        default: 'arcade',
+        default: "arcade",
       },
     });
 
@@ -89,7 +90,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameR
           enemiesRemaining: stats.enemiesRemaining,
           enemyHealth: stats.enemyHealth,
           enemyDamage: stats.enemyDamage,
-          enemySpeed: stats.enemySpeed
+          enemySpeed: stats.enemySpeed,
         });
       },
       onGameOver: (finalScore): void => {
@@ -112,18 +113,18 @@ export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameR
       },
       onPlayerHealthChanged: (health): void => {
         useCombatStore.getState().updateStats({ playerHealth: health });
-      }
+      },
     };
 
     const combatScene = new CombatScene(sceneEvents);
     sceneRef.current = combatScene;
-    game.scene.add('CombatScene', combatScene, true);
+    game.scene.add("CombatScene", combatScene, true);
 
     return () => {
       game.destroy(true);
       sceneRef.current = null;
     };
-  }, [onGameOver, resourcesStore]);
+  }, []); // <-- Run effect only once on mount
 
   const handleToggleAutoShoot = useCallback((): void => {
     // Only allow auto-shooting if player has ammo
@@ -138,7 +139,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameR
 
   const handleRetry = useCallback((): void => {
     useCombatStore.getState().resetState();
-    
+
     // Reset cash to 0 for new run
     useCurrencyStore.getState().resetCash();
 
@@ -170,7 +171,7 @@ export const useCombatGame = (onGameOver?: (score: number) => void): CombatGameR
       enemyDamage,
       enemySpeed,
       ammo,
-      killCount
+      killCount,
     },
     playerStats: {
       health: playerHealth,
