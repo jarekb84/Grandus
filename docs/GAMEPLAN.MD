@@ -128,15 +128,14 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
         *   Entity collects resources (limited by carry capacity) and **visually returns** to Home Base for deposit.
         *   Upgrades (Workshop/Labs) enhance gatherer speed, capacity, gathering time, and unlock/manage multiple concurrent gatherers.
     *   **Node Depletion & Visual Feedback:** Nodes contain a finite amount of resources per cycle. They **visually change state** (e.g., shrink, disappear, turn grey/faded) when depleted and cannot be targeted for gathering until they replenish.
-    *   **Node Replenishment:** (The underlying mechanics remain, but presentation is spatial)
-        *   **Combat-Triggered Boost:** Successful Expansion runs can grant temporary boosts (e.g., faster respawn, increased yield) to existing, non-depleted nodes within the **visible, conquered hexes/area**.
-        *   **Unlocking New Potential:** Reaching new distance milestones in Expansion reveals/unlocks **new hexes/areas** on the map, causing new instances of resource nodes to appear within them. This is the primary method for long-term resource growth.
-        *   **Baseline Respawn:** Essential resource nodes (especially those accessible early near the Home Base) have a slow default respawn timer (improvable via upgrades) providing a safety net against deadlocks. Replenished nodes regain their normal visual appearance. 
+    *   **Node Replenishment:** Nodes replenish via:
+        *   **Baseline Respawn:** A slow default timer (improvable via upgrades) for essential nodes, providing a safety net. Replenished nodes regain normal visual appearance.
+        *   **Combat-Triggered Boosts:** Successful `Enhance Hex` combat runs may grant temporary yield/respawn speed boosts to nodes within that specific hex, or potentially even adjacent/nearby hexes (cross-hex synergy?). *(Specify which runs trigger boosts and where)*
     *   **Hex Interaction & Strategic Actions:**
         *   **Clicking a Hex:** Selects the hex and displays contextual information in a dedicated UI panel (e.g., side panel).
         *   **Info Panel (Controlled Hex):** Shows resources present, node status (ready/depleted/respawning), current **Depth Level / Max Wave Cleared**, current yield/respawn bonuses resulting from that depth, potential special features. Provides an **`Enhance Hex`** button.
-        *   **Info Panel (Adjacent, Uncontrolled Hex):** Shows limited scouted info (if any), potential resource types (maybe?), estimated difficulty baseline. Provides an **`Expand Combat`** button.
-    *   **Combat Initiation:** Clicking `Expand Combat` or `Enhance Hex` triggers the transition to the `Combat Scene`, passing the context of the target hex and the action type. May include a brief "Prepare/Confirm" overlay showing current ammo inventory before starting.
+        *   **Info Panel (Adjacent, Uncontrolled Hex):** Shows limited scouted info (if any), potential resource types (maybe?), estimated difficulty baseline. Provides buttons to initiate combat.
+        *   **Combat Initiation:** Clicking `Expand Combat` or `Enhance Hex` triggers the transition to the `Combat Scene`, passing the context of the target hex and the action type. May include a brief "Prepare/Confirm" overlay showing current ammo inventory before starting.
     *   **Node Depletion & Replenishment:** Nodes visually deplete. Replenishment occurs via baseline timers (improvable), and potential temporary boosts triggered by successful `Enhance Hex` combat runs on *other* hexes (cross-hex synergy?). Unlocking *new* nodes happens primarily via `Expand Combat` into new hexes.
     *   **Offline Simulation:** Simulates gathering actions based on controlled hexes, node states, and gatherer stats.
 
@@ -282,14 +281,6 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
 
 ## Misc
 
-* **Laboratory and Workshop Systems:**
-  * Laboratory offers passive, long-term incremental improvements.  
-  * Workshop provides immediate upgrade benefits upon resource investment.  
-
-* **Resource and Territory Management:**
-  * Territory management following successful combat phases, unlocking strategic resources.  
-  * Incremental complexity in resource types, rarity, and management.  
-
 * **Guild and Multiplayer Mechanics:**
   * Joint efforts for territory conquest, special events, and resource collection.  
   * Enhanced cooperative gameplay through incremental guild research.  
@@ -299,7 +290,13 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
 
 ### **Initial Technical Approach**
 
-* **Tech Stack:** React/Next.js for rapid UI iteration.  
-* **Graphics:** WebGL via PhaserJs for interactive gameplay visuals.  
-* **Initial Focus:**  
-  * Core MVP: basic resource collection, initial combat mechanics, and essential upgrades managed via React.
+*   **Tech Stack:**
+    *   React/Next.js for UI (primarily `Management View`, potentially UI overlays).
+    *   WebGL via PhaserJs for interactive gameplay visuals (`Territory View` map/gathering, `Combat Scene`).
+*   **Initial Focus (MVP - Refined):**
+    1.  **`Territory View` Basics (PhaserJS):** Scene with Home Base, one gatherer entity, one resource type (Stone nodes) spatially placed (maybe on simple grid/hex overlay). Implement visual movement: entity travels to node, gathers (timer), returns. Basic resource inventory tracking. Implement "Gather Stone" button triggering nearest node logic.
+    2.  **Basic Hex Interaction (Territory View):** Allow clicking on the Home Base hex and one adjacent hex. Display a simple info panel for the selected hex. Add `Expand Combat` button for the adjacent hex.
+    3.  **Basic `Combat Scene` (PhaserJS):** Triggered by `Expand Combat`. Simple scene with player entity firing basic projectiles (consuming Stone/Pebbles). Spawn 1-2 types of basic enemies from top. Implement a basic **Depth/Distance** counter. Run ends on player defeat.
+    4.  **Core Loop Link:** Successfully completing (`Expand`) the Combat run (reaching any minimal distance) changes the target hex status to "Controlled" in the Territory View and reveals its Stone node(s).
+    5.  **Basic `Management View` (React):** Minimal view with Workshop tab. Implement Coin currency (awarded simply for completing a combat run). Allow purchasing one basic Workshop upgrade (e.g., +Pebble Damage) using Coins.
+    6.  **Basic Crafting (Management View):** Implement simple Stone -> Pebbles crafting recipe. Update Territory/Combat to use Pebbles as primary ammo if available.
