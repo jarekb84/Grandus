@@ -2,22 +2,18 @@
 
 ## **High-Level Themes**
 
-* **Visual Scale and Automation:**
-
-  * Visually experience scale and growth, not just numeric increases.  
-  * Begin with manual actions evolving gradually into fully automated systems, providing visually rewarding progression (inspired by Dyson Sphere Program and Factorio).  
-* **Cooperative Gameplay (Future Phase):**
-
-  * Collaborative progression with guilds/alliances to achieve mutual goals.  
-  * Mechanisms allowing players to help each other speed up progression and enhance collective power.  
-* **Progressive Complexity:**
-
-  * Gradually introduce new gameplay mechanics and UI elements.  
-  * Expose increasing complexity over time to maintain player engagement without initial overwhelm.  
-* **Incremental Progression (Active & Passive):**
-
-  * Clear incremental growth, both visually and numerically.  
-  * Meaningful offline progression complements active gameplay, encouraging regular player engagement.
+*   **Visual Scale and Automation:**
+    *   Visually experience scale and growth, not just numeric increases. Expansion represented on a **Strategic Map**.
+    *   Begin with **active visual gathering** evolving gradually into more automated systems, providing visually rewarding progression (inspired by Dyson Sphere Program and Factorio).
+*   **Cooperative Gameplay (Future Phase):**
+    *   Collaborative progression with guilds/alliances to achieve mutual goals.
+    *   Mechanisms allowing players to help each other speed up progression and enhance collective power.
+*   **Progressive Complexity:**
+    *   Gradually introduce new gameplay mechanics (**Strategic Map interactions**, deeper crafting, diverse upgrades) and UI elements.
+    *   Expose increasing complexity over time to maintain player engagement without initial overwhelm.
+*   **Incremental Progression (Active & Passive Balance):**
+    *   Clear incremental growth, both visually (map expansion, **gatherer movement**) and numerically (stats, distance).
+    *   Meaningful offline progression (Gathering simulation, potential passive Coin income) complements **focused active gameplay** (Combat/Expansion runs), encouraging regular player engagement without mandating excessive active playtime.
 
 
 ## **Detailed Vision and Mechanics**
