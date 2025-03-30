@@ -66,23 +66,24 @@ The core loop cycles through Gathering -> Management -> Combat/Expansion:
     *   **Resource Consumption:** Directly uses finite ammo crafted from gathered resources.
     *   **Dual Rewards:** Earn temporary currency ($) for in-run upgrades and persistent currency (Coins) for permanent progression (idle/incremental hybrids like "The Tower").
 
-### **Enemy Progression**
+## **Enemy Progression**
 
-* Each enemy's difficulty level represented visually by geometric complexity:  
-  * **Dot:** Easiest enemy, minimal threat.  
-  * **Line:** Slightly harder, increased threat.  
-  * **Triangle:** More challenging, higher damage, and health.  
-  * **Square (and Rectangle):** Further increased difficulty, stronger stats.  
-  * **Pentagon and Beyond:** Progressively tougher enemies with more sides.  
-  * **Bosses:** Larger circles (hollow), distinctly tougher encounters providing significant rewards.  
-* Enemy waves structured so that every ten waves introduce tougher enemy shapes with higher probabilities of spawning.
+*   Each enemy's difficulty level represented visually by geometric complexity:
+    *   **Dot:** Easiest enemy, minimal threat.
+    *   **Line:** Slightly harder, increased threat.
+    *   **Triangle:** More challenging, higher damage, and health.
+    *   **Square (and Rectangle):** Further increased difficulty, stronger stats.
+    *   **Pentagon and Beyond:** Progressively tougher enemies with more sides.
+    *   **Bosses:** Larger circles (hollow), or other distinct complex shapes, representing significantly tougher encounters at major **distance milestones** providing significant rewards.
+*   Enemy density, type variety, and individual strength scale based on the **distance achieved** within a Combat/Expansion run. Tougher geometric shapes become more common and appear in greater numbers the further the player progresses. Specific enemy types or modifiers might be tied to certain zones encountered (as represented on the Strategic Map).
 
-### **Visual Style Inspiration**
+## **Visual Style Inspiration**
 
-* The combat UI emphasizes simplicity and clarity:  
-  * Central entity (player/tower) clearly represented, surrounded by waves of incoming geometric enemies.  
-  * Projectiles and enemy health/damage indicators clearly visible, simple animations, bright contrasting colors.  
-  * Minimalist UI elements provide clear immediate visual feedback and maintain focus on gameplay.
+*   **Clarity and Simplicity:** The UI emphasizes simplicity, clarity, and immediate feedback using clean lines and easily readable geometric shapes for entities and resources. Bright, contrasting colors enhance readability during active gameplay.
+*   **Minimalist Information Display:** UI elements remain minimalist, focusing attention on the action. Key real-time metrics (Distance, Ammo, Health, Currencies) are clearly visible but unobtrusive during Combat/Gathering.
+*   **Visual Feedback:** Projectiles, impacts, node depletion/replenishment, status effects, and player actions should have clear, simple visual indicators and animations.
+*   **Sense of Motion (Combat):** Combat view incorporates visual cues suggesting forward motion (e.g., background parallax) to reinforce the feeling of expansion.
+*   **Progressive Disclosure & UI Scalability:** This is a core principle. The game starts with a very minimal interface (e.g., just the Gathering scene and a "Gather Stone" button). New UI elements, panels, tabs (like Inventory, Management sub-tabs, Combat stats), and even entire game modes/screens are **introduced gradually only as the player unlocks the relevant mechanics** through progression or completing introductory objectives (e.g., gathering enough resources, earning first Coins). The UI architecture should be designed to **scale cleanly**, allowing new elements to be added or revealed within the existing structure without overwhelming the player or requiring complete layout redesigns at each stage. Complexity is layered in over time, not presented all at once.
 
 ## **In-Depth Mechanic**
 
