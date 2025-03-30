@@ -55,15 +55,10 @@ The core loop cycles through Gathering -> Management -> Combat/Expansion:
     *   **Node Lifecycle:** Nodes deplete visually and replenish over time or via game events.
     *   **Offline Simulation:** Progress continues passively based on active gathering efficiency.    
 
-2. **Management Mode:**
-
-   * React-based UI for managing permanent upgrades that scale exponentially, with clear magnitude thresholds.
-   * Introduce crafting mechanics (e.g., converting stones into smaller rocks for throwing or crafting spears).   
-   * Players initiate combat/expansion phases by selecting regions on a map.  
-   * Systems
-     * Crafting: making items for use in gathering or combat
-     * Workshop: spend coins(or other resrouces) for immediate upgrades to skills/buffs
-     * Labs: spend coins(or other resrouces) to research (takes timee) upgrades to the effectiveness of levels of skills/buffs. Can also unlock new mechancis      
+2.  **Management Mode:** Players utilize this central hub (primarily React UI) for permanent progression by spending resources in systems like the Workshop (instant upgrades), Labs (timed research), and Crafting (item creation).
+    *   **Permanent Upgrades:** Spend persistent currency (Coins) etc. for lasting improvements to Gathering, Combat, and other systems.
+    *   **Resource Conversion:** Craft gathered resources into essential combat items (ammo, gear), intermediate goods, or other useful equipment.
+    *   **Progression Hub:** Serves as the primary interface for long-term character/capability development outside of active Gathering/Combat loops.    
 
 3. **Combat/Expansion Mode:**
 
@@ -166,25 +161,60 @@ The core loop cycles through Gathering -> Management -> Combat/Expansion:
     +--------------------------------------------------------------------------+
     ```
 ---
-### Management
-#### Workshop
-* Spend Coins (maybe other resrouces) to upgrade starting levels of combat stats (damage/defense)
-#### Labs
-* Costs resrouces (coins, maybe more) and take time to research
-* Universal vs. Stage-Specific Upgrades
-  * "General Efficiency" lab upgrades that universally enhance resource gathering, combat efficacy, or reduce resource costs, with stage-specific modifiers that tune how impactful these universal bonuses are across stages.
-* Cross-Stage Interconnectivity
-  * Cross-Stage Research: Players invest in research at higher stages (planet/solar/galaxy) that reduces the effectiveness penalty of previous stages, reinforcing earlier-stage replayability and exponential growth loops.  
-#### Crafting
-* Craftable Combat Gear: Stones and wood craft weapons/tools enhancing combat effectiveness.
-  * Examples
-    * Stones are broken down into multiple projectiles (small rocks) that can be thrown by hand, extending resource longevity and utility.
-    * Craft a slingshot
-    * Break down rocks into smeller pebbels that can be used in a slingshot
-    * Slingshot does more damg (faster projectile) while increasing quantity of projectiles which can be brought to battle
-      * Bring 1 stone to throw once for 100 damage
-      * Bring 10 rocks (from 1 stone) which can be thrown for 10 damage each (100 total dmg)
-      * Bring 100 pebbles (from 10 rocks broken up) which cna be shot for 2 damage each (200 total dmg)
+### Management Mode
+
+*   **Purpose:** Central hub for **permanent progression** and **resource transformation**. This is where players invest their accumulated persistent currencies (like Coins) and resources to enhance their core capabilities across all game modes (Gathering, Combat, Crafting efficiency, etc.) and to craft essential items.
+*   **Interface:** Primarily a React-based UI, suited for managing lists, tech trees, upgrade buttons, and crafting queues, separate from the real-time action in Phaser scenes.
+*   **Core Systems:**
+    *   **Workshop:**
+        *   **Function:** Spend persistent currency (Coins) and possibly other resources for **instant**, permanent upgrades to baseline stats and efficiencies.
+        *   **Upgrade Targets:** Examples include: starting combat stats (player/unit damage, health), Gatherer stats (movement speed, gather speed, carry capacity), Crafting speed/efficiency, Combat "Clearing Speed" effectiveness, base node respawn rates. Provides steady, incremental power gains.
+    *   **Labs:**
+        *   **Function:** Facilitates **long-term** progression through research projects that cost persistent currency (Coins), potentially rare resources, and take **real-time** to complete. Drives significant advancements and unlocks.
+        *   **Unlock Targets:** New game mechanics (e.g., unlocking Combat initially?, additional gatherer units, automation features, new combat abilities/unit types), higher tiers for Workshop upgrades, advanced/complex crafting recipes, passive income streams (e.g., research "Coin Geology"), major efficiency breakthroughs (e.g., global gathering speed buffs, cross-stage bonuses).
+        * **Universal vs. Stage-Specific Upgrades lab** upgrades that universally enhance resource gathering, combat efficacy, or reduce resource costs, with stage-specific modifiers that tune how impactful these universal bonuses are across stages.
+        * **Cross-Stage Interconnectivity**: Players invest in research at higher stages (planet/solar/galaxy) that reduces the effectiveness penalty of previous stages, reinforcing earlier-stage replayability and exponential growth loops. 
+    *   **Crafting:**
+        *   **Function:** Interface for transforming raw gathered resources into more useful items. Displays available recipes, required ingredients, and allows players to queue production.
+        *   **Outputs:** Combat consumables (various ammo types), permanent equipment (like the Slingshot), intermediate components for more complex recipes, potentially temporary buff items or building materials (future).
+        *   **Recipe Unlocks:** New recipes discovered through Lab research, found in the world (future?), or via progression milestones.
+        * Examples
+            * Stones are broken down into multiple projectiles (small rocks) that can be thrown by hand, extending resource longevity and utility.
+            * Craft a slingshot
+            * Break down rocks into smeller pebbels that can be used in a slingshot
+            * Slingshot does more damg (faster projectile) while increasing quantity of projectiles which can be brought to battle
+            * Bring 1 stone to throw once for 100 damage
+            * Bring 10 rocks (from 1 stone) which can be thrown for 10 damage each (100 total dmg)
+            * Bring 100 pebbles (from 10 rocks broken up) which cna be shot for 2 damage each (200 total dmg)
+
+*   **(Strategic Map Removed):** *Note: The Strategic Map for visualizing territory and choosing expansion targets is a crucial element but its optimal UI placement (pre-Combat, integrated Gathering view, dedicated screen) is TBD and handled separately from the core Management systems.*
+
+*   **Conceptual UI Layout (Text Mockup - Example: Workshop Tab Active):**
+    *(Mockup focuses only on Management systems, Map is omitted)*
+    ```text
+    +--------------------------------------------------------------------------+
+    | [Gathering] [Management] [Combat]  (Tabs, Management Active)             |
+    +--------------------------------------------------------------------------+
+    | [Top Resource Bar - Persistent Resources]                                |
+    | [Stone Icon] 150 | [Wood Icon] 85 | [Food Icon] 40 | [Coin Icon] 12     |
+    +--------------------------------------------------------------------------+
+    | [Sub-Tabs: [WORKSHOP] [Labs] [Crafting]] (Workshop Active)              |
+    +--------------------------------------------------------------------------+
+    | [Main Panel: Workshop Upgrades List]                                     |
+    |                                                                          |
+    |   **Gathering Upgrades**                                                 |
+    |    - Gatherer Speed Lv. 3 -> 4 [Cost: 50 Coins] [Upgrade Button]         |
+    |    - Carry Capacity Lv. 2 -> 3 [Cost: 40 Coins, 10 Wood] [Upgrade Button]|
+    |                                                                          |
+    |   **Combat Upgrades**                                                    |
+    |    - Pebble Damage Lv. 5 -> 6 [Cost: 75 Coins] [Upgrade Button]          |
+    |    - Clearing Speed Eff. Lv 1 -> 2 [Cost: 100 Coins] [Upgrade Button]    |
+    |                                                                          |
+    |   **Crafting Upgrades**                                                  |
+    |    - Crafting Speed Lv. 1 -> 2 [Cost: 30 Coins] [Upgrade Button]         |
+    |                                                                          |
+    +--------------------------------------------------------------------------+
+    ```
 
 ### Combat
 * Toggleable Active Resource Use: Introduce a toggle option during combat for using expendable resources (stones), making tactical choices meaningful (e.g., toggling throwing stones only when combat difficulty ramps up).
