@@ -60,12 +60,11 @@ The core loop cycles through Gathering -> Management -> Combat/Expansion:
     *   **Resource Conversion:** Craft gathered resources into essential combat items (ammo, gear), intermediate goods, or other useful equipment.
     *   **Progression Hub:** Serves as the primary interface for long-term character/capability development outside of active Gathering/Combat loops.    
 
-3. **Combat/Expansion Mode:**
-
-   * Gameplay inspired by mechanics in games like "The Tower" (a tower defense type game)  with enemies approaching from multiple directions and the player or automated soldiers firing projectiles or fighting melee.  
-   * Gameplay involves defending against waves of progressively difficult geometric-shaped enemies.
-   * Combat utilizes resources gathered in farming. (e.g., stones as throwable projectiles or crafted items)
-   * Rewards include cash (used in-run for temporary upgrades), coins (used for permanent upgrades), and possibly additional resources like leather for crafting.
+3.  **Combat/Expansion Mode:** Players engage in active combat within a 2D scene (PhaserJS) to push deeper into territory, measured by distance, using crafted ammo and earning rewards.
+    *   **Active Engagement:** Real-time gameplay inspired by tower defense/shooter, requiring resource management (ammo).
+    *   **Distance Progression:** Success is measured by how far (distance) the player pushes, not fixed waves, unlocking map territory.
+    *   **Resource Consumption:** Directly uses finite ammo crafted from gathered resources.
+    *   **Dual Rewards:** Earn temporary currency ($) for in-run upgrades and persistent currency (Coins) for permanent progression (idle/incremental hybrids like "The Tower").
 
 ### **Enemy Progression**
 
@@ -216,18 +215,46 @@ The core loop cycles through Gathering -> Management -> Combat/Expansion:
     +--------------------------------------------------------------------------+
     ```
 
-### Combat
-* Toggleable Active Resource Use: Introduce a toggle option during combat for using expendable resources (stones), making tactical choices meaningful (e.g., toggling throwing stones only when combat difficulty ramps up).
-* Role Specialization: Players configure combat unit roles (e.g., ranged attackers, melee defenders, support healers using food).
-* Combat rewards include:
-  * Resources
-    * Cash: Temporary upgrades within the current run.
-    * Coins: Persistent upgrades in the management phase.
-    * Special Resources: (like leather from wolves) for crafting or specific stage-linked upgrades.
-  * Clearing waves buffs yields/rarity of resrouce nodes in the Gathering Mode
-* In Run upgrades
-  * Spend Cash to improve levels of things like damage and defense stats
-  * Starting level of stats based on Workshop upgrades
+### Combat/Expansion Mode
+
+*   **Purpose:** The primary active gameplay phase where players expend gathered/crafted resources (ammo) to **push into new territory**, defeat enemies, earn currencies, and achieve **distance milestones**. Success in this mode directly enables further Gathering by unlocking new areas on the (separate) Strategic Map.
+*   **Interface:** A top-down or side-view **PhaserJS scene** displaying the player entity(ies), incoming enemies, projectiles, and relevant real-time stats.
+*   **Gameplay Style & Progression:**
+    *   **Proactive Expansion Focus:** Framed as pushing *forward* into territory, not just defending a fixed point. Visual cues like background parallax scrolling reinforce this.
+    *   **Distance Metric:** Progress is tracked continuously via a **distance** counter (meters -> km -> AU etc.). Enemy difficulty, density, and types scale dynamically based on the distance achieved within the run. Replaces discrete wave counts.
+    *   **Core Combat:** Inspired by tower defense/shooter hybrids. Player entity (and later, allied units) automatically targets/attacks incoming geometric enemies. May include player-activated special abilities or tactical positioning elements in later stages.
+*   **Mechanics:**
+    *   **Resource Consumption (Ammo):** Directly uses items crafted in Management Mode (e.g., Pebbles, specialized ammo) as finite ammunition. Running out of ammo significantly hinders progress but might not completely stop the player (e.g., revert to a very weak base attack or rely on allied units). Strategic ammo conservation could be important.
+    *   **"Clearing Speed" Mechanic:** To mitigate the grind of replaying early sections, when initiating a run into previously explored territory, the game rapidly advances the distance counter (e.g., to 80-90% of the previous max distance). This "fast travel" phase might feature significantly reduced enemy presence or offer bonus starting Cash ($). The effectiveness (speed/percentage) of Clearing Speed is improvable via Workshop upgrades.
+    *   **Dual Currency Rewards:**
+        *   `Cash ($)`: Earned from defeating standard enemies during the run. Spent *only* within the current run via an accessible **in-run upgrade panel** for temporary boosts (e.g., +Damage, +Attack Speed, temporary health regen). This currency is lost when the run ends.
+        *   `Coins`: The primary persistent currency. Earned from reaching significant new distance milestones, defeating bosses or special high-value enemies, and possibly completing specific run objectives. Used back in Management Mode (Workshop/Labs). Earning is skewed towards pushing *further* than before.
+    *   **Other Rewards:**
+        *   **Territory Conquest:** Reaching specific distance thresholds conquers the corresponding zone/hex on the Strategic Map, making it available for Gathering.
+        *   **Special Resources:** Rare crafting materials (e.g., Leather, Crystals) might drop from specific enemy types or bosses.
+        *   **(Potential):** Triggering temporary Gathering boosts in conquered zones upon successful completion.
+*   **(Strategic Map Interaction):** *Note: While Combat/Expansion runs are initiated based on selections potentially made viewing the Strategic Map, the map itself is not typically displayed during the active combat phase. The link is sequential: Plan/Select Target (potentially via Map) -> Enter Combat Mode -> Achieve Distance -> Conquered Territory updates on Map.*
+
+*   **Conceptual UI Layout (Text Mockup - During Combat):**
+
+    ```text
+    +--------------------------------------------------------------------------+
+    | [Gathering] [Management] [Combat]  (Tabs, Combat Active - or Mode Name)  |
+    +--------------------------------------------------------------------------+
+    | [Top Bar: Combat Run Stats]                                              |
+    | Distance: 175m | Max: 210m | [$ Icon]: 250 | [Coin Icon] This Run: +3    |
+    +--------------------------------------------------------------------------+
+    | [Main Gameplay View - Phaser Scene]                                      |
+    |   (Enemies approaching from top/ahead)                                   |
+    |   (Player entity at bottom/center firing upwards/forwards)               |
+    |   (Parallax background suggesting forward motion)                        |
+    +--------------------------------------------------------------------------+
+    | [Bottom Bar: Player & Controls]                                          |
+    | HP: [||||||||--] 80/100  | Ammo: [Pebble Icon] 1490/1500 [Toggle Use?]  |
+    | Dmg: 12 | Spd: 1.2/s     | [Upgrades ($) Button] [Abilities?] [Pause]   |
+    +--------------------------------------------------------------------------+
+    ```
+---
 
 
 ## Misc
