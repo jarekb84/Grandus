@@ -3,36 +3,38 @@
 ## **High-Level Themes**
 
 *   **Visual Scale and Automation:**
-    *   Visually experience scale and growth, not just numeric increases. Expansion represented on a **Strategic Map**.
-    *   Begin with **active visual gathering** evolving gradually into more automated systems, providing visually rewarding progression (inspired by Dyson Sphere Program and Factorio).
+    *   Visually experience scale and growth, not just numeric increases. Expansion and territory status represented on an interactive **Territory View**.
+    *   Begin with **active visual gathering** within the Territory View, evolving gradually into more automated systems, providing visually rewarding progression (inspired by Dyson Sphere Program and Factorio).
 *   **Cooperative Gameplay (Future Phase):**
     *   Collaborative progression with guilds/alliances to achieve mutual goals.
     *   Mechanisms allowing players to help each other speed up progression and enhance collective power.
 *   **Progressive Complexity:**
-    *   Gradually introduce new gameplay mechanics (**Strategic Map interactions**, deeper crafting, diverse upgrades) and UI elements.
+    *   Gradually introduce new gameplay mechanics (Territory interaction/enhancement, deeper crafting, diverse upgrades) and UI elements within the Territory and Management views.
     *   Expose increasing complexity over time to maintain player engagement without initial overwhelm.
 *   **Incremental Progression (Active & Passive Balance):**
-    *   Clear incremental growth, both visually (map expansion, **gatherer movement**) and numerically (stats, distance).
-    *   Meaningful offline progression (Gathering simulation, potential passive Coin income) complements **focused active gameplay** (Combat/Expansion runs), encouraging regular player engagement without mandating excessive active playtime.
+    *   Clear incremental growth, both visually (territory expansion on map, gatherer movement) and numerically (stats, combat depth achieved).
+    *   Meaningful offline progression (Gathering simulation, potential passive Coin income) complements focused active gameplay sessions within the **Combat Scene** (initiated from the Territory View), encouraging regular player engagement without mandating excessive active playtime.
 
 
 ## **Detailed Vision and Mechanics**
 ### **Visual Scale and Automation**
 
-*   Players begin as a single entity **actively gathering resources by moving on screen**, evolving into managing larger entities (town → region → planet → solar system → galaxy → multiverse) and potentially automated gatherers/combat units.
-*   Automation gradually reduces *manual clicks* but retains visual activity (e.g., seeing multiple gatherers work), enhancing visual and numerical satisfaction in progression.
-*   Scale visually represented through clear incremental tiers (distance units changing: meters -> km -> AU) and the **expanding territory shown on the Strategic Map**.
+*   Players begin as a single entity **actively gathering resources by moving on screen within the Territory View**, evolving into managing larger entities (town → region → planet → solar system → galaxy → multiverse) and potentially automated gatherers/combat units also operating within this view.
+*   Automation gradually reduces *manual clicks* for gathering initiation but retains visual activity (e.g., seeing multiple gatherers work on the Territory map), enhancing visual and numerical satisfaction in progression.
+*   Scale visually represented through clear incremental tiers (distance units changing during combat: meters -> km -> AU) and the **expanding, interactive territory shown on the Territory View map**.
 
 ### **Progressive Complexity**
 
-*   Initial gameplay features minimal UI complexity: basic visual gathering, simple combat initiation via the Strategic Map, basic Workshop/Crafting.
-*   Introduce complexity incrementally: **Strategic Map unlocks/navigation**, new resource types requiring specific gathering techniques or tools, deeper crafting chains (e.g., Stone -> Pebbles -> Specialized Ammo), Laboratories for timed research, and more sophisticated Combat mechanics (unit roles, abilities).
+*   Initial gameplay features minimal UI complexity: the basic **Territory View** showing Home Base, nearby nodes, and a "Gather Stone" button. Management and Combat are unlocked progressively via early goals or research.
+*   **Layering Mechanics:** Introduce complexity incrementally by unlocking new systems and interactions: **Territory View** reveals more hexes/zones, info panels, and combat initiation options (`Expand`/`Enhance Hex`); **Management View** unlocks tabs (Workshop, Labs, Crafting); **Combat Scene** complexity grows (new enemy types, deeper mechanics).
+*   **Evolving Systems:** Introduce complexity within systems over time, such as new resource types requiring specific gathering techniques or tools, deeper crafting chains (e.g., Stone -> Pebbles -> Specialized Ammo), advanced Lab research, and more sophisticated Combat options (unit roles, abilities). *(This bullet point is reinstated from an earlier version for its concrete examples)*
 
 ### **Incremental and Offline Progression**
 
-*   **Active Phase (Combat/Expansion):** Focused sessions where the player pushes into new territory, measured by **distance**. Success unlocks new zones on the Strategic Map and provides primary rewards (Coins, Cash). Visual feedback includes background parallax/movement suggesting forward progress. These runs are the main driver for unlocking *new* potential.
-*   **Active/Semi-Passive Phase (Gathering):** Player entity **visually moves** between Home Base and resource nodes in conquered zones to collect resources when the game is active. This provides clear visual feedback on gathering speed and efficiency and directly utilizes upgrades to gatherer stats. This phase accumulates the fuel for Expansion runs.
-*   **Offline Phase (Gathering Simulation & Passive Income):** When offline, Gathering progress is simulated based on conquered zones, node availability, gatherer stats (speed, capacity, number of gatherers), and benchmarked active gathering rates. Potential for passive Coin income from special map locations or Lab research further incentivizes return and ensures progression isn't solely tied to active combat.
+*   **Active Phase 1 (`Territory` View):** Players actively manage gathering (initiating via buttons, entities move visually) and make strategic decisions by interacting with the map (clicking hexes, viewing info, deciding whether to `Expand` or `Enhance Hex`). This phase accumulates resources and sets the stage for combat.
+*   **Active Phase 2 (`Combat` Scene):** Triggered by choosing `Expand` or `Enhance Hex` in the Territory view. Focused sessions where the player pushes combat **depth** (distance/waves cleared) within the context of the chosen hex. Provides primary rewards (Coins, Cash, special resources) and directly improves the targeted hex (conquers it on Expand, increases its Depth Level/bonuses on Enhance).
+*   **Progression Hub (`Management` View):** A separate interface (likely React-based) where players spend persistent resources (Coins etc.) on permanent upgrades (Workshop, Labs) and craft items. This is where long-term goals are set, driving the need for resources obtained via the Territory/Combat cycle.
+*   **Offline Simulation:** Primarily simulates the **Gathering** aspect based on conquered territory, available nodes, and gatherer stats. May also include passive Coin generation if unlocked via Labs/special hexes. Ensures meaningful progress while away.
 
 ### **Cooperative Gameplay (Future Phase)**
 
