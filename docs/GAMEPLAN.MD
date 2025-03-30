@@ -45,28 +45,30 @@
 
 ## **Gameplay Pillars**
 
-The core loop cycles through Gathering -> Management -> Combat/Expansion:
-1.  **Gather** resources needed for crafting and initiating combat.
-2.  **Manage** resources via Crafting (ammo/gear), Workshop/Labs (permanent upgrades), and plan the next move on the Strategic Map.
-3.  **Expand** via Combat runs, consuming resources to push distance, defeat enemies, earn rewards, and unlock new territory/gathering potential on the Strategic Map.
+The core gameplay loop involves a cycle of planning, preparation, and execution, primarily interacting through three key interfaces/modes:
 
-### **Core Gameplay Loop (Prototype)**
-1.  **Resource Gathering Mode:** Players visually command entities in a 2D scene (PhaserJS) to gather resources (Stone, Wood, etc.) from spatial nodes. Gathering takes time and resources are carried back; this mode fuels Crafting/Expansion and improves with upgrades.
-    *   **Visual & Spatial:** Entities physically travel between Home Base and nodes on the map.
-    *   **Direct Action:** Simple commands initiate gathering from targeted or nearest available nodes.
-    *   **Node Lifecycle:** Nodes deplete visually and replenish over time or via game events.
-    *   **Offline Simulation:** Progress continues passively based on active gathering efficiency.    
+1.  **Plan & Gather (`Territory` View):** Observe the game world, manage active resource gathering, assess territory status, identify needs/opportunities, and decide on the next strategic action (`Expand` or `Enhance Hex`).
+2.  **Prepare & Upgrade (`Management` View):** Invest accumulated resources into permanent upgrades (Workshop, Labs) and craft essential items (ammo, gear) to improve future capabilities based on strategic goals.
+3.  **Execute & Progress (`Combat` Scene):** Engage in active combat triggered from the Territory View. Push combat depth within the targeted hex to earn rewards, conquer new territory (`Expand`), or improve existing territory (`Enhance Hex`).
 
-2.  **Management Mode:** Players utilize this central hub (primarily React UI) for permanent progression by spending resources in systems like the Workshop (instant upgrades), Labs (timed research), and Crafting (item creation).
-    *   **Permanent Upgrades:** Spend persistent currency (Coins) etc. for lasting improvements to Gathering, Combat, and other systems.
-    *   **Resource Conversion:** Craft gathered resources into essential combat items (ammo, gear), intermediate goods, or other useful equipment.
-    *   **Progression Hub:** Serves as the primary interface for long-term character/capability development outside of active Gathering/Combat loops.    
+### Key Interfaces & Modes
 
-3.  **Combat/Expansion Mode:** Players engage in active combat within a 2D scene (PhaserJS) to push deeper into territory, measured by distance, using crafted ammo and earning rewards.
-    *   **Active Engagement:** Real-time gameplay inspired by tower defense/shooter, requiring resource management (ammo).
-    *   **Distance Progression:** Success is measured by how far (distance) the player pushes, not fixed waves, unlocking map territory.
-    *   **Resource Consumption:** Directly uses finite ammo crafted from gathered resources.
-    *   **Dual Rewards:** Earn temporary currency ($) for in-run upgrades and persistent currency (Coins) for permanent progression (idle/incremental hybrids like "The Tower").
+*   **1. Territory View (PhaserJS Scene):** The primary interactive map where players visually command entities to gather resources (Stone, Wood, etc.) from spatial nodes within controlled hexes. This view also serves as the strategic overlay for inspecting hex details and initiating combat actions (`Expand` / `Enhance Hex`).
+    *   **Visual & Spatial:** Entities physically travel between Home Base and nodes. Map visually represents controlled/targetable territory (e.g., via hex grid).
+    *   **Dual Function:** Combines active resource gathering management with strategic planning and combat initiation.
+    *   **Hex Interaction:** Clicking hexes provides contextual information and actions (`Expand`/`Enhance`).
+    *   **Node Lifecycle:** Nodes deplete visually and replenish over time or via game events/combat success.
+
+*   **2. Management View (React UI):** The central hub for permanent progression and crafting, accessed separately (likely via a main UI tab). Players spend persistent currency (Coins) etc. here.
+    *   **Permanent Upgrades:** Invest in Workshop (instant buffs) and Labs (timed research) for lasting improvements across all game aspects.
+    *   **Resource Conversion:** Craft gathered resources into essential combat items (ammo, gear), intermediate goods, or other equipment.
+    *   **Goal Setting:** This is where players review upgrade costs and research goals, informing their resource needs and strategic decisions back in the Territory View.
+
+*   **3. Combat Scene (PhaserJS Scene):** The dedicated view for active combat engagements, triggered by actions in the Territory View. Players focus on surviving, defeating enemies, and pushing combat depth.
+    *   **Active Engagement:** Real-time gameplay requires managing finite crafted ammo and potentially using abilities.
+    *   **Contextual Challenge:** Difficulty and rewards are based on the specific hex being Expanded into or Enhanced.
+    *   **Depth Progression:** Success is measured by depth achieved (distance/waves cleared), which improves the targeted hex's status/yield.
+    *   **Dual Rewards:** Earn temporary currency ($) for in-run upgrades and persistent currency (Coins) for Management Mode progression.
 
 ## **Enemy Progression**
 
