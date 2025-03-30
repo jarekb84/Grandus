@@ -19,26 +19,27 @@
 ## **Detailed Vision and Mechanics**
 ### **Visual Scale and Automation**
 
-* Players begin as a single entity gathering resources manually, evolving into managing larger entities (town → region → planet → solar system → galaxy → multiverse).  
-* Automation gradually reduces manual actions, enhancing visual and numerical satisfaction in progression.  
-* Scale visually represented through clear incremental tiers, expanding scope progressively.
+*   Players begin as a single entity **actively gathering resources by moving on screen**, evolving into managing larger entities (town → region → planet → solar system → galaxy → multiverse) and potentially automated gatherers/combat units.
+*   Automation gradually reduces *manual clicks* but retains visual activity (e.g., seeing multiple gatherers work), enhancing visual and numerical satisfaction in progression.
+*   Scale visually represented through clear incremental tiers (distance units changing: meters -> km -> AU) and the **expanding territory shown on the Strategic Map**.
 
 ### **Progressive Complexity**
 
-* Initial gameplay features minimal UI complexity, starting with basic actions like collecting resources.  
-* Introduce complexity incrementally, such as new resource types, combat options, and upgrades (laboratories and workshops).
+*   Initial gameplay features minimal UI complexity: basic visual gathering, simple combat initiation via the Strategic Map, basic Workshop/Crafting.
+*   Introduce complexity incrementally: **Strategic Map unlocks/navigation**, new resource types requiring specific gathering techniques or tools, deeper crafting chains (e.g., Stone -> Pebbles -> Specialized Ammo), Laboratories for timed research, and more sophisticated Combat mechanics (unit roles, abilities).
 
 ### **Incremental and Offline Progression**
 
-* Active phases include resource gathering and expansion/combat with visual feedback.  
-* Offline phases allow passive resource collection and upgrades, creating an incentive for regular interaction.
+*   **Active Phase (Combat/Expansion):** Focused sessions where the player pushes into new territory, measured by **distance**. Success unlocks new zones on the Strategic Map and provides primary rewards (Coins, Cash). Visual feedback includes background parallax/movement suggesting forward progress. These runs are the main driver for unlocking *new* potential.
+*   **Active/Semi-Passive Phase (Gathering):** Player entity **visually moves** between Home Base and resource nodes in conquered zones to collect resources when the game is active. This provides clear visual feedback on gathering speed and efficiency and directly utilizes upgrades to gatherer stats. This phase accumulates the fuel for Expansion runs.
+*   **Offline Phase (Gathering Simulation & Passive Income):** When offline, Gathering progress is simulated based on conquered zones, node availability, gatherer stats (speed, capacity, number of gatherers), and benchmarked active gathering rates. Potential for passive Coin income from special map locations or Lab research further incentivizes return and ensures progression isn't solely tied to active combat.
 
 ### **Cooperative Gameplay (Future Phase)**
 
-* Guild mechanics for cooperative resource management and progression:  
-  * Players can submit requests for resources or assistance.  
-  * Guild research increases the effectiveness of cooperative actions.  
-  * Shared benefits from guild actions create a cyclical loop of mutual improvement.
+*   Guild mechanics for cooperative resource management and progression:
+    *   Players can submit requests for resources or assistance.
+    *   Guild research increases the effectiveness of cooperative actions.
+    *   Shared benefits from guild actions create a cyclical loop of mutual improvement.
 
 ## **Initial Gameplay Mechanics Detail**
 
