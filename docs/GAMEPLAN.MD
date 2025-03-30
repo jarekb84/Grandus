@@ -114,72 +114,69 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
 * Stage-specific resources with universal currencies (coins, gems) that persist and remain valuable throughout all stages.
 
 ## Modes within a stage
-### Resource Gathering Mode
+### Territory View (Formerly Gathering Mode)
 
-*   **Purpose:** Accumulate raw resources (stone, wood, food, etc.) through direct, visually represented actions within a spatial game environment, providing the fuel for crafting and expansion.
+*   **Purpose:** Serve as the primary interactive hub for visualizing the game world, managing active resource gathering (stone, wood, food, etc.), assessing territory status, planning strategic actions, and initiating combat encounters.
+*   **Interface:** A top-down 2D **PhaserJS scene** displaying the Home Base, player-controlled gatherer entities, spatial resource nodes, and a visual representation of controlled/adjacent territory (e.g., via a hex grid overlay). Includes overlaid UI elements for action buttons and status information.
 *   **Mechanics:**
-    *   **Primary Interface:** A top-down 2D **PhaserJS scene** serves as the main interaction space. It displays a central **Home Base**, the player's controllable entity(ies), and resource nodes positioned spatially on the map.
-    *   **Spatial Nodes & Territory Representation:** Resource nodes (e.g., Stone Piles, Trees) exist at specific coordinates on the map. The map area might feature a subtle visual overlay (e.g., a **hex grid**) where grid cells correspond to conquered territory zones. New resource nodes appear within newly revealed/conquered hex grid cells following successful Combat/Expansion runs, visually representing the expanding access to resources.
+    *   **Spatial Nodes & Territory Representation:** Resource nodes (e.g., Stone Piles, Trees) exist at specific coordinates within hexes/zones on the map. Controlled territory is visually distinct (e.g., colored/lit hexes). Adjacent, uncontrolled hexes might be revealed with limited detail (Fog of War, scoutable?).
     *   **Active Visual Gathering:**
-        *   Interaction occurs via simple **action buttons** (e.g., "Gather Stone").
-        *   Clicking an action button commands the primary player entity (or an available automated gatherer entity later) to automatically pathfind to the **nearest available node** of the specified type within the accessible/conquered territory.
-        *   The entity **visually travels** across the scene to the node location.
-        *   Upon reaching the node, a brief, time-based gathering animation plays (duration influenced by gather speed stats).
-        *   The entity collects resources (amount limited by carry capacity stats) and then **visually travels back** to the Home Base to deposit the resources into the main inventory.
-        *   Upgrades (via Workshop/Labs) directly enhance this visual loop: increasing movement speed, gathering speed, carry capacity, and eventually unlocking/managing multiple concurrent gathering entities.
+        *   Initiated via **global action buttons** (e.g., "Gather Stone", "Gather Wood") – *not* by clicking individual nodes.
+        *   Clicking an action button commands an available gatherer entity to automatically pathfind to the **nearest available node** of the specified type within controlled territory (logic can be refined later via research - e.g., target highest yield, closest, specific hex).
+        *   The entity **visually travels** to the node's location within its hex.
+        *   A brief, time-based gathering animation occurs (duration based on stats).
+        *   Entity collects resources (limited by carry capacity) and **visually returns** to Home Base for deposit.
+        *   Upgrades (Workshop/Labs) enhance gatherer speed, capacity, gathering time, and unlock/manage multiple concurrent gatherers.
     *   **Node Depletion & Visual Feedback:** Nodes contain a finite amount of resources per cycle. They **visually change state** (e.g., shrink, disappear, turn grey/faded) when depleted and cannot be targeted for gathering until they replenish.
     *   **Node Replenishment:** (The underlying mechanics remain, but presentation is spatial)
         *   **Combat-Triggered Boost:** Successful Expansion runs can grant temporary boosts (e.g., faster respawn, increased yield) to existing, non-depleted nodes within the **visible, conquered hexes/area**.
         *   **Unlocking New Potential:** Reaching new distance milestones in Expansion reveals/unlocks **new hexes/areas** on the map, causing new instances of resource nodes to appear within them. This is the primary method for long-term resource growth.
-        *   **Baseline Respawn:** Essential resource nodes (especially those accessible early near the Home Base) have a slow default respawn timer (improvable via upgrades) providing a safety net against deadlocks. Replenished nodes regain their normal visual appearance.
-    *   **Offline Simulation:** Calculates resources gathered while offline by simulating the actions of available gatherers targeting available/respawned nodes within the player's conquered territory (visible hexes/map area), considering their stats (speed, capacity). Presents a summary of offline gains upon the player's return.
+        *   **Baseline Respawn:** Essential resource nodes (especially those accessible early near the Home Base) have a slow default respawn timer (improvable via upgrades) providing a safety net against deadlocks. Replenished nodes regain their normal visual appearance. 
+    *   **Hex Interaction & Strategic Actions:**
+        *   **Clicking a Hex:** Selects the hex and displays contextual information in a dedicated UI panel (e.g., side panel).
+        *   **Info Panel (Controlled Hex):** Shows resources present, node status (ready/depleted/respawning), current **Depth Level / Max Wave Cleared**, current yield/respawn bonuses resulting from that depth, potential special features. Provides an **`Enhance Hex`** button.
+        *   **Info Panel (Adjacent, Uncontrolled Hex):** Shows limited scouted info (if any), potential resource types (maybe?), estimated difficulty baseline. Provides an **`Expand Combat`** button.
+    *   **Combat Initiation:** Clicking `Expand Combat` or `Enhance Hex` triggers the transition to the `Combat Scene`, passing the context of the target hex and the action type. May include a brief "Prepare/Confirm" overlay showing current ammo inventory before starting.
+    *   **Node Depletion & Replenishment:** Nodes visually deplete. Replenishment occurs via baseline timers (improvable), and potential temporary boosts triggered by successful `Enhance Hex` combat runs on *other* hexes (cross-hex synergy?). Unlocking *new* nodes happens primarily via `Expand Combat` into new hexes.
+    *   **Offline Simulation:** Simulates gathering actions based on controlled hexes, node states, and gatherer stats.
 
-*   **Conceptual UI Layout (Text Mockup - Focusing on Screen Elements):**
-    *(This describes elements visible within/overlaying the main Phaser scene)*
+*   **Conceptual UI Layout (Text Mockup - Territory View):**
 
     ```text
     +--------------------------------------------------------------------------+
-    | [Top Bar - Persistent Resources Overlay]                                 |
-    | [Stone Icon] 150 | [Wood Icon] 85 | [Food Icon] 40 | [Coin Icon] 12     |
+    | [Top Bar - Persistent Resources & Goal Tracker?]                         |
+    | [Stone Icon] 150 | [Wood Icon] 85 | [Coin Icon] 12 | Goal: 500 Coins    |
     +--------------------------------------------------------------------------+
-    |                                                                          |
-    | [Main Area - PhaserJS Scene]                                             |
-    |                                                                          |
-    |    [Grey Square Node - Stone Pile]   [Faded Grey Square - Depleted Stone]|
-    |                                                                          |
-    |              [Path Line?] ---> [Green Square - Player Entity]            |
-    |                                ^                                         |
-    |                                |                                         |
-    |                         [Blue Circle - Home Base]                        |
-    |                                                                          |
-    |   [Subtle Hex Grid Lines Overlaying the Scene?]                          |
-    |                                                                          |
-    |    [Orange Circle Node - Wood]      [Another Grey Square - Stone Pile]   |
-    |                                                                          |
-    +--------------------------------------------------------------------------+
-    | [Bottom/Side Bar - Action Buttons Overlay]                               |
-    |    [Gather Stone Button]                                                 |
-    |    [Gather Wood Button (Greyed Out?)]                                    |
-    |    [Gather Food Button (Greyed Out?)]                                    |
-    |    [Maybe minimal Gatherer Status: Idle / Gathering Stone / Returning]   |
+    | [Main Area - PhaserJS Scene]                 | [Side Panel: Hex Info]    |
+    |                                              |  Selected Hex: North-1    |
+    |    [Hex Grid Overlay]                        |  Status: Controlled       |
+    |    [Nodes within Hexes]                      |  Resources: Stone(Rich)   |
+    |    [Player Entity Moving] --- Path ---> Node |  Depth Level: 120         |
+    |    [Home Base Hex]                           |  Yield Bonus: +20%        |
+    |                                              |  Respawn Bonus: -5s       |
+    |                                              |  [Enhance Hex Button]     |
+    |                                              |  (Or shows Expand button  |
+    |                                              |   for adjacent hex)       |
+    +----------------------------------------------+---------------------------+
+    | [Bottom Bar - Gathering Action Buttons]                                  |
+    |    [Gather Stone Button] [Gather Wood Button] [Manage Gatherers?]        |
+    |    [Status: 1/2 Gatherers Busy]              [Go to Management View Btn] |
     +--------------------------------------------------------------------------+
     ```
----
-### Management Mode
 
-*   **Purpose:** Central hub for **permanent progression** and **resource transformation**. This is where players invest their accumulated persistent currencies (like Coins) and resources to enhance their core capabilities across all game modes (Gathering, Combat, Crafting efficiency, etc.) and to craft essential items.
-*   **Interface:** Primarily a React-based UI, suited for managing lists, tech trees, upgrade buttons, and crafting queues, separate from the real-time action in Phaser scenes.
+### Management View
+
+*   **Purpose:** Central hub for **permanent progression** and **resource transformation**. This is where players invest their accumulated persistent currencies (like Coins) and resources to enhance their core capabilities across all game modes (Gathering, Combat, Crafting efficiency, etc.) and to craft essential items. Defines player goals.
+
+*   **Interface:** Primarily a React-based UI, accessed separately from the Territory View (likely via a main UI tab or button). Suited for menus, lists, tech trees, etc. separate from the real-time action in Phaser scenes.
 *   **Core Systems:**
-    *   **Workshop:**
-        *   **Function:** Spend persistent currency (Coins) and possibly other resources for **instant**, permanent upgrades to baseline stats and efficiencies.
+    *   **Workshop:** Instant, permanent upgrades via Coins/resources (Gatherer stats, base Combat stats, Crafting speed, "Clearing Speed" effectiveness, node respawn rates, etc.).
         *   **Upgrade Targets:** Examples include: starting combat stats (player/unit damage, health), Gatherer stats (movement speed, gather speed, carry capacity), Crafting speed/efficiency, Combat "Clearing Speed" effectiveness, base node respawn rates. Provides steady, incremental power gains.
-    *   **Labs:**
-        *   **Function:** Facilitates **long-term** progression through research projects that cost persistent currency (Coins), potentially rare resources, and take **real-time** to complete. Drives significant advancements and unlocks.
+    *   **Labs:** Time-and-resource-based research for major unlocks (new mechanics, higher tiers, advanced recipes, passive income, core game rule changes). Facilitates **long-term** progression through research projects that cost persistent currency (Coins), potentially rare resources, and take **real-time** to complete. Drives significant advancements and unlocks.
         *   **Unlock Targets:** New game mechanics (e.g., unlocking Combat initially?, additional gatherer units, automation features, new combat abilities/unit types), higher tiers for Workshop upgrades, advanced/complex crafting recipes, passive income streams (e.g., research "Coin Geology"), major efficiency breakthroughs (e.g., global gathering speed buffs, cross-stage bonuses).
         * **Universal vs. Stage-Specific Upgrades lab** upgrades that universally enhance resource gathering, combat efficacy, or reduce resource costs, with stage-specific modifiers that tune how impactful these universal bonuses are across stages.
         * **Cross-Stage Interconnectivity**: Players invest in research at higher stages (planet/solar/galaxy) that reduces the effectiveness penalty of previous stages, reinforcing earlier-stage replayability and exponential growth loops. 
-    *   **Crafting:**
-        *   **Function:** Interface for transforming raw gathered resources into more useful items. Displays available recipes, required ingredients, and allows players to queue production.
+    *   **Crafting:** Convert raw resources into usable items (ammo types, gear, components). Queue-based system. Recipe discovery via Labs/progression. Includes examples like Stone -> Pebbles, Slingshot.
         *   **Outputs:** Combat consumables (various ammo types), permanent equipment (like the Slingshot), intermediate components for more complex recipes, potentially temporary buff items or building materials (future).
         *   **Recipe Unlocks:** New recipes discovered through Lab research, found in the world (future?), or via progression milestones.
         * Examples
@@ -190,9 +187,7 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
             * Bring 1 stone to throw once for 100 damage
             * Bring 10 rocks (from 1 stone) which can be thrown for 10 damage each (100 total dmg)
             * Bring 100 pebbles (from 10 rocks broken up) which cna be shot for 2 damage each (200 total dmg)
-
-*   **(Strategic Map Removed):** *Note: The Strategic Map for visualizing territory and choosing expansion targets is a crucial element but its optimal UI placement (pre-Combat, integrated Gathering view, dedicated screen) is TBD and handled separately from the core Management systems.*
-
+*   **Goal Setting:** Players identify desired upgrades or research here, creating the *demand* for specific resources or higher Coin income, thus driving strategic decisions made back in the Territory View. Includes potential for a **Goal Tracking** system where players can pin desired upgrades/research to keep requirements visible elsewhere (e.g., in the Territory View top bar).
 *   **Conceptual UI Layout (Text Mockup - Example: Workshop Tab Active):**
     *(Mockup focuses only on Management systems, Map is omitted)*
     ```text
@@ -220,34 +215,57 @@ The core gameplay loop involves a cycle of planning, preparation, and execution,
     +--------------------------------------------------------------------------+
     ```
 
-### Combat/Expansion Mode
+*   **Conceptual UI Layout (Text Mockup - Example: Labs Tab Active):**
+    *(Similar structure to previous Management mockup, just showing a different tab)*
+    ```text
+    +--------------------------------------------------------------------------+
+    | [Territory] [Management] [Combat (Disabled?)] (Tabs, Management Active)  |
+    +--------------------------------------------------------------------------+
+    | [Top Resource Bar - Persistent Resources]                                |
+    | [Stone Icon] 150 | [Wood Icon] 85 | [Food Icon] 40 | [Coin Icon] 12     |
+    +--------------------------------------------------------------------------+
+    | [Sub-Tabs: [Workshop] [LABS] [Crafting]] (Labs Active)                   |
+    +--------------------------------------------------------------------------+
+    | [Main Panel: Research Tree / Available Research]                         |
+    |                                                                          |
+    |   **Available Research**                                                 |
+    |    - Advanced Mining Tech [Cost: 500 Coins, 50 Crystals] [Time: 4h] [Pin Goal] [Start Research] |
+    |    - Automated Gathering [Cost: 1000 Coins] [Time: 8h] [Requires: Adv. Mining] [Pin Goal] [Start Research] |
+    |                                                                          |
+    |   **Currently Researching**                                              |
+    |    - Pebble Efficiency Lv. 4 [Time Left: 1h 15m] [Speed Up?]             |
+    |                                                                          |
+    +--------------------------------------------------------------------------+
+    ```
 
-*   **Purpose:** The primary active gameplay phase where players expend gathered/crafted resources (ammo) to **push into new territory**, defeat enemies, earn currencies, and achieve **distance milestones**. Success in this mode directly enables further Gathering by unlocking new areas on the (separate) Strategic Map.
-*   **Interface:** A top-down or side-view **PhaserJS scene** displaying the player entity(ies), incoming enemies, projectiles, and relevant real-time stats.
+### Combat Scene
+
+*   **Purpose:** The dedicated active gameplay phase for resolving `Expand Combat` or `Enhance Hex` actions initiated from the Territory View. Focus is on pushing combat **depth** to achieve objectives (conquer territory or improve hex yield/bonuses).
+*   **Interface:** A top-down or side-view **PhaserJS scene**, distinct from the Territory View map. Displays player entity(ies), incoming enemies, projectiles, real-time combat stats.
 *   **Gameplay Style & Progression:**
-    *   **Proactive Expansion Focus:** Framed as pushing *forward* into territory, not just defending a fixed point. Visual cues like background parallax scrolling reinforce this.
-    *   **Distance Metric:** Progress is tracked continuously via a **distance** counter (meters -> km -> AU etc.). Enemy difficulty, density, and types scale dynamically based on the distance achieved within the run. Replaces discrete wave counts.
-    *   **Core Combat:** Inspired by tower defense/shooter hybrids. Player entity (and later, allied units) automatically targets/attacks incoming geometric enemies. May include player-activated special abilities or tactical positioning elements in later stages.
+    *   **Contextual Combat:** The baseline difficulty, enemy types, scaling rate, and potential rewards are determined by the **target hex** and whether the action is `Expand` (conquering, likely lower initial difficulty but aims for a completion state) or `Enhance` (pushing depth on a controlled hex, potentially starting harder but scaling indefinitely).
+    *   **Depth Metric:** Progress is measured by **depth achieved** (can be represented as distance cleared, waves survived, or a similar scaling metric). Pushing deeper in `Enhance` runs increases the target hex's Depth Level, directly boosting its yield/respawn bonuses shown in the Territory View.
+    *   **Core Combat:** Inspired by tower defense/shooter hybrids. Player entity (and later, allied units) automatically targets/attacks incoming geometric enemies. May include player-activated special abilities or tactical positioning elements in later stages. Player entity attacks enemies. Uses finite crafted ammo. In-run upgrades ($) provide temporary power boosts. Clearing Speed mechanic applies when re-entering `Enhance` runs for a hex you've previously pushed deep in.
 *   **Mechanics:**
     *   **Resource Consumption (Ammo):** Directly uses items crafted in Management Mode (e.g., Pebbles, specialized ammo) as finite ammunition. Running out of ammo significantly hinders progress but might not completely stop the player (e.g., revert to a very weak base attack or rely on allied units). Strategic ammo conservation could be important.
-    *   **"Clearing Speed" Mechanic:** To mitigate the grind of replaying early sections, when initiating a run into previously explored territory, the game rapidly advances the distance counter (e.g., to 80-90% of the previous max distance). This "fast travel" phase might feature significantly reduced enemy presence or offer bonus starting Cash ($). The effectiveness (speed/percentage) of Clearing Speed is improvable via Workshop upgrades.
+    *   **"Clearing Speed":** Applies primarily to `Enhance Hex` runs, rapidly skipping early, already-mastered depths. This phase might feature significantly reduced enemy presence or offer bonus starting Cash ($). The effectiveness (speed/percentage) of Clearing Speed is improvable via Workshop upgrades.
     *   **Dual Currency Rewards:**
         *   `Cash ($)`: Earned from defeating standard enemies during the run. Spent *only* within the current run via an accessible **in-run upgrade panel** for temporary boosts (e.g., +Damage, +Attack Speed, temporary health regen). This currency is lost when the run ends.
         *   `Coins`: The primary persistent currency. Earned from reaching significant new distance milestones, defeating bosses or special high-value enemies, and possibly completing specific run objectives. Used back in Management Mode (Workshop/Labs). Earning is skewed towards pushing *further* than before.
-    *   **Other Rewards:**
+    *   **Hex Improvement (`Enhance`):** Reaching higher depths permanently increases the target hex's yield multiplier, reduces respawn timers, or grants other bonuses visible in the Territory View info panel.
+    *   **Territory Conquest (`Expand`):** Successfully completing an `Expand` run (e.g., reaching a target distance/defeating a specific boss) changes the target hex's status to "Controlled" on the Territory map, revealing its nodes and allowing future `Enhance` runs.
+    *   **Other (Potential) Rewards:**
         *   **Territory Conquest:** Reaching specific distance thresholds conquers the corresponding zone/hex on the Strategic Map, making it available for Gathering.
         *   **Special Resources:** Rare crafting materials (e.g., Leather, Crystals) might drop from specific enemy types or bosses.
         *   **(Potential):** Triggering temporary Gathering boosts in conquered zones upon successful completion.
-*   **(Strategic Map Interaction):** *Note: While Combat/Expansion runs are initiated based on selections potentially made viewing the Strategic Map, the map itself is not typically displayed during the active combat phase. The link is sequential: Plan/Select Target (potentially via Map) -> Enter Combat Mode -> Achieve Distance -> Conquered Territory updates on Map.*
+*   **(Pre-Combat Overlay):** A potential brief overlay screen before the Combat Scene fully loads could confirm the action (`Expand`/`Enhance`), target hex, show current ammo counts, and allow final confirmation or backing out.
 
 *   **Conceptual UI Layout (Text Mockup - During Combat):**
-
     ```text
     +--------------------------------------------------------------------------+
-    | [Gathering] [Management] [Combat]  (Tabs, Combat Active - or Mode Name)  |
-    +--------------------------------------------------------------------------+
-    | [Top Bar: Combat Run Stats]                                              |
-    | Distance: 175m | Max: 210m | [$ Icon]: 250 | [Coin Icon] This Run: +3    |
+    | [Status Bar: Combat Context & Run Stats]                                 |
+    | Action: Enhance Hex (North-1) | Depth: 125 | Max Depth: 180             |
+    | [$ Icon]: 250 | [Coin Icon] This Run: +5                                  |
     +--------------------------------------------------------------------------+
     | [Main Gameplay View - Phaser Scene]                                      |
     |   (Enemies approaching from top/ahead)                                   |
