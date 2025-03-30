@@ -20,9 +20,9 @@
 
 ## Technical Constraints
 - **Browser Compatibility:** Ensure compatibility across modern web browsers.
-- **Performance:** Optimize PhaserJs scenes for smooth performance, especially in combat with multiple entities.
-- **Scalability:** Design architecture to handle increasing complexity and potential future features, including multiplayer.
-- **Memory Management:** Efficiently manage game assets and resources to prevent memory leaks and ensure smooth gameplay over extended sessions.
+- **Performance:** Optimize PhaserJs scenes for smooth performance, especially in combat with multiple entities. Key strategies include tiered update frequencies, object pooling (projectiles, particles, enemies), spatial partitioning for collision detection, and potential rendering optimizations (LOD, culling) as entity counts scale (Ref: PERFORMANCE_PLAN.MD). Target thresholds defined for implementing optimization milestones.
+- **Scalability:** Design architecture to handle increasing complexity and potential future features, including multiplayer. State management and system design should support this.
+- **Memory Management:** Efficiently manage game assets and resources (object pooling helps here) to prevent memory leaks and ensure smooth gameplay over extended sessions.
 
 ## Dependencies
 - **Next.js:** Full-stack React framework for web application structure and features.
@@ -35,5 +35,7 @@
 ## Notes
 - Project uses TypeScript for all code to ensure type safety and improve maintainability.
 - Next.js provides a robust framework for handling routing, server-side rendering, and API routes if needed.
-- PhaserJs is used specifically for the interactive game scenes, allowing for efficient rendering of game entities and effects.
-- Zustand is implemented for simple and scalable state management, facilitating communication between React components and Phaser scenes.
+- PhaserJs is used specifically for the interactive game scenes (Territory, Combat), allowing for efficient rendering of game entities and effects.
+- Zustand is implemented for global state management, with plans to refactor into domain-specific stores (e.g., `CombatStore`, `ResourceNodeStore`) for better organization. (Ref: STATE_ARCHITECTURE.MD)
+- **State Architecture:** Emphasizes separation between high-frequency Phaser state and lower-frequency React/Zustand state. Communication facilitated by a standardized Adapter pattern and an Event Bus. Plans include using Dependency Injection and potentially a Service Layer for business logic. (Ref: STATE_ARCHITECTURE.MD & PERFORMANCE_PLAN.MD)
+- **Performance Strategy:** Follows a milestone-based approach, implementing optimizations like object pooling and spatial partitioning based on measured performance against defined entity count thresholds. (Ref: PERFORMANCE_PLAN.MD)
