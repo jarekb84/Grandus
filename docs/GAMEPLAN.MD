@@ -41,13 +41,19 @@
     *   Guild research increases the effectiveness of cooperative actions.
     *   Shared benefits from guild actions create a cyclical loop of mutual improvement.
 
-## **Initial Gameplay Mechanics Detail**
+## **Gameplay Pillars**
+
+The core loop cycles through Gathering -> Management -> Combat/Expansion:
+1.  **Gather** resources needed for crafting and initiating combat.
+2.  **Manage** resources via Crafting (ammo/gear), Workshop/Labs (permanent upgrades), and plan the next move on the Strategic Map.
+3.  **Expand** via Combat runs, consuming resources to push distance, defeat enemies, earn rewards, and unlock new territory/gathering potential on the Strategic Map.
 
 ### **Core Gameplay Loop (Prototype)**
-1. **Resource Gathering Mode:**
-
-   * Passive phase for collecting raw resources (stone, wood, food).
-   * Resources used directly or indirectly in combat (crafting weapons/tools, replenishing HP, etc.).
+1.  **Resource Gathering Mode:** Players visually command entities in a 2D scene (PhaserJS) to gather resources (Stone, Wood, etc.) from spatial nodes. Gathering takes time and resources are carried back; this mode fuels Crafting/Expansion and improves with upgrades.
+    *   **Visual & Spatial:** Entities physically travel between Home Base and nodes on the map.
+    *   **Direct Action:** Simple commands initiate gathering from targeted or nearest available nodes.
+    *   **Node Lifecycle:** Nodes deplete visually and replenish over time or via game events.
+    *   **Offline Simulation:** Progress continues passively based on active gathering efficiency.    
 
 2. **Management Mode:**
 
@@ -84,7 +90,7 @@
   * Projectiles and enemy health/damage indicators clearly visible, simple animations, bright contrasting colors.  
   * Minimalist UI elements provide clear immediate visual feedback and maintain focus on gameplay.
 
-## **Gameplay Mechanics Details**
+## **In-Depth Mechanic**
 
 ## Stages
 * Wilderness
@@ -109,8 +115,57 @@
 * Stage-specific resources with universal currencies (coins, gems) that persist and remain valuable throughout all stages.
 
 ## Modes within a stage
-### Gathering
-* TODO
+### Resource Gathering Mode
+
+*   **Purpose:** Accumulate raw resources (stone, wood, food, etc.) through direct, visually represented actions within a spatial game environment, providing the fuel for crafting and expansion.
+*   **Mechanics:**
+    *   **Primary Interface:** A top-down 2D **PhaserJS scene** serves as the main interaction space. It displays a central **Home Base**, the player's controllable entity(ies), and resource nodes positioned spatially on the map.
+    *   **Spatial Nodes & Territory Representation:** Resource nodes (e.g., Stone Piles, Trees) exist at specific coordinates on the map. The map area might feature a subtle visual overlay (e.g., a **hex grid**) where grid cells correspond to conquered territory zones. New resource nodes appear within newly revealed/conquered hex grid cells following successful Combat/Expansion runs, visually representing the expanding access to resources.
+    *   **Active Visual Gathering:**
+        *   Interaction occurs via simple **action buttons** (e.g., "Gather Stone").
+        *   Clicking an action button commands the primary player entity (or an available automated gatherer entity later) to automatically pathfind to the **nearest available node** of the specified type within the accessible/conquered territory.
+        *   The entity **visually travels** across the scene to the node location.
+        *   Upon reaching the node, a brief, time-based gathering animation plays (duration influenced by gather speed stats).
+        *   The entity collects resources (amount limited by carry capacity stats) and then **visually travels back** to the Home Base to deposit the resources into the main inventory.
+        *   Upgrades (via Workshop/Labs) directly enhance this visual loop: increasing movement speed, gathering speed, carry capacity, and eventually unlocking/managing multiple concurrent gathering entities.
+    *   **Node Depletion & Visual Feedback:** Nodes contain a finite amount of resources per cycle. They **visually change state** (e.g., shrink, disappear, turn grey/faded) when depleted and cannot be targeted for gathering until they replenish.
+    *   **Node Replenishment:** (The underlying mechanics remain, but presentation is spatial)
+        *   **Combat-Triggered Boost:** Successful Expansion runs can grant temporary boosts (e.g., faster respawn, increased yield) to existing, non-depleted nodes within the **visible, conquered hexes/area**.
+        *   **Unlocking New Potential:** Reaching new distance milestones in Expansion reveals/unlocks **new hexes/areas** on the map, causing new instances of resource nodes to appear within them. This is the primary method for long-term resource growth.
+        *   **Baseline Respawn:** Essential resource nodes (especially those accessible early near the Home Base) have a slow default respawn timer (improvable via upgrades) providing a safety net against deadlocks. Replenished nodes regain their normal visual appearance.
+    *   **Offline Simulation:** Calculates resources gathered while offline by simulating the actions of available gatherers targeting available/respawned nodes within the player's conquered territory (visible hexes/map area), considering their stats (speed, capacity). Presents a summary of offline gains upon the player's return.
+
+*   **Conceptual UI Layout (Text Mockup - Focusing on Screen Elements):**
+    *(This describes elements visible within/overlaying the main Phaser scene)*
+
+    ```text
+    +--------------------------------------------------------------------------+
+    | [Top Bar - Persistent Resources Overlay]                                 |
+    | [Stone Icon] 150 | [Wood Icon] 85 | [Food Icon] 40 | [Coin Icon] 12     |
+    +--------------------------------------------------------------------------+
+    |                                                                          |
+    | [Main Area - PhaserJS Scene]                                             |
+    |                                                                          |
+    |    [Grey Square Node - Stone Pile]   [Faded Grey Square - Depleted Stone]|
+    |                                                                          |
+    |              [Path Line?] ---> [Green Square - Player Entity]            |
+    |                                ^                                         |
+    |                                |                                         |
+    |                         [Blue Circle - Home Base]                        |
+    |                                                                          |
+    |   [Subtle Hex Grid Lines Overlaying the Scene?]                          |
+    |                                                                          |
+    |    [Orange Circle Node - Wood]      [Another Grey Square - Stone Pile]   |
+    |                                                                          |
+    +--------------------------------------------------------------------------+
+    | [Bottom/Side Bar - Action Buttons Overlay]                               |
+    |    [Gather Stone Button]                                                 |
+    |    [Gather Wood Button (Greyed Out?)]                                    |
+    |    [Gather Food Button (Greyed Out?)]                                    |
+    |    [Maybe minimal Gatherer Status: Idle / Gathering Stone / Returning]   |
+    +--------------------------------------------------------------------------+
+    ```
+---
 ### Management
 #### Workshop
 * Spend Coins (maybe other resrouces) to upgrade starting levels of combat stats (damage/defense)
