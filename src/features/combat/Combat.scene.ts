@@ -118,7 +118,7 @@ export class CombatScene extends Phaser.Scene {
     // Immediately update the ammo count from resources store
     const stoneCount = useResourcesStore
       .getState()
-      .getResource(ResourceType.STONE);
+      .getResource(ResourceType.STONE); // Assuming STONE is still the ammo for now
     useCombatStore.getState().updateStats({ ammo: stoneCount });
     this.sceneEvents.onAmmoChanged(stoneCount);
 

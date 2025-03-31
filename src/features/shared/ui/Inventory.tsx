@@ -1,14 +1,20 @@
-'use client'
+"use client";
 
-import { FC } from 'react'
+import { FC } from "react";
 
 interface InventoryProps {
-  stoneCount: number
-  woodCount: number
-  foodCount: number
+  stoneCount: number;
+  woodCount: number;
+  foodCount: number;
+  pebbleCount: number;
 }
 
-const Inventory: FC<InventoryProps> = ({ stoneCount, woodCount, foodCount }) => {
+const Inventory: FC<InventoryProps> = ({
+  stoneCount,
+  woodCount,
+  foodCount,
+  pebbleCount,
+}) => {
   return (
     <div className="w-full bg-gray-800 p-4 rounded-lg shadow-lg text-white">
       <h2 className="text-lg font-bold mb-3">Inventory</h2>
@@ -25,9 +31,13 @@ const Inventory: FC<InventoryProps> = ({ stoneCount, woodCount, foodCount }) => 
           <div className="w-4 h-4 rounded-full bg-green-500 flex-shrink-0" />
           <span>Food: {foodCount}</span>
         </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-gray-500 flex-shrink-0" />
+          <span>Pebbles: {pebbleCount}</span>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Inventory 
+export default Inventory;

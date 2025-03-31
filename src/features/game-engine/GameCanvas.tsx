@@ -52,7 +52,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
             gameRef.current.scene.start("TerritoryScene"); // Updated scene key
             break;
           case GameMode.COMBAT:
-            gameRef.current.scene.start("CombatScene");
+            // Pass placeholder hexId when starting CombatScene
+            gameRef.current.scene.start("CombatScene", { hexId: "test-hex-1" });
             break;
           // Management mode is handled by React
         }

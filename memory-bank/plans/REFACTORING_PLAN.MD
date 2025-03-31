@@ -40,7 +40,7 @@ This document outlines the incremental steps to refactor the existing prototype 
         *   Modify `requestCombatStart` to accept and pass a dummy hex ID (e.g., `"test-hex-1"`).
         *   Modify `CombatScene`'s `init` method (Phaser scenes have an `init` method that receives data) to accept this data object `{ hexId: string }`. Log the received `hexId` in the `CombatScene`'s `create` method.
     *   **Vertical Slice:** The Combat scene now receives (and logs) context about which hex is being targeted, even if it's just placeholder data for now.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 ## Phase 3: Introducing Basic Management & Crafting
 
@@ -50,7 +50,7 @@ This document outlines the incremental steps to refactor the existing prototype 
         *   In `Management.tsx`, replace placeholder text with distinct sections/divs for "Workshop" and "Crafting".
         *   Add a button within the "Crafting" section: "Craft 10 Pebbles (Cost: 1 Stone)".
     *   **Vertical Slice:** The Management tab now shows basic sections and a functional (though not yet wired) crafting button.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 **7. Implement Basic Crafting Logic (Stone -> Pebbles):**
     *   **Goal:** Implement the core logic for the first crafting recipe.
@@ -64,7 +64,7 @@ This document outlines the incremental steps to refactor the existing prototype 
             *   Call `addResource(ResourceType.PEBBLE, 10)`.
         *   Update `Inventory.tsx` (likely requires updating `useInventoryAdapter`) to display the Pebble count.
     *   **Vertical Slice:** Players can now convert Stone into Pebbles via the Management view, and the inventory UI reflects this.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 **8. Use Pebbles as Ammo:**
     *   **Goal:** Connect the crafting output (Pebbles) to the Combat system's input (ammo).

@@ -36,6 +36,7 @@ const GameWrapper = (): React.ReactElement => {
             stoneCount={inventoryData.stoneCount}
             woodCount={inventoryData.woodCount}
             foodCount={inventoryData.foodCount}
+            pebbleCount={inventoryData.pebbleCount}
           />
         </div>
 
