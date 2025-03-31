@@ -8,7 +8,7 @@ This document outlines the incremental steps to refactor the existing prototype 
     *   **Goal:** Establish the new naming convention across the codebase.
     *   **Actions:** Rename files (`Gathering.tsx` -> `Territory.tsx`, `Gathering.scene.ts` -> `Territory.scene.ts`, etc.), update `GameMode` enum, update component imports and usage (`ModeSelector`, `GameContent`, `GameCanvas`), rename adapter (`useGatheringAdapter` -> `useTerritoryAdapter`).
     *   **Vertical Slice:** The application remains functionally identical but uses the new terminology.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 **2. Basic Hex Grid Overlay (Visual Only):**
     *   **Goal:** Introduce the visual concept of the hex grid.

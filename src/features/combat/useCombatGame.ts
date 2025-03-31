@@ -124,7 +124,7 @@ export const useCombatGame = (
       game.destroy(true);
       sceneRef.current = null;
     };
-  }, []); // <-- Run effect only once on mount
+  }, [onGameOver]);
 
   const handleToggleAutoShoot = useCallback((): void => {
     // Only allow auto-shooting if player has ammo

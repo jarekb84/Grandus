@@ -2,10 +2,10 @@
 
 import { forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import * as Phaser from "phaser";
-import { GatheringScene } from "@/features/gathering/Gathering.scene";
+import { TerritoryScene } from "@/features/territory/Territory.scene"; // Renamed import
 import { CombatScene } from "@/features/combat/Combat.scene";
 import { WaveRewards } from "@/features/combat/Wave"; // Import WaveRewards
-import { ResourceSystem } from "@/features/gathering/Resource";
+import { ResourceSystem } from "@/features/territory/Resource"; // Updated path
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { EntityType } from "@/features/shared/types/entities";
 import { GameMode } from "@/features/shared/types/GameMode";
@@ -19,13 +19,14 @@ export interface GameCanvasProps {
 export interface GameCanvasHandle {
   gatherFromNode: (nodeId: string) => Promise<void>;
   switchMode: (mode: GameMode) => void;
+  // Add requestCombatStart later in Step 4
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
   (props, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const gameRef = useRef<Phaser.Game | null>(null);
-    const sceneRef = useRef<GatheringScene | CombatScene | null>(null);
+    const sceneRef = useRef<TerritoryScene | CombatScene | null>(null); // Updated type hint
     const systemsRef = useRef<{ resource: ResourceSystem } | null>(null);
     const initialEntitiesRef = useRef<ReturnType<
       typeof generateInitialEntities
@@ -47,8 +48,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
 
         // Start the appropriate scene
         switch (mode) {
-          case GameMode.GATHERING:
-            gameRef.current.scene.start("MainScene");
+          case GameMode.TERRITORY: // Updated enum value
+            gameRef.current.scene.start("TerritoryScene"); // Updated scene key
             break;
           case GameMode.COMBAT:
             gameRef.current.scene.start("CombatScene");
@@ -73,7 +74,8 @@ const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(
         height: 768,
         backgroundColor: "#1e293b",
         scene: [
-          class extends GatheringScene {
+          class extends TerritoryScene {
+            // Renamed class
             constructor() {
               super({
                 onEntityInteraction: async (

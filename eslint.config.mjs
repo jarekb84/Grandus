@@ -35,6 +35,8 @@ const eslintConfig = [
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
       "@typescript-eslint/prefer-as-const": "error",
       "@typescript-eslint/ban-ts-comment": "error",
+      // React Hook Rules
+      "react-hooks/exhaustive-deps": "error", 
     },
   },
 ];

@@ -1,23 +1,24 @@
-'use client'
+"use client";
 
-import { FC, useMemo } from 'react'
-import dynamic from 'next/dynamic'
-import { GameMode } from '@/features/shared/types/GameMode'
-import { ManagementMode } from '@/features/management/Management'
+import { FC, useMemo } from "react";
+import dynamic from "next/dynamic";
+import { GameMode } from "@/features/shared/types/GameMode";
+import { ManagementMode } from "@/features/management/Management";
 
 // Import components directly with dynamic
-const DynamicGatheringMode = dynamic(
-  () => import('@/features/gathering/Gathering').then(mod => mod.GatheringMode),
-  { ssr: false }
-)
+const DynamicTerritoryMode = dynamic(
+  () =>
+    import("@/features/territory/Territory").then((mod) => mod.TerritoryMode),
+  { ssr: false },
+);
 
 const DynamicCombatMode = dynamic(
-  () => import('@/features/combat/Combat').then(mod => mod.CombatMode), 
-  { ssr: false }
-)
+  () => import("@/features/combat/Combat").then((mod) => mod.CombatMode),
+  { ssr: false },
+);
 
 interface GameContentProps {
-  currentMode: GameMode
+  currentMode: GameMode;
 }
 
 const GameContent: FC<GameContentProps> = ({ currentMode }) => {
@@ -25,21 +26,17 @@ const GameContent: FC<GameContentProps> = ({ currentMode }) => {
   const content = useMemo(() => {
     switch (currentMode) {
       case GameMode.MANAGEMENT:
-        return <ManagementMode />
+        return <ManagementMode />;
       case GameMode.COMBAT:
-        return <DynamicCombatMode />
-      case GameMode.GATHERING:
-        return <DynamicGatheringMode />
+        return <DynamicCombatMode />;
+      case GameMode.TERRITORY:
+        return <DynamicTerritoryMode />;
       default:
-        return null
+        return null;
     }
-  }, [currentMode])
+  }, [currentMode]);
 
-  return (
-    <div className="w-[1024px] bg-gray-800 rounded-lg">
-      {content}
-    </div>
-  )
-}
+  return <div className="w-[1024px] bg-gray-800 rounded-lg">{content}</div>;
+};
 
-export default GameContent 
+export default GameContent;
