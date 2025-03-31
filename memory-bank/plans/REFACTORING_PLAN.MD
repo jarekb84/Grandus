@@ -85,8 +85,8 @@ This document outlines the incremental steps to refactor the existing prototype 
         *   Refactor `useCombatGame.ts` to remove its game creation logic and interact with the shared game instance.
         *   Ensure `TerritoryMode` and `CombatMode` components correctly render their respective UIs and interact with the single game instance via adapters/events.
     *   **Vertical Slice:** The application switches between Territory, Management, and Combat modes correctly using a single Phaser instance, resolving the UI glitch where incorrect actions/UI were displayed.
-    *   **Status:** `[x]` (Completed 2025-03-30)
-
+    *   **Status:** `[ ]`
+    
 ## Phase 5: UI/UX Refinements (Post-MVP Core Loop)
 
 **10. Hex Hover Visual Feedback:**
