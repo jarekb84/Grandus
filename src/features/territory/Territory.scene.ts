@@ -29,9 +29,84 @@ export class TerritoryScene extends Phaser.Scene {
     // We'll create textures in create() instead
   }
 
+  // --- Hex Grid Properties ---
+  private hexSize = 72; // Radius of the hex (Increased again)
+  // Grid dimensions removed, we'll loop until off-screen
+  // --- End Hex Grid Properties ---
+
   create(): void {
     this.createShapeTextures();
+    this.drawHexGrid(); // Call the new grid drawing function
   }
+
+  // --- Hex Grid Drawing Logic ---
+  private drawHexGrid(): void {
+    const graphics = this.add.graphics({
+      lineStyle: { width: 1, color: 0x444444 },
+    }); // Use a slightly visible gray
+    const hexWidth = Math.sqrt(3) * this.hexSize;
+    const hexHeight = 2 * this.hexSize;
+    const screenWidth = this.cameras.main.width;
+    const screenHeight = this.cameras.main.height;
+
+    // Start drawing slightly off-screen top-left
+    const startOffsetX = -hexWidth / 2;
+    const startOffsetY = -hexHeight / 2;
+
+    // Loop until hexes are drawn past the bottom-right screen edge
+    // Estimate loop bounds generously to ensure coverage
+    const qMin = -2;
+    const qMax = 10; // Estimated based on screen width / hex width
+    const rMin = -2;
+    const rMax = 8; // Estimated based on screen height / hex vertical step
+
+    for (let r = rMin; r <= rMax; r++) {
+      for (let q = qMin; q <= qMax; q++) {
+        const pixelPos = this.hexToPixel(q, r, startOffsetX, startOffsetY);
+
+        // Basic culling: Only draw if the hex center is potentially near the screen
+        if (
+          pixelPos.x > -this.hexSize &&
+          pixelPos.x < screenWidth + this.hexSize &&
+          pixelPos.y > -this.hexSize &&
+          pixelPos.y < screenHeight + this.hexSize
+        ) {
+          const corners = this.getHexCorners(pixelPos.x, pixelPos.y);
+          graphics.strokePoints(corners, true); // true to close the shape
+        }
+      }
+    }
+  }
+
+  // Helper to get pixel coordinates for flat-top hex center
+  private hexToPixel(
+    q: number,
+    r: number,
+    offsetX: number,
+    offsetY: number,
+  ): { x: number; y: number } {
+    // Adjust for axial coordinates (flat-top)
+    // x = size * (sqrt(3) * q + sqrt(3)/2 * r)
+    // y = size * (                  3/2 * r)
+    const x =
+      this.hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r) + offsetX;
+    const y = this.hexSize * ((3 / 2) * r) + offsetY;
+    return { x, y };
+  }
+
+  // Helper to get the 6 corner points of a flat-top hex
+  private getHexCorners(x: number, y: number): Phaser.Geom.Point[] {
+    const corners: Phaser.Geom.Point[] = [];
+    for (let i = 0; i < 6; i++) {
+      // Start angle is 30 degrees (pi/6) for flat-top hexes
+      const angle = (Math.PI / 180) * (60 * i + 30);
+      const cornerX = x + this.hexSize * Math.cos(angle);
+      const cornerY = y + this.hexSize * Math.sin(angle);
+      corners.push(new Phaser.Geom.Point(cornerX, cornerY));
+    }
+    return corners;
+  }
+  // --- End Hex Grid Drawing Logic ---
 
   private createShapeTextures(): void {
     // Only create textures if they don't exist

@@ -14,7 +14,7 @@ This document outlines the incremental steps to refactor the existing prototype 
     *   **Goal:** Introduce the visual concept of the hex grid.
     *   **Actions:** Modify `Territory.scene.ts` (`create` method) to draw a static, visual hex grid overlay onto the scene background.
     *   **Vertical Slice:** The Territory view now displays a hex grid; gathering mechanics remain unchanged.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 **3. Basic Hex Interaction (Click & Log):**
     *   **Goal:** Implement the basic mechanism for interacting with hexes.
