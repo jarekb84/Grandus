@@ -11,6 +11,12 @@ interface EntitySprites {
   outline: Phaser.GameObjects.Sprite;
 }
 
+// Define an interface for hex coordinates
+interface HexCoords {
+  q: number;
+  r: number;
+}
+
 export class TerritoryScene extends Phaser.Scene {
   // Renamed class
   private entities: Map<string, EntitySprites> = new Map();
@@ -34,9 +40,15 @@ export class TerritoryScene extends Phaser.Scene {
   // Grid dimensions removed, we'll loop until off-screen
   // --- End Hex Grid Properties ---
 
+  // --- Grid Interaction Properties ---
+  private startOffsetX: number = 0; // Store offset for pixelToHex conversion
+  private startOffsetY: number = 0;
+  // --- End Grid Interaction Properties ---
+
   create(): void {
     this.createShapeTextures();
     this.drawHexGrid(); // Call the new grid drawing function
+    this.setupInputHandling(); // Add input listener
   }
 
   // --- Hex Grid Drawing Logic ---
@@ -49,9 +61,9 @@ export class TerritoryScene extends Phaser.Scene {
     const screenWidth = this.cameras.main.width;
     const screenHeight = this.cameras.main.height;
 
-    // Start drawing slightly off-screen top-left
-    const startOffsetX = -hexWidth / 2;
-    const startOffsetY = -hexHeight / 2;
+    // Store offsets for later use in pixelToHex
+    this.startOffsetX = -hexWidth / 2;
+    this.startOffsetY = -hexHeight / 2;
 
     // Loop until hexes are drawn past the bottom-right screen edge
     // Estimate loop bounds generously to ensure coverage
@@ -62,7 +74,12 @@ export class TerritoryScene extends Phaser.Scene {
 
     for (let r = rMin; r <= rMax; r++) {
       for (let q = qMin; q <= qMax; q++) {
-        const pixelPos = this.hexToPixel(q, r, startOffsetX, startOffsetY);
+        const pixelPos = this.hexToPixelCoords(
+          q,
+          r,
+          this.startOffsetX,
+          this.startOffsetY,
+        );
 
         // Basic culling: Only draw if the hex center is potentially near the screen
         if (
@@ -79,7 +96,7 @@ export class TerritoryScene extends Phaser.Scene {
   }
 
   // Helper to get pixel coordinates for flat-top hex center
-  private hexToPixel(
+  private hexToPixelCoords(
     q: number,
     r: number,
     offsetX: number,
@@ -107,6 +124,67 @@ export class TerritoryScene extends Phaser.Scene {
     return corners;
   }
   // --- End Hex Grid Drawing Logic ---
+
+  // --- Input Handling & Coordinate Conversion ---
+  private setupInputHandling(): void {
+    this.input.on(
+      Phaser.Input.Events.POINTER_DOWN,
+      (pointer: Phaser.Input.Pointer) => {
+        const hexCoords = this.pixelToHex(pointer.worldX, pointer.worldY);
+        console.log(
+          `Clicked Hex Coords (q, r): ${hexCoords.q}, ${hexCoords.r}`,
+        );
+        // Later: Emit event hex:clicked with hexCoords
+      },
+    );
+
+    // Optional: Add hover handling later
+    // this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
+    //   const hexCoords = this.pixelToHex(pointer.worldX, pointer.worldY);
+    //   // Logic to highlight hex under cursor
+    //   // Emit event hex:hovered with hexCoords
+    // });
+  }
+
+  // Converts pixel coordinates (world space) to axial hex coordinates (flat-top)
+  // Based on https://www.redblobgames.com/grids/hexagons/#pixel-to-hex
+  private pixelToHex(worldX: number, worldY: number): HexCoords {
+    // Adjust for the offset used during drawing
+    const relativeX = worldX - this.startOffsetX;
+    const relativeY = worldY - this.startOffsetY;
+
+    // Convert pixel to fractional axial coordinates
+    const q_frac =
+      ((Math.sqrt(3) / 3) * relativeX - (1 / 3) * relativeY) / this.hexSize;
+    const r_frac = ((2 / 3) * relativeY) / this.hexSize;
+
+    // Convert fractional axial to cube coordinates
+    const x_cube_frac = q_frac;
+    const z_cube_frac = r_frac;
+    const y_cube_frac = -x_cube_frac - z_cube_frac;
+
+    // Round cube coordinates to nearest integer cube coordinates
+    let q_round = Math.round(x_cube_frac);
+    let r_round = Math.round(z_cube_frac);
+    const s_round = Math.round(y_cube_frac);
+
+    const q_diff = Math.abs(q_round - x_cube_frac);
+    const r_diff = Math.abs(r_round - z_cube_frac);
+    const s_diff = Math.abs(s_round - y_cube_frac);
+
+    // Adjust rounding based on largest difference (ensures q+r+s = 0)
+    if (q_diff > r_diff && q_diff > s_diff) {
+      q_round = -r_round - s_round;
+    } else if (r_diff > s_diff) {
+      r_round = -q_round - s_round;
+    } else {
+      // s_round = -q_round - r_round; // Not needed as we only return q, r
+    }
+
+    // Return axial coordinates
+    return { q: q_round, r: r_round };
+  }
+  // --- End Input Handling & Coordinate Conversion ---
 
   private createShapeTextures(): void {
     // Only create textures if they don't exist

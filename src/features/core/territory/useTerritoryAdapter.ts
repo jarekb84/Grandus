@@ -6,12 +6,14 @@ import {
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 import type { GameCanvasHandle } from "@/features/game-engine/GameCanvas";
+import { GameMode } from "@/features/shared/types/GameMode";
 
 interface TerritoryAdapter {
   // Renamed interface
   isGathering: boolean; // Keeping prop name for now
   hasAvailableNodeType: (nodeType: ResourceNodeType) => boolean;
   gatherResource: (type: ResourceType) => Promise<void>;
+  requestCombatStart: (hexId: string) => void;
 }
 
 /**
@@ -49,13 +51,27 @@ export const useTerritoryAdapter = (
     [gameCanvasRef, isGathering, getNodesByType, hasAvailableNodeType],
   );
 
+  // Placeholder function for starting combat
+  const requestCombatStart = useCallback(
+    (hexId: string) => {
+      // TODO: Implement actual call to game canvas handle or event bus
+      console.log(`Requesting combat start for hex: ${hexId}`);
+      // Example: gameCanvasRef.current?.requestCombatStart(hexId);
+      // For now, just switch mode directly for testing Step 4
+      gameCanvasRef.current?.switchMode(GameMode.COMBAT);
+    },
+    [gameCanvasRef],
+  );
+
   // Return a stable reference to the adapter interface
+  // Ensure all functions are included here
   return useMemo(
     () => ({
       isGathering,
       hasAvailableNodeType,
       gatherResource,
+      requestCombatStart,
     }),
-    [isGathering, hasAvailableNodeType, gatherResource],
+    [isGathering, hasAvailableNodeType, gatherResource, requestCombatStart],
   );
 };

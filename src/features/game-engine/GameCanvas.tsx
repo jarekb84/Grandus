@@ -19,7 +19,7 @@ export interface GameCanvasProps {
 export interface GameCanvasHandle {
   gatherFromNode: (nodeId: string) => Promise<void>;
   switchMode: (mode: GameMode) => void;
-  // Add requestCombatStart later in Step 4
+  // requestCombatStart: (hexId: string) => void; // We'll add this properly later, switchMode is sufficient for now
 }
 
 const GameCanvas = forwardRef<GameCanvasHandle, GameCanvasProps>(

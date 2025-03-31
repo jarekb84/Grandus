@@ -12,6 +12,7 @@ interface TerritoryActionsProps {
   isGathering: boolean; // Prop name kept for now
   onGather: (type: ResourceType) => void;
   hasAvailableNodeType: (nodeType: ResourceNodeType) => boolean;
+  onStartCombat: () => void;
 }
 
 const TerritoryActions: FC<TerritoryActionsProps> = ({
@@ -19,13 +20,14 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
   isGathering,
   onGather,
   hasAvailableNodeType,
+  onStartCombat,
 }) => {
   return (
     <div className="w-full bg-gray-800 rounded-lg p-4 mt-4">
       <div className="flex flex-col gap-4">
         <div className="flex gap-4">
           <div className="flex-1">
-            <h3 className="text-white font-semibold mb-2">Territory Actions</h3>
+            <h3 className="text-white font-semibold mb-2">Gather Resources</h3>
             <div className="flex gap-2">
               <button
                 onClick={() => onGather(ResourceType.STONE)}
@@ -84,6 +86,27 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               >
                 Gather Food
               </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Combat Initiation Section */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <h3 className="text-white font-semibold mb-2">Territory Actions</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={onStartCombat} // Use the new callback
+                disabled={isGathering} // Disable if gathering
+                className={`flex-1 px-4 py-2 bg-red-700 text-white rounded ${
+                  isGathering
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-red-600"
+                }`}
+              >
+                Expand Combat (Test Hex)
+              </button>
+              {/* Add Enhance Hex button later */}
             </div>
           </div>
         </div>

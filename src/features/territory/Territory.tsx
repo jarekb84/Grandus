@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react"; // Added useCallback
 import type { GameCanvasHandle } from "@/features/game-engine/GameCanvas";
 import TerritoryActions from "./TerritoryActions"; // Renamed import
 import { useTerritoryAdapter } from "@/features/core/territory/useTerritoryAdapter"; // Renamed import path and hook
@@ -24,8 +24,18 @@ export const TerritoryMode: React.FC<TerritoryModeProps> = ({ className }) => {
   const gameCanvasRef = useRef<GameCanvasHandle>(null);
 
   // Use adapter to connect with territory functionality
-  const { isGathering, hasAvailableNodeType, gatherResource } =
-    useTerritoryAdapter(gameCanvasRef); // Renamed hook
+  const {
+    isGathering,
+    hasAvailableNodeType,
+    gatherResource,
+    requestCombatStart,
+  } = useTerritoryAdapter(gameCanvasRef); // Destructure requestCombatStart // Renamed hook
+
+  // Handler for the combat start button
+  const handleStartCombat = useCallback(() => {
+    // Pass a placeholder hex ID for now
+    requestCombatStart("test-hex-1");
+  }, [requestCombatStart]);
 
   return (
     <div
@@ -42,6 +52,7 @@ export const TerritoryMode: React.FC<TerritoryModeProps> = ({ className }) => {
           isGathering={isGathering} // Prop name kept for now, could rename later if needed
           onGather={gatherResource}
           hasAvailableNodeType={hasAvailableNodeType}
+          onStartCombat={handleStartCombat} // Pass the handler down
         />
       </div>
     </div>

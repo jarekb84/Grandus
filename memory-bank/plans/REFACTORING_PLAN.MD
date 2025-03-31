@@ -20,7 +20,7 @@ This document outlines the incremental steps to refactor the existing prototype 
     *   **Goal:** Implement the basic mechanism for interacting with hexes.
     *   **Actions:** In `Territory.scene.ts`, add input listeners (e.g., `this.input.on('pointerdown', ...)`). On click, calculate the logical hex coordinates based on the click position and the grid layout. Log the identified hex coordinates/ID to the console.
     *   **Vertical Slice:** Users can click on the map, and the corresponding hex is identified (visible in console logs).
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 ## Phase 2: Connecting Territory & Combat
 
@@ -32,7 +32,7 @@ This document outlines the incremental steps to refactor the existing prototype 
         *   Implement `requestCombatStart` in `GameCanvas.tsx` to stop the `TerritoryScene` and start the `CombatScene`.
         *   Remove the "Combat" tab/button from `ModeSelector.tsx`.
     *   **Vertical Slice:** Combat is now started via a button in the Territory view, reflecting the new game flow.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 **5. Basic Hex Context Passing (Placeholder):**
     *   **Goal:** Establish the pattern of passing context (the target hex) from Territory to Combat.
@@ -75,7 +75,31 @@ This document outlines the incremental steps to refactor the existing prototype 
     *   **Vertical Slice:** The full loop is complete for the MVP's core resource: Gather Stone (Territory) -> Craft Pebbles (Management) -> Use Pebbles in Combat.
     *   **Status:** `[ ]`
 
-## Future Phases (Post-MVP Refinement)
+## Phase 4: UI/UX Refinements (Post-MVP Core Loop)
+
+**9. Hex Hover Visual Feedback:**
+    *   **Goal:** Provide visual indication when the mouse is over a hex.
+    *   **Actions:** Implement `pointermove` listener in `TerritoryScene.ts`. Calculate hovered hex coordinates. Apply/remove a visual effect (e.g., tint, scale change, highlight graphic) to the hovered hex.
+    *   **Vertical Slice:** Hovering over hexes provides immediate visual feedback in the Phaser scene.
+    *   **Status:** `[ ]`
+
+**10. Selected Hex Visual Feedback:**
+    *   **Goal:** Keep the last clicked hex visually distinct.
+    *   **Actions:** In `TerritoryScene.ts`, store the coordinates of the last clicked hex. Apply/remove a persistent visual effect (different from hover) to the selected hex.
+    *   **Vertical Slice:** Clicking a hex makes it visually distinct until another hex is clicked.
+    *   **Status:** `[ ]`
+
+**11. Basic Hex Info Panel (React):**
+    *   **Goal:** Display basic information about the selected hex in the React UI.
+    *   **Actions:**
+        *   Create a new React component `HexInfoPanel.tsx`.
+        *   Modify `TerritoryScene.ts`'s click handler to emit an event (`hex:selected`, via adapter/event bus) with the clicked hex coordinates.
+        *   Modify `useTerritoryAdapter` to listen for `hex:selected`, store the selected coordinates in React state.
+        *   `HexInfoPanel` reads the selected coordinates, fetches basic hex data (e.g., coordinates, maybe terrain type later) from Zustand (requires state setup), and displays it.
+    *   **Vertical Slice:** Clicking a hex displays its basic info in a dedicated React panel.
+    *   **Status:** `[ ]`
+
+## Future Phases (Further Post-MVP Refinement)
 
 *   Integrate architectural patterns (Event Bus, Domain Stores, etc.) more deeply.
 *   Implement detailed hex interactions (info panels, `Enhance Hex`).

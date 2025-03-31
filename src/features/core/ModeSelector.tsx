@@ -32,16 +32,6 @@ const ModeSelector: FC<ModeSelectorProps> = ({ currentMode, onModeChange }) => {
         >
           Management
         </button>
-        <button
-          onClick={() => onModeChange(GameMode.COMBAT)}
-          className={`px-6 py-2 rounded-t-lg ${
-            currentMode === GameMode.COMBAT
-              ? "bg-gray-800 text-white"
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
-        >
-          Combat
-        </button>
       </div>
     </div>
   );

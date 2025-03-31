@@ -36,6 +36,7 @@ export class CombatScene extends Phaser.Scene {
   private readonly PLAYER_Y = 700; // Player's fixed Y position near bottom
   private isGameOver: boolean = false; // Track game over state
   private frameCount: number = 0; // Track frame count for tiered updates
+  private targetHexId: string | null = null; // To store the hex context
 
   constructor(events: CombatSceneEvents) {
     super({
@@ -48,6 +49,11 @@ export class CombatScene extends Phaser.Scene {
       },
     });
     this.sceneEvents = events;
+  }
+
+  init(data: { hexId?: string }): void {
+    this.targetHexId = data.hexId ?? null;
+    console.log(`CombatScene initialized for hex: ${this.targetHexId}`);
   }
 
   setAutoShooting(enabled: boolean): void {
