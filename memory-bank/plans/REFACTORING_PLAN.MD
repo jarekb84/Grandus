@@ -73,7 +73,7 @@ This document outlines the incremental steps to refactor the existing prototype 
         *   Update the ammo count synchronization logic in `Combat.system.ts`, `CombatScene.ts`, and `useCombatGame.ts` to read/update based on the `PEBBLE` count in `ResourcesStore`.
         *   Update the UI display (`GameControls.tsx`, potentially `Combat.tsx`) to show "Pebbles: X" instead of "Ammo: X".
     *   **Vertical Slice:** The full loop is complete for the MVP's core resource: Gather Stone (Territory) -> Craft Pebbles (Management) -> Use Pebbles in Combat.
-    *   **Status:** `[ ]`
+    *   **Status:** `[x]` (Completed 2025-03-30)
 
 ## Phase 4: UI/UX Refinements (Post-MVP Core Loop)
 

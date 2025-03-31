@@ -116,11 +116,11 @@ export class CombatScene extends Phaser.Scene {
     this.performanceMonitor = new PerformanceMonitor(this);
 
     // Immediately update the ammo count from resources store
-    const stoneCount = useResourcesStore
+    const pebbleCount = useResourcesStore // Use Pebble count
       .getState()
-      .getResource(ResourceType.STONE); // Assuming STONE is still the ammo for now
-    useCombatStore.getState().updateStats({ ammo: stoneCount });
-    this.sceneEvents.onAmmoChanged(stoneCount);
+      .getResource(ResourceType.PEBBLE);
+    useCombatStore.getState().updateStats({ ammo: pebbleCount }); // Update store with Pebble count
+    this.sceneEvents.onAmmoChanged(pebbleCount); // Notify with Pebble count
 
     // Start first wave
     this.waveSystem.startNextWave(player.x, player.y);
@@ -132,7 +132,7 @@ export class CombatScene extends Phaser.Scene {
       playerHealth: this.playerSystem.getPlayerHealth(),
       wave: this.waveSystem.getCurrentWave(),
       enemiesRemaining: this.enemySystem.getEnemies().length,
-      ammo: stoneCount,
+      ammo: pebbleCount, // Sync Pebble count
     });
   }
 

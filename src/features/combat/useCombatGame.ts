@@ -150,14 +150,14 @@ export const useCombatGame = (
     }
   }, []);
 
-  // Sync ammo with stone count
+  // Sync ammo with PEBBLE count
   useEffect(() => {
-    const stoneCount = resourcesStore.getResource(ResourceType.STONE);
+    const pebbleCount = resourcesStore.getResource(ResourceType.PEBBLE); // Get Pebble count
     // Only update if the scene isn't mounted yet or the ammo doesn't match
-    if (!sceneRef.current || stoneCount !== ammo) {
-      useCombatStore.getState().updateStats({ ammo: stoneCount });
+    if (!sceneRef.current || pebbleCount !== ammo) {
+      useCombatStore.getState().updateStats({ ammo: pebbleCount }); // Update with Pebble count
     }
-  }, [resourcesStore, ammo]);
+  }, [resourcesStore, ammo]); // Dependency remains ammo to react to store changes
 
   return {
     gameRef,
