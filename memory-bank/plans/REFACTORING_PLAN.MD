@@ -75,21 +75,33 @@ This document outlines the incremental steps to refactor the existing prototype 
     *   **Vertical Slice:** The full loop is complete for the MVP's core resource: Gather Stone (Territory) -> Craft Pebbles (Management) -> Use Pebbles in Combat.
     *   **Status:** `[x]` (Completed 2025-03-30)
 
-## Phase 4: UI/UX Refinements (Post-MVP Core Loop)
+## Phase 4: Centralize Phaser Instance (Architecture Refactor)
 
-**9. Hex Hover Visual Feedback:**
+**9. Centralize Phaser Game Instance:**
+    *   **Goal:** Ensure only one Phaser game instance exists and is managed correctly to fix UI glitches during mode switching.
+    *   **Actions:**
+        *   Refactor `GameWrapper.tsx` to create and hold the single `Phaser.Game` instance.
+        *   Modify `GameCanvas.tsx` to accept the game instance (e.g., via prop or context) and manage scenes within *that* instance, removing its own game creation logic.
+        *   Refactor `useCombatGame.ts` to remove its game creation logic and interact with the shared game instance.
+        *   Ensure `TerritoryMode` and `CombatMode` components correctly render their respective UIs and interact with the single game instance via adapters/events.
+    *   **Vertical Slice:** The application switches between Territory, Management, and Combat modes correctly using a single Phaser instance, resolving the UI glitch where incorrect actions/UI were displayed.
+    *   **Status:** `[x]` (Completed 2025-03-30)
+
+## Phase 5: UI/UX Refinements (Post-MVP Core Loop)
+
+**10. Hex Hover Visual Feedback:**
     *   **Goal:** Provide visual indication when the mouse is over a hex.
     *   **Actions:** Implement `pointermove` listener in `TerritoryScene.ts`. Calculate hovered hex coordinates. Apply/remove a visual effect (e.g., tint, scale change, highlight graphic) to the hovered hex.
     *   **Vertical Slice:** Hovering over hexes provides immediate visual feedback in the Phaser scene.
     *   **Status:** `[ ]`
 
-**10. Selected Hex Visual Feedback:**
+**11. Selected Hex Visual Feedback:**
     *   **Goal:** Keep the last clicked hex visually distinct.
     *   **Actions:** In `TerritoryScene.ts`, store the coordinates of the last clicked hex. Apply/remove a persistent visual effect (different from hover) to the selected hex.
     *   **Vertical Slice:** Clicking a hex makes it visually distinct until another hex is clicked.
     *   **Status:** `[ ]`
 
-**11. Basic Hex Info Panel (React):**
+**12. Basic Hex Info Panel (React):**
     *   **Goal:** Display basic information about the selected hex in the React UI.
     *   **Actions:**
         *   Create a new React component `HexInfoPanel.tsx`.
