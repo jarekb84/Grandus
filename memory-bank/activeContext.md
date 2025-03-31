@@ -1,23 +1,19 @@
 # Active Context: Grandus Game
 
 ## Current Work Focus
-Updating the Memory Bank based on revised `/docs` documentation (`GAMEPLAN.MD`, `PERFORMANCE_PLAN.MD`, `STATE_ARCHITECTURE.MD`) and establishing the initial `.clinerules` file.
+Executing the incremental refactoring plan to align the prototype with the `GAMEPLAN.MD` vision. The detailed steps are tracked in `memory-bank/plans/REFACTORING_PLAN.MD`.
 
 ## Recent Changes
-- Reviewed all existing Memory Bank files.
-- Reviewed all files in the `/docs` directory.
-- Updated `projectbrief.md` to align high-level goals with the refined core loop.
-- Updated `productContext.md` to incorporate detailed mechanics (Territory/Management/Combat views, etc.).
-- Overhauled `systemPatterns.md` to reflect the detailed architecture, design patterns, and technical decisions from `/docs`.
-- Updated `techContext.md` with notes on performance strategy and state architecture patterns.
-- Updated `progress.md` with refined MVP scope, detailed "What's Left to Build", current status, and known issues based on `/docs`.
+- Reviewed all existing Memory Bank files and `/docs` directory contents.
+- Updated all core Memory Bank files (`projectbrief.md`, `productContext.md`, `systemPatterns.md`, `techContext.md`, `progress.md`) to reflect the refined game plan and architecture.
+- Created the initial `.clinerules` file.
+- Created `memory-bank/plans/REFACTORING_PLAN.MD` detailing the incremental refactoring steps.
 
 ## Next Steps
-1.  Create the initial `.clinerules` file, capturing foundational project patterns derived from the documentation.
-2.  Signal completion of the Memory Bank update task.
-3.  Proceed with implementing the refined MVP features as outlined in `progress.md`, likely starting with Territory View basics.
+1.  Update `.clinerules` with the agreed-upon note regarding `repomix-output.xml` usage for context updates.
+2.  Begin executing Step 1 of the refactoring plan: "Rename Gathering -> Territory".
 
 ## Active Decisions and Considerations
-- Synthesizing detailed information from multiple `/docs` files into concise, actionable Memory Bank entries.
-- Ensuring consistency across all Memory Bank files.
-- Identifying key, foundational patterns from the documentation to seed the `.clinerules` file.
+- Established a detailed, incremental refactoring plan stored in `memory-bank/plans/REFACTORING_PLAN.MD`.
+- Agreed on using `memory-bank/plans/` for storing detailed task-specific plans.
+- Agreed to add a note to `.clinerules` about preferred context update methods (using `repomix-output.xml`).
