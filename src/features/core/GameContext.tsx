@@ -27,51 +27,36 @@ const handleEntityInteraction = async (
   entityId: string,
   type: EntityType,
 ): Promise<void> => {
-  console.log("Entity Interaction:", entityId, type);
+  // Placeholder: Implement resource node interaction logic if needed
   if (type === EntityType.RESOURCE_NODE) {
-    console.warn(
-      "Resource gathering interaction needs implementation via event bus or scene reference.",
-    );
+    // Example: const { triggerGathering } = useGatheringStore.getState(); triggerGathering(entityId);
   }
 };
-const handleWaveComplete = (waveNumber: number, rewards: WaveRewards): void => {
-  console.log(`Wave ${waveNumber} complete! Rewards:`, rewards);
-};
-const handleGameOver = (score: number): void => {
-  console.log("Game Over! Score:", score);
+const handleWaveComplete = (
+  _waveNumber: number,
+  _rewards: WaveRewards,
+): void => {};
+const handleGameOver = (_score: number): void => {
   const { resetCash } = useCurrencyStore.getState();
   resetCash();
   // Restarting the scene should be triggered externally based on game state, not directly here.
 };
-const handleStatsUpdate = (stats: {
+const handleStatsUpdate = (_stats: {
   wave: number;
   enemiesRemaining: number;
   enemyHealth: number;
   enemyDamage: number;
   enemySpeed: number;
-}): void => {
-  console.log("Stats update:", stats);
-};
-const handleAmmoChanged = (ammo: number): void => {
-  console.log("Ammo changed:", ammo);
-};
-const handleTerritoryHealthUpdate = (health: number): void => {
-  console.log("Territory Player health changed:", health);
-};
-const handleCombatHealthUpdate = (health: number): void => {
-  console.log("Combat Player health changed:", health);
-};
-const handleOutOfAmmo = (): void => {
-  console.log("Out of ammo!");
-};
+}): void => {};
+const handleAmmoChanged = (_ammo: number): void => {};
+const handleTerritoryHealthUpdate = (_health: number): void => {};
+const handleCombatHealthUpdate = (_health: number): void => {};
+const handleOutOfAmmo = (): void => {};
 
 const handleResourceGathered = (
   resourceType: ResourceType,
   amount: number,
 ): void => {
-  console.log(
-    `Context: Resource gathered - Type: ${resourceType}, Amount: ${amount}`,
-  );
   const { addResource } = useResourcesStore.getState();
   addResource(resourceType, amount);
 };
@@ -122,7 +107,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
               this.addEntity(entity);
             });
           }
-          console.log("Territory Scene Created via Context");
         }
       }
 
@@ -142,11 +126,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
           this.startData = data;
         }
         override create(): void {
-          const hexId = this.startData?.hexId ?? "default-hex-id";
-          console.log("Combat Scene creating with hexId:", hexId);
           super.create();
           this.setAutoShooting(false);
-          console.log("Combat Scene Created via Context");
         }
       }
 
@@ -173,7 +154,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       game = new Phaser.Game(config);
       gameInstanceRef.current = game;
       setIsInitialized(true);
-      console.log("Phaser Game Initialized in Context");
     };
 
     void initPhaser();
@@ -208,13 +188,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
       if (activeSceneKey != null && activeSceneKey !== targetSceneKey) {
         if (game.scene.isActive(activeSceneKey)) {
-          console.log(`Stopping scene: ${activeSceneKey}`);
           game.scene.stop(activeSceneKey);
         }
       }
 
       if (targetSceneKey != null && !game.scene.isActive(targetSceneKey)) {
-        console.log(`Starting scene: ${targetSceneKey}`);
         // Use provided data, or default if necessary (e.g., for direct mode switches without specific data)
         const startData =
           data ??
@@ -223,14 +201,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
             : undefined);
         if (game.scene.keys[targetSceneKey]) {
           game.scene.start(targetSceneKey, startData);
-        } else {
-          console.error(`Scene key "${targetSceneKey}" not found!`);
         }
       } else if (
         targetSceneKey != null &&
         game.scene.isSleeping(targetSceneKey)
       ) {
-        console.log(`Waking scene: ${targetSceneKey}`);
         game.scene.wake(targetSceneKey);
       }
 
@@ -244,9 +219,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   useEffect(() => {
     // Only run if initialized and we have a valid mode selected (should always be TERRITORY initially)
     if (isInitialized && currentGameMode !== null) {
-      console.log(
-        `GameContext: Initialized. Setting initial scene for mode: ${currentGameMode}`,
-      );
       setActiveScene(currentGameMode, undefined);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

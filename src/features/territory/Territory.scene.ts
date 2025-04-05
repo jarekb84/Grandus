@@ -116,11 +116,8 @@ export class TerritoryScene extends Phaser.Scene {
   private setupInputHandling(): void {
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
-      (pointer: Phaser.Input.Pointer) => {
-        const hexCoords = this.pixelToHex(pointer.worldX, pointer.worldY);
-        console.log(
-          `Clicked Hex Coords (q, r): ${hexCoords.q}, ${hexCoords.r}`,
-        );
+      (_pointer: Phaser.Input.Pointer) => {
+        // TODO: Implement hex click interaction (using pixelToHex)
       },
     );
   }
@@ -196,7 +193,6 @@ export class TerritoryScene extends Phaser.Scene {
 
   addEntity(entity: Entity): void {
     if (!this.ensureTexture(entity.properties.shape)) {
-      console.error("Failed to create entity - missing texture");
       return;
     }
 
@@ -255,9 +251,6 @@ export class TerritoryScene extends Phaser.Scene {
   async moveEntityTo(entityId: string, x: number, y: number): Promise<void> {
     const sprites = this.entities.get(entityId);
     if (sprites == null || sprites.main == null) {
-      console.warn(
-        `moveEntityTo: Entity or main sprite not found for ID: ${entityId}`,
-      );
       return Promise.resolve();
     }
 
@@ -277,9 +270,7 @@ export class TerritoryScene extends Phaser.Scene {
           if (typeof resolve === "function") {
             resolve();
           } else {
-            console.error(
-              `moveEntityTo: Resolve function is not valid for ${entityId}`,
-            );
+            // Handle cases where resolve might not be a function (shouldn't happen with Promise)
           }
         },
       });
@@ -292,28 +283,16 @@ export class TerritoryScene extends Phaser.Scene {
    * @param resourceType The type of resource to start gathering.
    */
   public async initiateGathering(resourceType: ResourceType): Promise<void> {
-    console.log(`TerritoryScene: Initiating gathering for ${resourceType}`);
-    console.log(
-      `[DEBUG] initiateGathering called with resourceType: ${resourceType}`,
-    );
-
     const playerId = "player1";
 
     const playerSprites = this.entities.get(playerId);
     if (!playerSprites) {
-      console.warn(
-        `TerritoryScene: Player sprites with ID '${playerId}' not found.`,
-      );
       return;
     }
     const playerPosition = { x: playerSprites.main.x, y: playerSprites.main.y };
 
     let targetNodeSprite: Phaser.GameObjects.Sprite | null = null;
     let minDistance = Infinity;
-
-    console.log(
-      `[DEBUG] Searching for nearest node sprite of type: ${resourceType}`,
-    );
     this.entities.forEach((sprites, id) => {
       if (id === playerId) {
         return;
@@ -347,9 +326,6 @@ export class TerritoryScene extends Phaser.Scene {
     });
 
     if (targetNodeSprite == null) {
-      console.warn(
-        `TerritoryScene: No resource node sprites of type ${resourceType} found.`,
-      );
       return;
     }
 
@@ -357,51 +333,24 @@ export class TerritoryScene extends Phaser.Scene {
       x: (targetNodeSprite as Phaser.GameObjects.Sprite).x,
       y: (targetNodeSprite as Phaser.GameObjects.Sprite).y,
     };
-    console.log(
-      `TerritoryScene: Found nearest node sprite of type ${resourceType} at (${nodePosition.x}, ${nodePosition.y}). Moving player...`,
-    );
 
     try {
-      console.log("[DEBUG] Attempting moveEntityTo node...");
       await this.moveEntityTo(playerId, nodePosition.x, nodePosition.y);
-      console.log(
-        `TerritoryScene: Player reached node. Simulating gathering...`,
-      );
-      console.log("[DEBUG] moveEntityTo node complete.");
 
       await new Promise((resolve) => this.time.delayedCall(2000, resolve));
-      console.log(`TerritoryScene: Gathering complete. Returning to base...`);
-
-      console.log(
-        "[DEBUG] Finding home base and attempting moveEntityTo base...",
-      );
       const homeBaseId = "base1";
       const homeBaseSprites = this.entities.get(homeBaseId);
 
       if (homeBaseSprites != null && homeBaseSprites.main != null) {
-        console.log(`[DEBUG] Found home base sprite for ID '${homeBaseId}'.`);
         const targetX = homeBaseSprites.main.x;
         const targetY = homeBaseSprites.main.y;
-        console.log(
-          `[DEBUG] Using base coordinates for return: (${targetX}, ${targetY})`,
-        );
         await this.moveEntityTo(playerId, targetX, targetY);
-        console.log(
-          `TerritoryScene: Player returned to base at (${targetX}, ${targetY}).`,
-        );
-        console.log("[DEBUG] moveEntityTo base complete.");
       } else {
-        console.warn(
-          `TerritoryScene: Home base entity with ID '${homeBaseId}' not found. Cannot return player.`,
-        );
+        // Home base entity not found, player cannot return automatically
       }
-      console.log(
-        `TerritoryScene: Triggering resource update for ${resourceType}.`,
-      );
       this.sceneEvents.onResourceGathered?.(resourceType, 1);
-    } catch (error) {
-      console.error(`TerritoryScene: Error during gathering sequence:`, error);
-      console.error("[DEBUG] Error caught in gathering sequence:", error);
+    } catch {
+      // TODO: Implement error handling for gathering process (move, delay, resource callback)
     }
   }
 }

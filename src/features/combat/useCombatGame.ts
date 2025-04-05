@@ -76,7 +76,6 @@ export const useCombatGame = (
       if (scene.scene.isActive()) {
         sceneRef.current = scene;
         setIsSceneReady(true);
-        console.log("Combat Scene instance obtained and active in hook.");
 
         const handleStatsUpdate = (stats: {
           wave: number;
@@ -109,11 +108,9 @@ export const useCombatGame = (
           useCombatStore.getState().setAutoShooting(false);
         };
         const handleWaveComplete = (
-          waveNumber: number,
-          rewards: Record<string, number>,
-        ): void => {
-          console.log(`Wave ${waveNumber} complete with rewards:`, rewards);
-        };
+          _waveNumber: number,
+          _rewards: Record<string, number>,
+        ): void => {};
         const handlePlayerHealthChanged = (health: number): void => {
           useCombatStore.getState().updateStats({ playerHealth: health });
         };
@@ -126,7 +123,6 @@ export const useCombatGame = (
         scene.events.on("playerHealthChanged", handlePlayerHealthChanged);
 
         return (): void => {
-          console.log("Cleaning up Combat Scene listeners in hook.");
           scene.events.off("statsUpdate", handleStatsUpdate);
           scene.events.off("gameOver", handleGameOver);
           scene.events.off("ammoChanged", handleAmmoChanged);
@@ -137,27 +133,21 @@ export const useCombatGame = (
           setIsSceneReady(false);
         };
       } else {
-        console.log(
-          "Combat Scene found but not active, attaching wake/start listeners.",
-        );
         const wakeOrStartListener = (): void => {
           if (gameInstance.scene.isActive("CombatScene")) {
             setIsSceneReady(true);
             sceneRef.current = scene;
-            console.log("Combat Scene became active after wait.");
           }
         };
         scene.events.once(Phaser.Scenes.Events.WAKE, wakeOrStartListener);
         scene.events.once(Phaser.Scenes.Events.START, wakeOrStartListener);
 
         return (): void => {
-          console.log("Cleaning up Combat Scene wake/start listeners.");
           scene.events.off(Phaser.Scenes.Events.WAKE, wakeOrStartListener);
           scene.events.off(Phaser.Scenes.Events.START, wakeOrStartListener);
         };
       }
     } else {
-      console.warn("Combat Scene not found in the game instance yet.");
       sceneRef.current = null;
       setIsSceneReady(false);
       return;
@@ -171,8 +161,6 @@ export const useCombatGame = (
     if (sceneRef.current && isSceneReady) {
       sceneRef.current.setAutoShooting(!isAutoShooting);
       useCombatStore.getState().setAutoShooting(!isAutoShooting);
-    } else {
-      console.warn("Attempted to toggle auto-shoot but scene is not ready.");
     }
   }, [isAutoShooting, ammo, isSceneReady]);
 
@@ -183,9 +171,6 @@ export const useCombatGame = (
 
     if (sceneRef.current && isSceneReady) {
       sceneRef.current.scene.restart();
-      console.log("Requesting Combat Scene restart.");
-    } else {
-      console.warn("Attempted to retry but scene is not ready.");
     }
   }, [isSceneReady]);
 

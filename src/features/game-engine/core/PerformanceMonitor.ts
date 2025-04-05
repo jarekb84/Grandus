@@ -38,9 +38,6 @@ export class PerformanceMonitor {
 
     // Reset min/max periodically to see recent performance
     if (Date.now() - this.startTime > this.resetInterval) {
-      console.log(
-        `Performance reset - Min FPS: ${this.minFps}, Max FPS: ${this.maxFps}, Entities: ${this.entityCount}`,
-      );
       this.startTime = Date.now();
       this.minFps = Number.MAX_VALUE;
       this.maxFps = 0;

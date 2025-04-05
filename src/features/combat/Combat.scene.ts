@@ -53,7 +53,6 @@ export class CombatScene extends Phaser.Scene {
 
   init(data: { hexId?: string }): void {
     this.targetHexId = data.hexId ?? null;
-    console.log(`CombatScene initialized for hex: ${this.targetHexId}`);
   }
 
   setAutoShooting(enabled: boolean): void {

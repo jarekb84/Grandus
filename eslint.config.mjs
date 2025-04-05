@@ -66,6 +66,11 @@ const eslintConfig = [
       'eslint-comments/no-unused-disable': 'error',
     },
   },
+  {
+    rules: {
+      "no-console": "error",
+    },
+  },
   { // Ignore build output and node_modules
     ignores: ['dist/', 'node_modules/'],
   },
