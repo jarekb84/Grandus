@@ -1,22 +1,22 @@
-'use client'
+"use client";
 
-import React from 'react';
-import { CombatModeProps } from '@/features/combat/Combat.types';
-import { useCombatGame } from '@/features/combat/useCombatGame';
-import { GameStats } from '@/features/combat/GameStats';
-import { GameControls } from '@/features/combat/GameControls';
-import { GameOver } from '@/features/combat/GameOver';
-import styles from '@/features/combat/Combat.module.css';
+import React from "react";
+import { CombatModeProps } from "@/features/combat/Combat.types";
+import { useCombatGame } from "@/features/combat/useCombatGame";
+import { GameStats } from "@/features/combat/GameStats";
+import { GameControls } from "@/features/combat/GameControls";
+import { GameOver } from "@/features/combat/GameOver";
+import styles from "@/features/combat/Combat.module.css";
 
 export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
   const {
-    gameRef,
+    // gameRef, // Removed, no longer returned by hook or needed here
     isAutoShooting,
     isGameOver,
     combatStats,
     playerStats,
     handleToggleAutoShoot,
-    handleRetry
+    handleRetry,
   } = useCombatGame(onGameOver);
 
   // Determine if we're out of ammo
@@ -24,8 +24,8 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
 
   return (
     <div className={styles.container}>
-      <div ref={gameRef} className={styles.gameContainer} />
-      
+      {/* The Phaser game canvas is now rendered by GameContent using GameContext */}
+
       <div className={styles.statsContainer}>
         {isGameOver ? (
           <GameOver
@@ -35,10 +35,7 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
           />
         ) : (
           <>
-            <GameStats
-              combatStats={combatStats}
-              playerStats={playerStats}
-            />
+            <GameStats combatStats={combatStats} playerStats={playerStats} />
             <GameControls
               isAutoShooting={isAutoShooting}
               shootingCooldown={0} // We don't track this in the store anymore
@@ -52,4 +49,4 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
       </div>
     </div>
   );
-}; 
+};

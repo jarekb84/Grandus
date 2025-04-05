@@ -1,9 +1,16 @@
 import * as Phaser from "phaser";
-import { Entity, EntityType, Shape } from "@/features/shared/types/entities";
+import {
+  Entity,
+  EntityType,
+  Shape,
+  ResourceYield,
+} from "@/features/shared/types/entities"; // Removed unused ResourceNodeEntity
+import { ResourceType } from "@/features/shared/types/entities"; // Corrected import path based on adapter
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
   onPlayerHealthChanged?: (health: number) => void;
+  onResourceGathered?: (resourceType: ResourceType, amount: number) => void; // Added for resource updates
 }
 
 interface EntitySprites {
@@ -243,6 +250,8 @@ export class TerritoryScene extends Phaser.Scene {
     // Make resource nodes interactive
     if (entity.type === EntityType.RESOURCE_NODE) {
       sprites.main.setInteractive();
+      // Store the full entity data on the main sprite for later retrieval
+      sprites.main.setData("entityData", entity);
     }
   }
 
@@ -296,17 +305,197 @@ export class TerritoryScene extends Phaser.Scene {
 
   async moveEntityTo(entityId: string, x: number, y: number): Promise<void> {
     const sprites = this.entities.get(entityId);
-    if (!sprites) return Promise.resolve();
+    // Ensure sprites exist AND the main sprite exists
+    if (sprites == null || sprites.main == null) {
+      // Explicit null checks
+      console.warn(
+        `moveEntityTo: Entity or main sprite not found for ID: ${entityId}`,
+      );
+      return Promise.resolve(); // Resolve immediately if no valid target
+    }
+
+    // Determine targets, handling potentially missing outline
+    const targets =
+      sprites.outline != null
+        ? [sprites.main, sprites.outline]
+        : [sprites.main]; // Explicit null check
 
     return new Promise((resolve) => {
+      // console.log(`moveEntityTo: Starting tween for ${entityId} to (${x}, ${y})`); // Optional: Log start
       this.tweens.add({
-        targets: [sprites.main, sprites.outline],
+        targets: targets,
         x,
         y,
-        duration: 1000,
+        duration: 1000, // Using fixed duration as per original code
         ease: "Power2",
-        onComplete: () => resolve(),
+        onComplete: () => {
+          // console.log(`moveEntityTo: Tween completed visually for ${entityId}`); // Optional: Log completion visually
+          // Ensure resolution happens
+          if (typeof resolve === "function") {
+            // console.log(`moveEntityTo: Resolving promise for ${entityId}`); // Optional: Log resolution
+            resolve();
+          } else {
+            console.error(
+              `moveEntityTo: Resolve function is not valid for ${entityId}`,
+            );
+          }
+        },
+        // Consider adding error handling if tween creation can fail
       });
     });
+  }
+
+  /**
+   * Initiates the gathering process for a specific resource type.
+   * Called from the React UI via the adapter.
+   * @param resourceType The type of resource to start gathering.
+   */
+  public async initiateGathering(resourceType: ResourceType): Promise<void> {
+    // Made async
+    console.log(`TerritoryScene: Initiating gathering for ${resourceType}`);
+    console.log(
+      `[DEBUG] initiateGathering called with resourceType: ${resourceType}`,
+    );
+
+    // --- Placeholder Identifiers ---
+    const playerId = "player1"; // Player entity ID from entityGenerator
+    // const homeBasePosition = { x: 100, y: 100 }; // ASSUMPTION: Home base location (Removed unused variable)
+    // --- End Placeholder Identifiers ---
+
+    const playerSprites = this.entities.get(playerId); // Get player's sprites
+    if (!playerSprites) {
+      console.warn(
+        `TerritoryScene: Player sprites with ID '${playerId}' not found.`,
+      );
+      return;
+    }
+    // Use the position from the player's main sprite
+    const playerPosition = { x: playerSprites.main.x, y: playerSprites.main.y };
+
+    // --- Find Nearest Valid Resource Node Sprite ---
+    let targetNodeSprite: Phaser.GameObjects.Sprite | null = null; // Store the sprite
+    let minDistance = Infinity;
+
+    console.log(
+      `[DEBUG] Searching for nearest node sprite of type: ${resourceType}`,
+    );
+    this.entities.forEach((sprites, id) => {
+      // Skip the player entity
+      if (id === playerId) {
+        return;
+      }
+
+      // Retrieve the full entity data stored on the sprite
+      const entityData = sprites.main.getData("entityData") as
+        | Entity
+        | undefined;
+
+      // Check if it's a resource node and if it yields the required resource type
+      if (
+        entityData && // Ensure data exists
+        entityData.type === EntityType.RESOURCE_NODE
+      ) {
+        // Cast to ResourceNodeEntity to access specific properties
+        const resourceNodeData = entityData; // Removed unnecessary type assertion (type narrowed by check on line 375)
+
+        // Check if the node yields the requested resourceType
+        const yieldsRequiredResource = resourceNodeData.yields?.some(
+          (yieldInfo: ResourceYield) => yieldInfo.resourceType === resourceType,
+        );
+
+        if (yieldsRequiredResource) {
+          // Log candidate entity details (optional)
+          // console.log(`[DEBUG] Considering valid node ID: ${id}, Type: ${entityData.type}, Yields: ${resourceType}, Pos: (${sprites.main.x}, ${sprites.main.y})`);
+
+          const distance = Phaser.Math.Distance.Between(
+            playerPosition.x,
+            playerPosition.y,
+            sprites.main.x, // Use sprite position for distance
+            sprites.main.y,
+          );
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            targetNodeSprite = sprites.main; // Store the closest valid sprite
+          }
+        }
+      }
+    });
+
+    if (targetNodeSprite == null) {
+      // Explicit null check
+      console.warn(
+        `TerritoryScene: No resource node sprites of type ${resourceType} found.`,
+      );
+      // Maybe add visual feedback later
+      return; // Exit if no valid target found
+    }
+
+    // Use the position from the found sprite, adding type assertion for safety
+    const nodePosition = {
+      x: (targetNodeSprite as Phaser.GameObjects.Sprite).x,
+      y: (targetNodeSprite as Phaser.GameObjects.Sprite).y,
+    };
+    // console.log(`[DEBUG] Selected targetNodeSprite? ${!!targetNodeSprite}`); // Optional debug log
+    // console.log(`[DEBUG] Calculated nodePosition: (${nodePosition.x}, ${nodePosition.y}) from sprite`); // Optional debug log
+    console.log(
+      `TerritoryScene: Found nearest node sprite of type ${resourceType} at (${nodePosition.x}, ${nodePosition.y}). Moving player...`,
+    );
+
+    // --- Move to Node ---
+    try {
+      console.log("[DEBUG] Attempting moveEntityTo node...");
+      await this.moveEntityTo(playerId, nodePosition.x, nodePosition.y);
+      console.log(
+        `TerritoryScene: Player reached node. Simulating gathering...`,
+      );
+      console.log("[DEBUG] moveEntityTo node complete.");
+
+      // --- Simulate Gathering Duration ---
+      // Placeholder: Wait 2 seconds to simulate gathering
+      console.log("[DEBUG] Starting gathering delay...");
+      await new Promise((resolve) => this.time.delayedCall(2000, resolve));
+      console.log("[DEBUG] Gathering delay complete.");
+      console.log(`TerritoryScene: Gathering complete. Returning to base...`);
+
+      // --- Find Home Base and Move Back ---
+      console.log(
+        "[DEBUG] Finding home base and attempting moveEntityTo base...",
+      );
+      const homeBaseId = "base1"; // Use the correct ID from entityGenerator
+      const homeBaseSprites = this.entities.get(homeBaseId);
+
+      if (homeBaseSprites != null && homeBaseSprites.main != null) {
+        // Explicit null checks
+        console.log(`[DEBUG] Found home base sprite for ID '${homeBaseId}'.`);
+        const targetX = homeBaseSprites.main.x;
+        const targetY = homeBaseSprites.main.y;
+        console.log(
+          `[DEBUG] Using base coordinates for return: (${targetX}, ${targetY})`,
+        );
+        await this.moveEntityTo(playerId, targetX, targetY);
+        console.log(
+          `TerritoryScene: Player returned to base at (${targetX}, ${targetY}).`,
+        );
+        console.log("[DEBUG] moveEntityTo base complete.");
+      } else {
+        console.warn(
+          `TerritoryScene: Home base entity with ID '${homeBaseId}' not found. Cannot return player.`,
+        );
+        // Optionally handle this case, e.g., leave player at node or move to default coords
+      }
+      // --- Trigger Resource Update ---
+      console.log(
+        `TerritoryScene: Triggering resource update for ${resourceType}.`,
+      );
+      // Use the sceneEvents object passed during construction (likely via adapter)
+      // Assume 'onResourceGathered' is a valid event handler expected by the adapter
+      this.sceneEvents.onResourceGathered?.(resourceType, 1); // Gathered amount is 1 for now
+    } catch (error) {
+      console.error(`TerritoryScene: Error during gathering sequence:`, error);
+      console.error("[DEBUG] Error caught in gathering sequence:", error);
+      // Optional: Move player back home on error?
+      // await this.moveEntityTo(playerId, homeBasePosition.x, homeBasePosition.y);
+    }
   }
 }
