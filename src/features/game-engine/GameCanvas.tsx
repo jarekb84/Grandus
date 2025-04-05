@@ -1,5 +1,3 @@
-"use client";
-
 import { forwardRef, useRef } from "react";
 export interface GameCanvasProps {
   className?: string;

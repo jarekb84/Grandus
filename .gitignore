@@ -13,12 +13,11 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
+# build output
+/dist/
+/out/ # Keep /out/ just in case, though Vite uses /dist
 
 # production
-/build
 
 # misc
 .DS_Store
@@ -38,4 +37,3 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts

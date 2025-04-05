@@ -3,7 +3,7 @@ import { useCombatStore } from "@/features/combat/Combat.store";
 import { CombatScene } from "@/features/combat/Combat.scene";
 import { useCurrencyStore } from "@/features/shared/stores/Currency.store";
 import { useResourcesStore } from "@/features/shared/stores/Resources.store";
-import { useGameContext } from "@/features/core/GameContext";
+import { useGameContext } from "@/features/core/useGameContext";
 
 interface CombatGameReturn {
   isAutoShooting: boolean;

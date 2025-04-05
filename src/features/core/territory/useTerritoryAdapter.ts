@@ -6,7 +6,7 @@ import {
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 import { GameMode } from "@/features/shared/types/GameMode";
-import { useGameContext } from "@/features/core/GameContext";
+import { useGameContext } from "@/features/core/useGameContext";
 import type { TerritoryScene } from "@/features/territory/Territory.scene";
 interface TerritoryAdapter {
   isGathering: boolean;

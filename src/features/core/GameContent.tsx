@@ -1,20 +1,9 @@
-"use client";
-
 import { FC } from "react";
-import dynamic from "next/dynamic";
 import { GameMode } from "@/features/shared/types/GameMode";
 import { ManagementMode } from "@/features/management/Management";
-import { useGameContext } from "./GameContext";
-const DynamicTerritoryMode = dynamic(
-  () =>
-    import("@/features/territory/Territory").then((mod) => mod.TerritoryMode),
-  { ssr: false },
-);
-
-const DynamicCombatMode = dynamic(
-  () => import("@/features/combat/Combat").then((mod) => mod.CombatMode),
-  { ssr: false },
-);
+import { useGameContext } from "./useGameContext";
+import { TerritoryMode } from "@/features/territory/Territory";
+import { CombatMode } from "@/features/combat/Combat";
 
 interface GameContentProps {
   currentMode: GameMode;
@@ -37,8 +26,8 @@ const GameContent: FC<GameContentProps> = ({ currentMode }) => {
       <div className="relative flex-grow flex-shrink min-h-0 p-2">
         {" "}
         {currentMode === GameMode.MANAGEMENT && <ManagementMode />}
-        {currentMode === GameMode.COMBAT && <DynamicCombatMode />}
-        {currentMode === GameMode.TERRITORY && <DynamicTerritoryMode />}
+        {currentMode === GameMode.COMBAT && <CombatMode />}
+        {currentMode === GameMode.TERRITORY && <TerritoryMode />}
       </div>
     </div>
   );

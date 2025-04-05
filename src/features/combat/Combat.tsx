@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { CombatModeProps } from "@/features/combat/Combat.types";
 import { useCombatGame } from "@/features/combat/useCombatGame";

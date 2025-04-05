@@ -1,9 +1,7 @@
-"use client";
-
 import React, { useCallback } from "react";
 import TerritoryActions from "./TerritoryActions";
 import { useTerritoryAdapter } from "@/features/core/territory/useTerritoryAdapter";
-import { useGameContext } from "@/features/core/GameContext";
+import { useGameContext } from "@/features/core/useGameContext";
 import { GameMode } from "@/features/shared/types/GameMode";
 
 export interface TerritoryModeProps {

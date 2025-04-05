@@ -151,8 +151,7 @@ export class TerritoryScene extends Phaser.Scene {
       q_round = -r_round - s_round;
     } else if (r_diff > s_diff) {
       r_round = -q_round - s_round;
-    } else {
-    }
+    } // else: s_diff is largest, no change needed for q_round or r_round
 
     return { q: q_round, r: r_round };
   }

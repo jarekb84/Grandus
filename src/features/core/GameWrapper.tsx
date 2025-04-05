@@ -1,12 +1,11 @@
-"use client";
-
 import React from "react";
 import { GameMode } from "@/features/shared/types/GameMode";
 import Inventory from "@/features/shared/ui/Inventory";
 import ModeSelector from "./ModeSelector";
 import GameContent from "./GameContent";
 import { useInventoryAdapter } from "./inventory/useInventoryAdapter";
-import { GameProvider, useGameContext } from "./GameContext";
+import { GameProvider } from "./GameContext";
+import { useGameContext } from "./useGameContext";
 
 const GameUI = (): React.ReactElement => {
   const { currentGameMode, setActiveScene } = useGameContext();

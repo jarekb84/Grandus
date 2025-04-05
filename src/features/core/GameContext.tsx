@@ -1,6 +1,4 @@
 import React, {
-  createContext,
-  useContext,
   ReactNode,
   useRef,
   useEffect,
@@ -15,28 +13,10 @@ import { useCurrencyStore } from "../shared/stores/Currency.store";
 import { WaveRewards } from "../combat/Wave";
 import { useResourcesStore } from "@/features/shared/stores/Resources.store";
 import { ResourceType } from "@/features/shared/types/entities";
+import { GameContext } from "./gameContextTypes";
 
 // Forward declare Phaser type for use in interfaces/refs before dynamic import
 type PhaserGameInstance = import("phaser").Game;
-
-interface GameContextProps {
-  gameInstance: PhaserGameInstance | null;
-  activeSceneKey: string | null;
-  setActiveScene: (mode: GameMode, data?: Record<string, unknown>) => void;
-  gameContainerRef: React.RefObject<HTMLDivElement | null>;
-  isInitialized: boolean;
-  currentGameMode: GameMode | null;
-}
-
-const GameContext = createContext<GameContextProps | undefined>(undefined);
-
-export const useGameContext = (): GameContextProps => {
-  const context = useContext(GameContext);
-  if (!context) {
-    throw new Error("useGameContext must be used within a GameProvider");
-  }
-  return context;
-};
 
 interface GameProviderProps {
   children: ReactNode;
