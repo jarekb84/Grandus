@@ -8,7 +8,6 @@ export interface ResourcesState {
     [ResourceType.PEBBLE]: number;
   };
 
-  // Resource operations
   addResource: (type: ResourceType, amount: number) => void;
   removeResource: (type: ResourceType, amount: number) => void;
   getResource: (type: ResourceType) => number;

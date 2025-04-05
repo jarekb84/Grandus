@@ -19,12 +19,10 @@ export class GameModeManager {
   }
 
   async switchMode(config: GameModeConfig): Promise<void> {
-    // Don't switch if we're already in this mode
     if (this.currentMode === config.mode) {
       return;
     }
 
-    // Stop current scene
     switch (this.currentMode) {
       case GameMode.TERRITORY:
         this.game.scene.stop("MainScene");
@@ -37,7 +35,6 @@ export class GameModeManager {
         break;
     }
 
-    // Start new scene/mode
     this.currentMode = config.mode;
 
     switch (config.mode) {
@@ -52,7 +49,6 @@ export class GameModeManager {
         break;
     }
 
-    // Notify listeners of mode change
     this.events.onModeChange(config.mode);
   }
 }

@@ -17,7 +17,6 @@ export const GameControls: React.FC<GameControlsProps> = ({
           className={`${styles.ammoLabel} ${outOfAmmo ? styles.outOfAmmo : ""}`}
         >
           {outOfAmmo ? "OUT OF PEBBLES" : `Pebbles: ${ammo}`}{" "}
-          {/* Updated Text */}
         </span>
       </div>
       <button

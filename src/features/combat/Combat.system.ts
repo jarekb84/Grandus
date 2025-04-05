@@ -49,30 +49,24 @@ export class CombatSystem {
     return this.isAutoShooting;
   }
 
-  // Modified update to focus only on shooting logic
   update(time: number): boolean {
     const player = this.playerSystem.getPlayer();
 
-    // Handle automatic shooting
     if (this.isAutoShooting && time > this.nextShootTime) {
       const nearestEnemy = this.enemySystem.findNearestEnemy(
         player.x,
         player.y,
       );
-      // Check if we have PEBBLES available to shoot
       const hasPebbles = this.resourcesStore
         .getState()
-        .hasResource(ResourceType.PEBBLE, 1); // Check for PEBBLE
+        .hasResource(ResourceType.PEBBLE, 1);
 
       if (nearestEnemy && hasPebbles) {
-        // Check hasPebbles
-        // Consume a PEBBLE when shooting
-        this.resourcesStore.getState().removeResource(ResourceType.PEBBLE, 1); // Consume PEBBLE
+        this.resourcesStore.getState().removeResource(ResourceType.PEBBLE, 1);
 
-        // Update the ammo in combat store (using PEBBLE count)
         const newAmmoCount = this.resourcesStore
           .getState()
-          .getResource(ResourceType.PEBBLE); // Get PEBBLE count
+          .getResource(ResourceType.PEBBLE);
         useCombatStore.getState().updateStats({ ammo: newAmmoCount });
 
         this.projectileSystem.shootProjectile(
@@ -83,17 +77,14 @@ export class CombatSystem {
         );
         this.nextShootTime = time + this.SHOOT_INTERVAL;
 
-        // Notify listeners about ammo change
         this.events.onAmmoChanged(newAmmoCount);
       } else if (!hasPebbles) {
-        // Check hasPebbles
-        // No pebbles left - notify listeners and stop shooting
         useCombatStore.getState().updateStats({ ammo: 0 });
         this.events.onAmmoChanged(0);
         this.events.onOutOfAmmo();
       }
     }
 
-    return false; // Game continues
+    return false;
   }
 }

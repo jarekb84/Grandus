@@ -10,7 +10,6 @@ import styles from "@/features/combat/Combat.module.css";
 
 export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
   const {
-    // gameRef, // Removed, no longer returned by hook or needed here
     isAutoShooting,
     isGameOver,
     combatStats,
@@ -19,18 +18,15 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
     handleRetry,
   } = useCombatGame(onGameOver);
 
-  // Determine if we're out of ammo
   const outOfAmmo = combatStats.ammo <= 0;
 
   return (
     <div className={styles.container}>
-      {/* The Phaser game canvas is now rendered by GameContent using GameContext */}
-
       <div className={styles.statsContainer}>
         {isGameOver ? (
           <GameOver
             wave={combatStats.wave}
-            finalScore={combatStats.wave} // Use wave as final score
+            finalScore={combatStats.wave}
             onRetry={handleRetry}
           />
         ) : (
@@ -38,7 +34,7 @@ export const CombatMode: React.FC<CombatModeProps> = ({ onGameOver }) => {
             <GameStats combatStats={combatStats} playerStats={playerStats} />
             <GameControls
               isAutoShooting={isAutoShooting}
-              shootingCooldown={0} // We don't track this in the store anymore
+              shootingCooldown={0}
               ammo={combatStats.ammo}
               outOfAmmo={outOfAmmo}
               onToggleAutoShoot={handleToggleAutoShoot}

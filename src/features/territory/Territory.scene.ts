@@ -4,13 +4,13 @@ import {
   EntityType,
   Shape,
   ResourceYield,
-} from "@/features/shared/types/entities"; // Removed unused ResourceNodeEntity
-import { ResourceType } from "@/features/shared/types/entities"; // Corrected import path based on adapter
+} from "@/features/shared/types/entities";
+import { ResourceType } from "@/features/shared/types/entities";
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
   onPlayerHealthChanged?: (health: number) => void;
-  onResourceGathered?: (resourceType: ResourceType, amount: number) => void; // Added for resource updates
+  onResourceGathered?: (resourceType: ResourceType, amount: number) => void;
 }
 
 interface EntitySprites {
@@ -18,14 +18,12 @@ interface EntitySprites {
   outline: Phaser.GameObjects.Sprite;
 }
 
-// Define an interface for hex coordinates
 interface HexCoords {
   q: number;
   r: number;
 }
 
 export class TerritoryScene extends Phaser.Scene {
-  // Renamed class
   private entities: Map<string, EntitySprites> = new Map();
   private sceneEvents: MainSceneEvents;
   private static readonly SHAPE_KEYS = {
@@ -34,7 +32,7 @@ export class TerritoryScene extends Phaser.Scene {
   };
 
   constructor(events: MainSceneEvents) {
-    super({ key: "TerritoryScene" }); // Updated scene key
+    super({ key: "TerritoryScene" });
     this.sceneEvents = events;
   }
 
@@ -42,42 +40,33 @@ export class TerritoryScene extends Phaser.Scene {
     // We'll create textures in create() instead
   }
 
-  // --- Hex Grid Properties ---
-  private hexSize = 72; // Radius of the hex (Increased again)
-  // Grid dimensions removed, we'll loop until off-screen
-  // --- End Hex Grid Properties ---
+  private hexSize = 72;
 
-  // --- Grid Interaction Properties ---
-  private startOffsetX: number = 0; // Store offset for pixelToHex conversion
+  private startOffsetX: number = 0;
   private startOffsetY: number = 0;
-  // --- End Grid Interaction Properties ---
 
   create(): void {
     this.createShapeTextures();
-    this.drawHexGrid(); // Call the new grid drawing function
-    this.setupInputHandling(); // Add input listener
+    this.drawHexGrid();
+    this.setupInputHandling();
   }
 
-  // --- Hex Grid Drawing Logic ---
   private drawHexGrid(): void {
     const graphics = this.add.graphics({
       lineStyle: { width: 1, color: 0x444444 },
-    }); // Use a slightly visible gray
+    });
     const hexWidth = Math.sqrt(3) * this.hexSize;
     const hexHeight = 2 * this.hexSize;
     const screenWidth = this.cameras.main.width;
     const screenHeight = this.cameras.main.height;
 
-    // Store offsets for later use in pixelToHex
     this.startOffsetX = -hexWidth / 2;
     this.startOffsetY = -hexHeight / 2;
 
-    // Loop until hexes are drawn past the bottom-right screen edge
-    // Estimate loop bounds generously to ensure coverage
     const qMin = -2;
-    const qMax = 10; // Estimated based on screen width / hex width
+    const qMax = 10;
     const rMin = -2;
-    const rMax = 8; // Estimated based on screen height / hex vertical step
+    const rMax = 8;
 
     for (let r = rMin; r <= rMax; r++) {
       for (let q = qMin; q <= qMax; q++) {
@@ -88,7 +77,6 @@ export class TerritoryScene extends Phaser.Scene {
           this.startOffsetY,
         );
 
-        // Basic culling: Only draw if the hex center is potentially near the screen
         if (
           pixelPos.x > -this.hexSize &&
           pixelPos.x < screenWidth + this.hexSize &&
@@ -96,33 +84,27 @@ export class TerritoryScene extends Phaser.Scene {
           pixelPos.y < screenHeight + this.hexSize
         ) {
           const corners = this.getHexCorners(pixelPos.x, pixelPos.y);
-          graphics.strokePoints(corners, true); // true to close the shape
+          graphics.strokePoints(corners, true);
         }
       }
     }
   }
 
-  // Helper to get pixel coordinates for flat-top hex center
   private hexToPixelCoords(
     q: number,
     r: number,
     offsetX: number,
     offsetY: number,
   ): { x: number; y: number } {
-    // Adjust for axial coordinates (flat-top)
-    // x = size * (sqrt(3) * q + sqrt(3)/2 * r)
-    // y = size * (                  3/2 * r)
     const x =
       this.hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r) + offsetX;
     const y = this.hexSize * ((3 / 2) * r) + offsetY;
     return { x, y };
   }
 
-  // Helper to get the 6 corner points of a flat-top hex
   private getHexCorners(x: number, y: number): Phaser.Geom.Point[] {
     const corners: Phaser.Geom.Point[] = [];
     for (let i = 0; i < 6; i++) {
-      // Start angle is 30 degrees (pi/6) for flat-top hexes
       const angle = (Math.PI / 180) * (60 * i + 30);
       const cornerX = x + this.hexSize * Math.cos(angle);
       const cornerY = y + this.hexSize * Math.sin(angle);
@@ -130,9 +112,7 @@ export class TerritoryScene extends Phaser.Scene {
     }
     return corners;
   }
-  // --- End Hex Grid Drawing Logic ---
 
-  // --- Input Handling & Coordinate Conversion ---
   private setupInputHandling(): void {
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
@@ -141,36 +121,23 @@ export class TerritoryScene extends Phaser.Scene {
         console.log(
           `Clicked Hex Coords (q, r): ${hexCoords.q}, ${hexCoords.r}`,
         );
-        // Later: Emit event hex:clicked with hexCoords
       },
     );
-
-    // Optional: Add hover handling later
-    // this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
-    //   const hexCoords = this.pixelToHex(pointer.worldX, pointer.worldY);
-    //   // Logic to highlight hex under cursor
-    //   // Emit event hex:hovered with hexCoords
-    // });
   }
 
-  // Converts pixel coordinates (world space) to axial hex coordinates (flat-top)
   // Based on https://www.redblobgames.com/grids/hexagons/#pixel-to-hex
   private pixelToHex(worldX: number, worldY: number): HexCoords {
-    // Adjust for the offset used during drawing
     const relativeX = worldX - this.startOffsetX;
     const relativeY = worldY - this.startOffsetY;
 
-    // Convert pixel to fractional axial coordinates
     const q_frac =
       ((Math.sqrt(3) / 3) * relativeX - (1 / 3) * relativeY) / this.hexSize;
     const r_frac = ((2 / 3) * relativeY) / this.hexSize;
 
-    // Convert fractional axial to cube coordinates
     const x_cube_frac = q_frac;
     const z_cube_frac = r_frac;
     const y_cube_frac = -x_cube_frac - z_cube_frac;
 
-    // Round cube coordinates to nearest integer cube coordinates
     let q_round = Math.round(x_cube_frac);
     let r_round = Math.round(z_cube_frac);
     const s_round = Math.round(y_cube_frac);
@@ -185,19 +152,13 @@ export class TerritoryScene extends Phaser.Scene {
     } else if (r_diff > s_diff) {
       r_round = -q_round - s_round;
     } else {
-      // s_round = -q_round - r_round; // Not needed as we only return q, r
     }
 
-    // Return axial coordinates
     return { q: q_round, r: r_round };
   }
-  // --- End Input Handling & Coordinate Conversion ---
 
   private createShapeTextures(): void {
-    // Only create textures if they don't exist
     if (!this.textures.exists(TerritoryScene.SHAPE_KEYS[Shape.SQUARE])) {
-      // Updated class name reference
-      // Create square texture (32x32)
       const squareGraphics = this.add.graphics();
       squareGraphics.fillStyle(0xffffff);
       squareGraphics.fillRect(0, 0, 32, 32);
@@ -205,13 +166,11 @@ export class TerritoryScene extends Phaser.Scene {
         TerritoryScene.SHAPE_KEYS[Shape.SQUARE],
         32,
         32,
-      ); // Updated class name reference
+      );
       squareGraphics.destroy();
     }
 
     if (!this.textures.exists(TerritoryScene.SHAPE_KEYS[Shape.CIRCLE])) {
-      // Updated class name reference
-      // Create circle texture (32x32)
       const circleGraphics = this.add.graphics();
       circleGraphics.fillStyle(0xffffff);
       circleGraphics.beginPath();
@@ -222,23 +181,21 @@ export class TerritoryScene extends Phaser.Scene {
         TerritoryScene.SHAPE_KEYS[Shape.CIRCLE],
         32,
         32,
-      ); // Updated class name reference
+      );
       circleGraphics.destroy();
     }
   }
 
-  // Helper method to verify texture exists
   private ensureTexture(shape: Shape): boolean {
-    const key = TerritoryScene.SHAPE_KEYS[shape]; // Updated class name reference
+    const key = TerritoryScene.SHAPE_KEYS[shape];
     const exists = this.textures.exists(key);
     if (!exists) {
-      this.createShapeTextures(); // Attempt to recreate
+      this.createShapeTextures();
     }
     return this.textures.exists(key);
   }
 
   addEntity(entity: Entity): void {
-    // Verify texture exists before creating sprite
     if (!this.ensureTexture(entity.properties.shape)) {
       console.error("Failed to create entity - missing texture");
       return;
@@ -247,7 +204,6 @@ export class TerritoryScene extends Phaser.Scene {
     const sprites = this.createSpritesForEntity(entity);
     this.entities.set(entity.id, sprites);
 
-    // Make resource nodes interactive
     if (entity.type === EntityType.RESOURCE_NODE) {
       sprites.main.setInteractive();
       // Store the full entity data on the main sprite for later retrieval
@@ -268,9 +224,8 @@ export class TerritoryScene extends Phaser.Scene {
     const { shape, size, color } = entity.properties;
     const { x, y } = entity.position;
 
-    const textureKey = TerritoryScene.SHAPE_KEYS[shape]; // Updated class name reference
+    const textureKey = TerritoryScene.SHAPE_KEYS[shape];
 
-    // Create outline first so it's behind the main sprite
     const outline = this.add.sprite(x, y, textureKey);
     outline.setDisplaySize(size + 2, size + 2);
     outline.setTint(0x000000);
@@ -279,10 +234,6 @@ export class TerritoryScene extends Phaser.Scene {
     main.setDisplaySize(size, size);
     main.setTint(color);
 
-    // Set depths based on entity type
-    // Buildings (base) at depth 0
-    // Character (player) at depth 1
-    // Resource nodes at depth 0
     switch (entity.type) {
       case EntityType.BUILDING:
         outline.setDepth(0);
@@ -293,7 +244,6 @@ export class TerritoryScene extends Phaser.Scene {
         main.setDepth(1);
         break;
 
-      // todo maybe add resrouce back in as en tity that only exists when it is carreid back to the base
       case EntityType.RESOURCE_NODE:
         outline.setDepth(0);
         main.setDepth(0);
@@ -305,34 +255,27 @@ export class TerritoryScene extends Phaser.Scene {
 
   async moveEntityTo(entityId: string, x: number, y: number): Promise<void> {
     const sprites = this.entities.get(entityId);
-    // Ensure sprites exist AND the main sprite exists
     if (sprites == null || sprites.main == null) {
-      // Explicit null checks
       console.warn(
         `moveEntityTo: Entity or main sprite not found for ID: ${entityId}`,
       );
-      return Promise.resolve(); // Resolve immediately if no valid target
+      return Promise.resolve();
     }
 
-    // Determine targets, handling potentially missing outline
     const targets =
       sprites.outline != null
         ? [sprites.main, sprites.outline]
-        : [sprites.main]; // Explicit null check
+        : [sprites.main];
 
     return new Promise((resolve) => {
-      // console.log(`moveEntityTo: Starting tween for ${entityId} to (${x}, ${y})`); // Optional: Log start
       this.tweens.add({
         targets: targets,
         x,
         y,
-        duration: 1000, // Using fixed duration as per original code
+        duration: 1000,
         ease: "Power2",
         onComplete: () => {
-          // console.log(`moveEntityTo: Tween completed visually for ${entityId}`); // Optional: Log completion visually
-          // Ensure resolution happens
           if (typeof resolve === "function") {
-            // console.log(`moveEntityTo: Resolving promise for ${entityId}`); // Optional: Log resolution
             resolve();
           } else {
             console.error(
@@ -340,7 +283,6 @@ export class TerritoryScene extends Phaser.Scene {
             );
           }
         },
-        // Consider adding error handling if tween creation can fail
       });
     });
   }
@@ -351,98 +293,75 @@ export class TerritoryScene extends Phaser.Scene {
    * @param resourceType The type of resource to start gathering.
    */
   public async initiateGathering(resourceType: ResourceType): Promise<void> {
-    // Made async
     console.log(`TerritoryScene: Initiating gathering for ${resourceType}`);
     console.log(
       `[DEBUG] initiateGathering called with resourceType: ${resourceType}`,
     );
 
-    // --- Placeholder Identifiers ---
-    const playerId = "player1"; // Player entity ID from entityGenerator
-    // const homeBasePosition = { x: 100, y: 100 }; // ASSUMPTION: Home base location (Removed unused variable)
-    // --- End Placeholder Identifiers ---
+    const playerId = "player1";
 
-    const playerSprites = this.entities.get(playerId); // Get player's sprites
+    const playerSprites = this.entities.get(playerId);
     if (!playerSprites) {
       console.warn(
         `TerritoryScene: Player sprites with ID '${playerId}' not found.`,
       );
       return;
     }
-    // Use the position from the player's main sprite
     const playerPosition = { x: playerSprites.main.x, y: playerSprites.main.y };
 
-    // --- Find Nearest Valid Resource Node Sprite ---
-    let targetNodeSprite: Phaser.GameObjects.Sprite | null = null; // Store the sprite
+    let targetNodeSprite: Phaser.GameObjects.Sprite | null = null;
     let minDistance = Infinity;
 
     console.log(
       `[DEBUG] Searching for nearest node sprite of type: ${resourceType}`,
     );
     this.entities.forEach((sprites, id) => {
-      // Skip the player entity
       if (id === playerId) {
         return;
       }
 
-      // Retrieve the full entity data stored on the sprite
       const entityData = sprites.main.getData("entityData") as
         | Entity
         | undefined;
 
-      // Check if it's a resource node and if it yields the required resource type
-      if (
-        entityData && // Ensure data exists
-        entityData.type === EntityType.RESOURCE_NODE
-      ) {
-        // Cast to ResourceNodeEntity to access specific properties
-        const resourceNodeData = entityData; // Removed unnecessary type assertion (type narrowed by check on line 375)
+      if (entityData && entityData.type === EntityType.RESOURCE_NODE) {
+        const resourceNodeData = entityData;
 
-        // Check if the node yields the requested resourceType
         const yieldsRequiredResource = resourceNodeData.yields?.some(
           (yieldInfo: ResourceYield) => yieldInfo.resourceType === resourceType,
         );
 
         if (yieldsRequiredResource) {
-          // Log candidate entity details (optional)
-          // console.log(`[DEBUG] Considering valid node ID: ${id}, Type: ${entityData.type}, Yields: ${resourceType}, Pos: (${sprites.main.x}, ${sprites.main.y})`);
-
           const distance = Phaser.Math.Distance.Between(
             playerPosition.x,
             playerPosition.y,
-            sprites.main.x, // Use sprite position for distance
+            sprites.main.x,
             sprites.main.y,
           );
 
           if (distance < minDistance) {
             minDistance = distance;
-            targetNodeSprite = sprites.main; // Store the closest valid sprite
+            targetNodeSprite = sprites.main;
           }
         }
       }
     });
 
     if (targetNodeSprite == null) {
-      // Explicit null check
       console.warn(
         `TerritoryScene: No resource node sprites of type ${resourceType} found.`,
       );
-      // Maybe add visual feedback later
-      return; // Exit if no valid target found
+      return;
     }
 
-    // Use the position from the found sprite, adding type assertion for safety
     const nodePosition = {
       x: (targetNodeSprite as Phaser.GameObjects.Sprite).x,
       y: (targetNodeSprite as Phaser.GameObjects.Sprite).y,
     };
-    // console.log(`[DEBUG] Selected targetNodeSprite? ${!!targetNodeSprite}`); // Optional debug log
-    // console.log(`[DEBUG] Calculated nodePosition: (${nodePosition.x}, ${nodePosition.y}) from sprite`); // Optional debug log
     console.log(
       `TerritoryScene: Found nearest node sprite of type ${resourceType} at (${nodePosition.x}, ${nodePosition.y}). Moving player...`,
     );
 
-    // --- Move to Node ---
     try {
       console.log("[DEBUG] Attempting moveEntityTo node...");
       await this.moveEntityTo(playerId, nodePosition.x, nodePosition.y);
@@ -451,22 +370,16 @@ export class TerritoryScene extends Phaser.Scene {
       );
       console.log("[DEBUG] moveEntityTo node complete.");
 
-      // --- Simulate Gathering Duration ---
-      // Placeholder: Wait 2 seconds to simulate gathering
-      console.log("[DEBUG] Starting gathering delay...");
       await new Promise((resolve) => this.time.delayedCall(2000, resolve));
-      console.log("[DEBUG] Gathering delay complete.");
       console.log(`TerritoryScene: Gathering complete. Returning to base...`);
 
-      // --- Find Home Base and Move Back ---
       console.log(
         "[DEBUG] Finding home base and attempting moveEntityTo base...",
       );
-      const homeBaseId = "base1"; // Use the correct ID from entityGenerator
+      const homeBaseId = "base1";
       const homeBaseSprites = this.entities.get(homeBaseId);
 
       if (homeBaseSprites != null && homeBaseSprites.main != null) {
-        // Explicit null checks
         console.log(`[DEBUG] Found home base sprite for ID '${homeBaseId}'.`);
         const targetX = homeBaseSprites.main.x;
         const targetY = homeBaseSprites.main.y;
@@ -482,20 +395,14 @@ export class TerritoryScene extends Phaser.Scene {
         console.warn(
           `TerritoryScene: Home base entity with ID '${homeBaseId}' not found. Cannot return player.`,
         );
-        // Optionally handle this case, e.g., leave player at node or move to default coords
       }
-      // --- Trigger Resource Update ---
       console.log(
         `TerritoryScene: Triggering resource update for ${resourceType}.`,
       );
-      // Use the sceneEvents object passed during construction (likely via adapter)
-      // Assume 'onResourceGathered' is a valid event handler expected by the adapter
-      this.sceneEvents.onResourceGathered?.(resourceType, 1); // Gathered amount is 1 for now
+      this.sceneEvents.onResourceGathered?.(resourceType, 1);
     } catch (error) {
       console.error(`TerritoryScene: Error during gathering sequence:`, error);
       console.error("[DEBUG] Error caught in gathering sequence:", error);
-      // Optional: Move player back home on error?
-      // await this.moveEntityTo(playerId, homeBasePosition.x, homeBasePosition.y);
     }
   }
 }

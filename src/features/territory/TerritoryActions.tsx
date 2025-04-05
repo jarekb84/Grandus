@@ -8,15 +8,13 @@ import {
 import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 
 interface TerritoryActionsProps {
-  // Renamed interface
-  isGathering: boolean; // Prop name kept for now
+  isGathering: boolean;
   onGather: (type: ResourceType) => void;
   hasAvailableNodeType: (nodeType: ResourceNodeType) => boolean;
   onStartCombat: () => void;
 }
 
 const TerritoryActions: FC<TerritoryActionsProps> = ({
-  // Renamed component
   isGathering,
   onGather,
   hasAvailableNodeType,
@@ -90,14 +88,13 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
           </div>
         </div>
 
-        {/* Combat Initiation Section */}
         <div className="flex gap-4">
           <div className="flex-1">
             <h3 className="text-white font-semibold mb-2">Territory Actions</h3>
             <div className="flex gap-2">
               <button
-                onClick={onStartCombat} // Use the new callback
-                disabled={isGathering} // Disable if gathering
+                onClick={onStartCombat}
+                disabled={isGathering}
                 className={`flex-1 px-4 py-2 bg-red-700 text-white rounded ${
                   isGathering
                     ? "opacity-50 cursor-not-allowed"
@@ -106,7 +103,6 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               >
                 Expand Combat (Test Hex)
               </button>
-              {/* Add Enhance Hex button later */}
             </div>
           </div>
         </div>

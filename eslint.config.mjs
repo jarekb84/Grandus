@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
 import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin";
 import typescriptEslintParser from "@typescript-eslint/parser";
+import eslintCommentsPlugin from "eslint-plugin-eslint-comments";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,6 +14,18 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    plugins: {
+      "eslint-comments": eslintCommentsPlugin,
+    },
+    rules: {
+      // Additional recommended rules from eslint-plugin-eslint-comments can be added here if desired
+      "eslint-comments/disable-enable-pair": ["error", { allowWholeFile: true }],
+      "eslint-comments/no-duplicate-disable": "error",
+      "eslint-comments/no-unlimited-disable": "error",
+      "eslint-comments/no-unused-disable": "error",
+    }
+  },
   {
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
@@ -36,7 +49,7 @@ const eslintConfig = [
       "@typescript-eslint/prefer-as-const": "error",
       "@typescript-eslint/ban-ts-comment": "error",
       // React Hook Rules
-      "react-hooks/exhaustive-deps": "error", 
+      "react-hooks/exhaustive-deps": "error",
     },
   },
 ];

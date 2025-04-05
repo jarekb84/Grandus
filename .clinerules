@@ -39,10 +39,14 @@ This file captures key patterns, preferences, and project intelligence discovere
     *   Prefer combining small architectural refactorings (implementing state patterns, services) with feature development rather than large-scale rewrites. (Ref: STATE_ARCHITECTURE.MD)
     *   When modifying a file, apply the Boy Scout rule: clean up minor issues like unnecessary comments.
     *   If significant structural/architectural improvements are identified that are outside the scope of the current task, flag them for potential addition to a dedicated refactoring plan (like `REFACTORING_PLAN.MD`) rather than performing them immediately.
-*   **Code Comments:**
-    *   Add comments sparingly and only when necessary to clarify the *why* behind a design decision or complex logic, not the *what* or *how*.
-    *   Avoid redundant comments that merely restate the code's function.
-    *   Do not add comments describing refactoring actions (e.g., "// Renamed variable"); this belongs in commit messages.
+*   **Code Comments (Strict Guidelines):**
+    *   **Purpose:** Comments MUST explain the *why* behind complex, non-obvious logic or design decisions that cannot be easily inferred from the code itself. They should *never* explain the *what* or *how* if the code is clear.
+    *   **Prohibited Comments (AI & Human):** The following types of comments are strictly forbidden and should not be generated or added:
+        *   **Change Descriptions:** Comments describing the change being made (e.g., `// Refactored X`, `// Added Y`, `// Moved function`). This information belongs exclusively in commit messages.
+        *   **Redundant/Obvious Logic:** Comments that merely restate the function/variable name or describe self-evident code logic (e.g., `// Loop through items`, `// Increment counter`).
+        *   **Markers/Placeholders:** `TODO`, `FIXME`, `XXX`, `NOTE`, placeholder comments, or similar temporary markers. Use issue tracking systems for managing tasks and known issues.
+        *   **Temporary State/Workarounds:** Comments explaining temporary fixes, workarounds, or incomplete states (e.g., `// Temporary fix until API is ready`). Address the underlying issue or document it externally.
+    *   **Sparsity:** Add comments *very sparingly*. Clean, self-documenting code is preferred over excessive commenting. If code requires extensive comments to be understood, consider refactoring it for clarity first.
 
 ## Development Workflow & Context Management
 

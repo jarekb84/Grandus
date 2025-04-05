@@ -5,7 +5,7 @@ interface InventoryResources {
   stoneCount: number;
   woodCount: number;
   foodCount: number;
-  pebbleCount: number; // Added pebble count
+  pebbleCount: number;
 }
 
 /**

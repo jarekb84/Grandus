@@ -1,20 +1,23 @@
-import React from 'react';
-import { GameStatsProps } from '@/features/combat/Combat.types';
-import styles from '@/features/combat/Combat.module.css';
-import { useCurrencyStore } from '@/features/shared/stores/Currency.store';
+import React from "react";
+import { GameStatsProps } from "@/features/combat/Combat.types";
+import styles from "@/features/combat/Combat.module.css";
+import { useCurrencyStore } from "@/features/shared/stores/Currency.store";
 
-export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }) => {
-  // Get current cash from the store
-  const cash = useCurrencyStore(state => state.cash);
-  
-  // Calculate health percentage for the health bar
-  const healthPercentage = Math.max(0, Math.min(100, (playerStats.health / 100) * 100));
-  
-  // Determine health bar color based on current health
+export const GameStats: React.FC<GameStatsProps> = ({
+  combatStats,
+  playerStats,
+}) => {
+  const cash = useCurrencyStore((state) => state.cash);
+
+  const healthPercentage = Math.max(
+    0,
+    Math.min(100, (playerStats.health / 100) * 100),
+  );
+
   const getHealthBarColor = (): string => {
-    if (healthPercentage > 60) return '#4ade80'; // Green
-    if (healthPercentage > 30) return '#facc15'; // Yellow
-    return '#ef4444'; // Red
+    if (healthPercentage > 60) return "#4ade80"; // Green
+    if (healthPercentage > 30) return "#facc15"; // Yellow
+    return "#ef4444"; // Red
   };
 
   return (
@@ -36,11 +39,11 @@ export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }
           <div className={styles.healthContainer}>
             <div>Health: {playerStats.health}/100</div>
             <div className={styles.healthBar}>
-              <div 
-                className={styles.healthBarFill} 
-                style={{ 
+              <div
+                className={styles.healthBarFill}
+                style={{
                   width: `${healthPercentage}%`,
-                  backgroundColor: getHealthBarColor()
+                  backgroundColor: getHealthBarColor(),
                 }}
               />
             </div>
@@ -52,4 +55,4 @@ export const GameStats: React.FC<GameStatsProps> = ({ combatStats, playerStats }
       </div>
     </>
   );
-}; 
+};

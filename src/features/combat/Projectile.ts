@@ -1,40 +1,42 @@
-import * as Phaser from 'phaser';
-import { Enemy } from '@/features/combat/Enemy';
+import * as Phaser from "phaser";
+import { Enemy } from "@/features/combat/Enemy";
 
 export class ProjectileSystem {
   private scene: Phaser.Scene;
   private physics: Phaser.Physics.Arcade.ArcadePhysics;
   private projectiles: Phaser.GameObjects.Group;
-  
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.physics = scene.physics;
-    
+
     this.projectiles = this.scene.add.group({
       classType: Phaser.Physics.Arcade.Sprite,
-      runChildUpdate: true
+      runChildUpdate: true,
     });
-    
+
     this.createProjectileTextures();
   }
-  
+
   private createProjectileTextures(): void {
     const graphics = this.scene.add.graphics();
     graphics.fillStyle(0xffff00);
     graphics.fillCircle(0, 0, 4);
-    graphics.generateTexture('projectile', 8, 8);
+    graphics.generateTexture("projectile", 8, 8);
     graphics.destroy();
   }
-  
-  shootProjectile(sourceX: number, sourceY: number, targetX: number, targetY: number): Phaser.Physics.Arcade.Sprite {
-    const projectile = this.physics.add.sprite(sourceX, sourceY, 'projectile');
+
+  shootProjectile(
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number,
+  ): Phaser.Physics.Arcade.Sprite {
+    const projectile = this.physics.add.sprite(sourceX, sourceY, "projectile");
     this.projectiles.add(projectile);
 
     // Calculate direction to target
-    const angle = Phaser.Math.Angle.Between(
-      sourceX, sourceY,
-      targetX, targetY
-    );
+    const angle = Phaser.Math.Angle.Between(sourceX, sourceY, targetX, targetY);
 
     // Set velocity directly towards click position
     const speed = 400;
@@ -44,29 +46,37 @@ export class ProjectileSystem {
     this.scene.time.delayedCall(2000, () => {
       projectile.destroy();
     });
-    
+
     return projectile;
   }
-  
-  checkCollisions(enemies: Enemy[], onEnemyHit: (enemy: Enemy, projectile: Phaser.Physics.Arcade.Sprite) => void): void {
-    this.projectiles.getChildren().forEach((gameObject: Phaser.GameObjects.GameObject) => {
-      const projectile = gameObject as Phaser.Physics.Arcade.Sprite;
-      enemies.forEach(enemy => {
-        if (Phaser.Geom.Intersects.RectangleToRectangle(
-          projectile.getBounds(),
-          enemy.sprite.getBounds()
-        )) {
-          // Destroy projectile
-          projectile.destroy();
-          
-          // Call the hit callback
-          onEnemyHit(enemy, projectile);
-        }
+
+  checkCollisions(
+    enemies: Enemy[],
+    onEnemyHit: (
+      enemy: Enemy,
+      projectile: Phaser.Physics.Arcade.Sprite,
+    ) => void,
+  ): void {
+    this.projectiles
+      .getChildren()
+      .forEach((gameObject: Phaser.GameObjects.GameObject) => {
+        const projectile = gameObject as Phaser.Physics.Arcade.Sprite;
+        enemies.forEach((enemy) => {
+          if (
+            Phaser.Geom.Intersects.RectangleToRectangle(
+              projectile.getBounds(),
+              enemy.sprite.getBounds(),
+            )
+          ) {
+            projectile.destroy();
+
+            onEnemyHit(enemy, projectile);
+          }
+        });
       });
-    });
   }
-  
+
   getProjectiles(): Phaser.GameObjects.Group {
     return this.projectiles;
   }
-} 
+}

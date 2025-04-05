@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface CombatStats {
   playerHealth: number;
@@ -13,13 +13,11 @@ interface CombatStats {
 }
 
 interface CombatState {
-  // UI/Game State (low frequency updates)
   stats: CombatStats;
   isGameOver: boolean;
   isWaveComplete: boolean;
   isAutoShooting: boolean;
-  
-  // Actions
+
   updateStats: (updates: Partial<CombatStats>) => void;
   setGameOver: (isOver: boolean) => void;
   setWaveComplete: (isComplete: boolean) => void;
@@ -36,54 +34,52 @@ const initialStats: CombatStats = {
   enemySpeed: 50,
   ammo: 0,
   cash: 0,
-  killCount: 0
+  killCount: 0,
 };
 
 export const useCombatStore = create<CombatState>((set) => ({
-  // Initial state
   stats: { ...initialStats },
   isGameOver: false,
   isWaveComplete: false,
   isAutoShooting: false,
-  
-  // Actions
+
   updateStats: (updates: Partial<CombatStats>): void => {
-    set(state => ({
+    set((state) => ({
       ...state,
       stats: {
         ...state.stats,
-        ...updates
-      }
+        ...updates,
+      },
     }));
   },
-  
+
   setGameOver: (isOver: boolean): void => {
-    set(state => ({
+    set((state) => ({
       ...state,
-      isGameOver: isOver
+      isGameOver: isOver,
     }));
   },
-  
+
   setWaveComplete: (isComplete: boolean): void => {
-    set(state => ({
+    set((state) => ({
       ...state,
-      isWaveComplete: isComplete
+      isWaveComplete: isComplete,
     }));
   },
-  
+
   setAutoShooting: (enabled: boolean): void => {
-    set(state => ({
+    set((state) => ({
       ...state,
-      isAutoShooting: enabled
+      isAutoShooting: enabled,
     }));
   },
-  
+
   resetState: (): void => {
-    set(state => ({
+    set((state) => ({
       ...state,
       stats: { ...initialStats },
       isGameOver: false,
-      isWaveComplete: false
+      isWaveComplete: false,
     }));
-  }
+  },
 }));
