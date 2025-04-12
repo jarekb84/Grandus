@@ -35,7 +35,7 @@ The game is structured around a core loop involving three distinct views/modes:
 -   **State Separation (Phaser/React):** High-frequency game state (positions, physics) managed within Phaser scenes; lower-frequency summary data synced periodically to React/Zustand for UI display. (Ref: PERFORMANCE_PLAN.MD)
 -   **Tiered Update Frequency:** Different game systems update at varying frequencies (e.g., physics@60fps, AI@20fps, UI@6fps) for performance optimization. (Ref: PERFORMANCE_PLAN.MD)
 -   **Event Messaging System:** Decoupled communication between React UI and Phaser scenes using a pub/sub event bus. (Ref: STATE_ARCHITECTURE.MD)
--   **Adapter Pattern:** Standardized interfaces (Adapters) for React components to interact with game features/scenes (Gathering, Combat). (Ref: STATE_ARCHITECTURE.MD)
+-   **Adapter Pattern:** Standardized interfaces (Adapters) for React components to interact with game features/scenes (Territory, Combat). (Ref: STATE_ARCHITECTURE.MD)
 -   **Domain-Specific Stores:** Zustand state broken down into smaller, focused stores (e.g., `CombatStore`, `ResourceNodeStore`). (Ref: STATE_ARCHITECTURE.MD)
 -   **(Planned) Object Pooling:** For frequently created/destroyed objects like projectiles, particles, and potentially enemies to optimize performance. (Ref: PERFORMANCE_PLAN.MD)
 -   **(Planned) Spatial Partitioning:** Grid or quadtree for optimizing collision detection and nearest-neighbor searches at high entity counts. (Ref: PERFORMANCE_PLAN.MD)
@@ -49,7 +49,7 @@ The game is structured around a core loop involving three distinct views/modes:
 -   **Zustand Stores (Domain-Specific):** Hold persistent game state (currency, resources, unlocked upgrades, research progress, hex statuses). Accessed by Management View and synced periodically from Phaser scenes via Adapters/Event Bus.
 -   **Adapters:** Bridge the gap between React UI components and Phaser scenes/game logic, exposing specific actions and state slices.
 -   **Event Bus:** Facilitates communication between decoupled parts of the system (React <-> Phaser, System <-> System).
--   **Services (Planned):** Encapsulate core domain logic (GatheringService, CombatService, CraftingService) used by views/scenes. (Ref: STATE_ARCHITECTURE.MD)
+-   **Services (Planned):** Encapsulate core domain logic (TerritoryService, CombatService, CraftingService) used by views/scenes. (Ref: STATE_ARCHITECTURE.MD)
 
 ## Key Technical Decisions
 

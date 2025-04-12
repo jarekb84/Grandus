@@ -2,7 +2,7 @@
 
 ## What Works
 - **Basic Project Setup:** Next.js project with TypeScript, configured with ESLint.
-- **Core Game Structure:** Initial structure for features, including `combat`, `gathering`, `management`, and `core` game components.
+- **Core Game Structure:** Initial structure for features, including `combat`, `territory`, `management`, and `core` game components.
 - **Combat Feature Prototype:** Basic combat scene in PhaserJs with geometric enemies and player projectile system.
 - **State Management:** Zustand setup for game-wide state management.
 - **Game Engine Integration:** PhaserJs integrated into React components for rendering game scenes.
@@ -12,7 +12,7 @@
 **Core Loop Implementation (MVP Focus):**
 -   **Territory View (PhaserJS):**
     -   Implement basic hex grid overlay.
-    -   Implement visual gathering: 1 gatherer entity, 1 resource type (Stone), movement to nearest node, return to base.
+    -   **[DONE]** Implement visual gathering: 1 gatherer entity (blue circle), 1 resource type (Stone, grey squares), movement to nearest node, return to base (triggered by 'G' key).
     -   Implement basic hex interaction: Click hexes (Home + 1 adjacent), display simple info panel, `Expand Combat` button.
     -   Basic resource inventory tracking (Stone).
 -   **Combat Scene (PhaserJS):**
@@ -45,10 +45,10 @@
 -   **Future Features:** Cooperative gameplay, guilds, trading.
 
 ## Current Status
-- **Planning & Foundation Phase:** Core game plan significantly refined (`docs/GAMEPLAN.MD`). Memory Bank updated to reflect the detailed vision. Foundational project structure exists. Basic combat prototype exists.
+- **Planning & Foundation Phase:** Core game plan significantly refined (`docs/GAMEPLAN.MD`). Memory Bank updated to reflect the detailed vision. Foundational project structure exists. Basic combat prototype exists. Initial structural refactoring is complete.
 - **Architecture Defined:** Performance optimization strategy (`PERFORMANCE_PLAN.MD`) and state management architecture (`STATE_ARCHITECTURE.MD`) are documented.
 - **Development Team:** Currently single developer.
-- **Next Steps:** Begin implementing the refined MVP features, starting with the Territory View basics.
+- **Next Steps:** Focus shifted to implementing the Minimum Viable Product (MVP) features. Visual gathering MVP is complete. Next is basic hex interaction in the Territory View.
 
 ## Known Issues
 - **Performance Bottlenecks (Identified):** Initial tests show performance degradation above ~4,000 entities, primarily linked to projectile creation/collision checks. Optimization plan exists (`PERFORMANCE_PLAN.MD`). Milestone 1 optimizations (state separation, update frequency) are conceptually in place or easy to add.

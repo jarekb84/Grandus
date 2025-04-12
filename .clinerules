@@ -13,7 +13,7 @@ This file captures key patterns, preferences, and project intelligence discovere
 ## State Management & Communication
 
 *   **State Separation Principle:** CRITICAL - Keep high-frequency game state (e.g., entity positions, physics) strictly within Phaser scenes. Only sync lower-frequency summary data or necessary UI state to React/Zustand periodically (e.g., every 10-15 frames) to avoid performance bottlenecks caused by React re-renders. (Ref: PERFORMANCE_PLAN.MD, STATE_ARCHITECTURE.MD)
-*   **Communication:** Utilize a central **Event Bus** for decoupled communication between React components and Phaser scenes. Use the **Adapter Pattern** to provide standardized interfaces for React to interact with specific game features within Phaser (e.g., `useCombatAdapter`, `useGatheringAdapter`). (Ref: STATE_ARCHITECTURE.MD)
+*   **Communication:** Utilize a central **Event Bus** for decoupled communication between React components and Phaser scenes. Use the **Adapter Pattern** to provide standardized interfaces for React to interact with specific game features within Phaser (e.g., `useCombatAdapter`, `useTerritoryAdapter`). (Ref: STATE_ARCHITECTURE.MD)
 *   **Zustand Stores:** Prefer smaller, **domain-specific stores** (e.g., `ResourceStore`, `CombatStore`, `WorkshopStore`) over monolithic ones. (Ref: STATE_ARCHITECTURE.MD)
 
 ## Performance Patterns

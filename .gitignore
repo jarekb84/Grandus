@@ -37,3 +37,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# IDE/Tooling specific files
+repomix-output.xml
