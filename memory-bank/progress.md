@@ -54,3 +54,5 @@
 - **Performance Bottlenecks (Identified):** Initial tests show performance degradation above ~4,000 entities, primarily linked to projectile creation/collision checks. Optimization plan exists (`PERFORMANCE_PLAN.MD`). Milestone 1 optimizations (state separation, update frequency) are conceptually in place or easy to add.
 - **UI/UX Polish:** Current UI is placeholder/basic and needs significant work following the Progressive Disclosure principle.
 - **Content Scope:** MVP content is minimal; requires expansion post-MVP.
+
+[2025-04-12 14:22] - Task Completed: Consolidated project rules from legacy `.clinerules`/`.cursorrules` into the standard Roo format (`.roo/rules/` and `.roo/rules-code/`).

@@ -1,0 +1,3 @@
+# Decision Log
+
+[2025-04-12 14:22:00] - Migrated project rules from legacy `.clinerules` and `.cursorrules` to the standard Roo format (`.roo/rules/` and `.roo/rules-code/`). Rationale: To align with current Roo standards for better organization, maintainability, and integration with Roo tooling. Implications: All modes will now use the rules defined in the `.roo/` directories. The old files have been deleted.
