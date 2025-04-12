@@ -58,3 +58,5 @@
 [2025-04-12 14:22] - Task Completed: Consolidated project rules from legacy `.clinerules`/`.cursorrules` into the standard Roo format (`.roo/rules/` and `.roo/rules-code/`).
 
 [2025-04-12 14:49] - Defined workflow strategy (memory-bank/workflowStrategy.md) and persisted Epics/Stories breakdown into docs/epics/ and docs/stories/ structure.
+
+[2025-04-12 15:14] - Task Completed: Story docs/stories/epic1/01_Foundation_Hex_Grid_Integration_Home_Base.md - Home Base positioned in center hex, gatherer starts relative.

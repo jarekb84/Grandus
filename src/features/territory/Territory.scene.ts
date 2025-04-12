@@ -42,10 +42,12 @@ export class TerritoryScene extends Phaser.Scene {
 
   private hexSize = 72;
 
-  private startOffsetX: number = 0;
-  private startOffsetY: number = 0;
-
+  private centerX: number = 0;
+  private centerY: number = 0;
   create(): void {
+    this.centerX = this.cameras.main.centerX;
+    this.centerY = this.cameras.main.centerY;
+
     this.createShapeTextures();
     this.drawHexGrid();
     this.setupInputHandling();
@@ -55,26 +57,37 @@ export class TerritoryScene extends Phaser.Scene {
     const graphics = this.add.graphics({
       lineStyle: { width: 1, color: 0x444444 },
     });
-    const hexWidth = Math.sqrt(3) * this.hexSize;
-    const hexHeight = 2 * this.hexSize;
     const screenWidth = this.cameras.main.width;
     const screenHeight = this.cameras.main.height;
 
-    this.startOffsetX = -hexWidth / 2;
-    this.startOffsetY = -hexHeight / 2;
+    // --- START: Calculate dynamic hex range based on all 4 corners ---
+    const topLeftHex = this.pixelToHex(0, 0);
+    const topRightHex = this.pixelToHex(screenWidth, 0);
+    const bottomLeftHex = this.pixelToHex(0, screenHeight);
+    const bottomRightHex = this.pixelToHex(screenWidth, screenHeight);
+    const buffer = 2; // Draw a couple extra hexes around the edges
 
-    const qMin = -2;
-    const qMax = 10;
-    const rMin = -2;
-    const rMax = 8;
+    const qMin =
+      Math.min(topLeftHex.q, topRightHex.q, bottomLeftHex.q, bottomRightHex.q) -
+      buffer;
+    const qMax =
+      Math.max(topLeftHex.q, topRightHex.q, bottomLeftHex.q, bottomRightHex.q) +
+      buffer;
+    const rMin =
+      Math.min(topLeftHex.r, topRightHex.r, bottomLeftHex.r, bottomRightHex.r) -
+      buffer;
+    const rMax =
+      Math.max(topLeftHex.r, topRightHex.r, bottomLeftHex.r, bottomRightHex.r) +
+      buffer;
+    // --- END: Calculate dynamic hex range based on all 4 corners ---
 
     for (let r = rMin; r <= rMax; r++) {
       for (let q = qMin; q <= qMax; q++) {
         const pixelPos = this.hexToPixelCoords(
           q,
           r,
-          this.startOffsetX,
-          this.startOffsetY,
+          this.centerX,
+          this.centerY,
         );
 
         if (
@@ -93,12 +106,12 @@ export class TerritoryScene extends Phaser.Scene {
   private hexToPixelCoords(
     q: number,
     r: number,
-    offsetX: number,
-    offsetY: number,
+    centerX: number,
+    centerY: number,
   ): { x: number; y: number } {
     const x =
-      this.hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r) + offsetX;
-    const y = this.hexSize * ((3 / 2) * r) + offsetY;
+      centerX + this.hexSize * (Math.sqrt(3) * q + (Math.sqrt(3) / 2) * r);
+    const y = centerY + this.hexSize * ((3 / 2) * r);
     return { x, y };
   }
 
@@ -124,8 +137,8 @@ export class TerritoryScene extends Phaser.Scene {
 
   // Based on https://www.redblobgames.com/grids/hexagons/#pixel-to-hex
   private pixelToHex(worldX: number, worldY: number): HexCoords {
-    const relativeX = worldX - this.startOffsetX;
-    const relativeY = worldY - this.startOffsetY;
+    const relativeX = worldX - this.centerX;
+    const relativeY = worldY - this.centerY;
 
     const q_frac =
       ((Math.sqrt(3) / 3) * relativeX - (1 / 3) * relativeY) / this.hexSize;
@@ -198,6 +211,14 @@ export class TerritoryScene extends Phaser.Scene {
 
     const sprites = this.createSpritesForEntity(entity);
     this.entities.set(entity.id, sprites);
+
+    if (entity.id === "base1" || entity.id === "player1") {
+      const centerPos = this.hexToPixelCoords(0, 0, this.centerX, this.centerY);
+      sprites.main.x = centerPos.x;
+      sprites.main.y = centerPos.y;
+      sprites.outline.x = centerPos.x;
+      sprites.outline.y = centerPos.y;
+    }
 
     if (entity.type === EntityType.RESOURCE_NODE) {
       sprites.main.setInteractive();
@@ -338,16 +359,13 @@ export class TerritoryScene extends Phaser.Scene {
       await this.moveEntityTo(playerId, nodePosition.x, nodePosition.y);
 
       await new Promise((resolve) => this.time.delayedCall(2000, resolve));
-      const homeBaseId = "base1";
-      const homeBaseSprites = this.entities.get(homeBaseId);
 
-      if (homeBaseSprites != null && homeBaseSprites.main != null) {
-        const targetX = homeBaseSprites.main.x;
-        const targetY = homeBaseSprites.main.y;
-        await this.moveEntityTo(playerId, targetX, targetY);
-      } else {
-        // Home base entity not found, player cannot return automatically
-      }
+      // --- START: Return player to calculated center hex ---
+      const homePos = this.hexToPixelCoords(0, 0, this.centerX, this.centerY);
+      await this.moveEntityTo(playerId, homePos.x, homePos.y);
+      // --- END: Return player to calculated center hex ---
+
+      // Report resource gathered *after* returning
       this.sceneEvents.onResourceGathered?.(resourceType, 1);
     } catch {
       // TODO: Implement error handling for gathering process (move, delay, resource callback)

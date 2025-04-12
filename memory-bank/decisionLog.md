@@ -1,3 +1,5 @@
 # Decision Log
 
 [2025-04-12 14:22:00] - Migrated project rules from legacy `.clinerules` and `.cursorrules` to the standard Roo format (`.roo/rules/` and `.roo/rules-code/`). Rationale: To align with current Roo standards for better organization, maintainability, and integration with Roo tooling. Implications: All modes will now use the rules defined in the `.roo/` directories. The old files have been deleted.
+
+[2025-04-12 15:24:00] - Adopted hybrid story completion tracking. Status marked via `[x]` checkbox in relevant Epic file (`docs/epics/*.md`); history logged in `progress.md`. Corrected story filenames listed in `docs/epics/EPIC_1_CORE_LOOP.md` to match actual files. Rationale: Provides clear visual status in context (Epic file) and detailed history (progress log) without breaking file links. Improves documentation consistency.

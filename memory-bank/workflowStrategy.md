@@ -44,3 +44,11 @@ This document outlines the agreed-upon strategy for managing development tasks (
 ## Iterative Refinement
 
 This strategy is a starting point. We will adapt it based on experience, particularly around complexity assessment and decomposition methods.
+
+## Story Completion Tracking
+
+[2025-04-12 15:24]
+To track the completion status of user stories:
+- **Primary Status:** Edit the corresponding Epic file (e.g., `docs/epics/EPIC_NAME.md`) and add a Markdown checkbox `[x]` marker to the list item for the completed story. Ensure story filenames in the epic file match the actual filenames in `docs/stories/`.
+- **Historical Log:** Continue to record the completion event, including the story path and a brief summary, in `memory-bank/progress.md` with a timestamp.
+- **Commit Message Suggestion:** After confirming the completion updates, provide a suggested commit message summarizing the changes made during the story's implementation, following a concise title/detailed body format.
