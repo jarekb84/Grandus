@@ -56,3 +56,5 @@
 - **Content Scope:** MVP content is minimal; requires expansion post-MVP.
 
 [2025-04-12 14:22] - Task Completed: Consolidated project rules from legacy `.clinerules`/`.cursorrules` into the standard Roo format (`.roo/rules/` and `.roo/rules-code/`).
+
+[2025-04-12 14:49] - Defined workflow strategy (memory-bank/workflowStrategy.md) and persisted Epics/Stories breakdown into docs/epics/ and docs/stories/ structure.
