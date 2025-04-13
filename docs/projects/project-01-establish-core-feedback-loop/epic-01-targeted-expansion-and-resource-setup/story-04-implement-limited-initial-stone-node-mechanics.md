@@ -1,4 +1,4 @@
-# User Story: Implement Adjacent Hex Selection
+# User Story: Implement Limited Initial Stone Node Mechanics
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
 **Epic Goal:** Align home base and initial Stone node within specific hexes in Territory View. Implement hex selection to target the `Expand Combat` action specifically at an adjacent hex. Set up the initial home Stone node to be depletable/limited (e.g., 1 Stone capacity, slow respawn) as per the loop requirements. *(Refines existing Territory view for targeted actions and correct initial state).*
@@ -7,25 +7,25 @@
 
 ## Story Goal
 
-Allow the player to click on adjacent, uncontrolled hexes in the Territory View to select them as a potential target.
+Ensure the initial Stone node has a capacity of 1 Stone and replenishes slowly (e.g., every second) after being gathered, using the architecture established in Story 3.
 
 ---
 
 ## Initial Acceptance Criteria (Optional Placeholder)
 
-*   [Placeholder: Clicking on a hex adjacent to the home base hex registers an input event.]
-*   [Placeholder: Clicking an adjacent, uncontrolled hex updates the game state to mark that hex as the 'selected target'.]
-*   [Placeholder: Clicking the home base hex or an already controlled hex does not change the 'selected target' state (or deselects).]
-*   [Placeholder: Clicking a non-adjacent hex does not change the 'selected target' state.]
-*   [Placeholder: Only one hex can be the 'selected target' at a time.]
+*   [Placeholder: The initial Stone node has a maximum capacity defined as 1.]
+*   [Placeholder: Gathering from the node reduces its current capacity.]
+*   [Placeholder: Gathering is prevented if the node's current capacity is 0.]
+*   [Placeholder: After being depleted (capacity 0), the node starts a replenishment timer (e.g., 1 second).]
+*   [Placeholder: Upon timer completion, the node's capacity is restored to 1.]
+*   [Placeholder: The node state (capacity, timer) is managed by the `ResourceNodeStore`/`ResourceService` established in Story 3.]
 
 ---
 
 ## Notes / Context
 
-*   Focuses on the input handling and state management for selecting a target hex.
-*   Visual feedback for selection is handled in Story 6.
-*   Interaction with the `Expand Combat` button is handled in Story 7.
+*   This story implements the specific game mechanics for the initial node's limited capacity and respawn.
+*   Depends on the state management structure created in Story 3.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
 
 ---

@@ -1,4 +1,4 @@
-# User Story: Implement Adjacent Hex Selection
+# User Story: Tech Story: Refactor/Implement Resource Node State Management
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
 **Epic Goal:** Align home base and initial Stone node within specific hexes in Territory View. Implement hex selection to target the `Expand Combat` action specifically at an adjacent hex. Set up the initial home Stone node to be depletable/limited (e.g., 1 Stone capacity, slow respawn) as per the loop requirements. *(Refines existing Territory view for targeted actions and correct initial state).*
@@ -7,26 +7,26 @@
 
 ## Story Goal
 
-Allow the player to click on adjacent, uncontrolled hexes in the Territory View to select them as a potential target.
+Establish state management for resource node capacity/respawn according to `STATE_ARCHITECTURE.md`. Create `ResourceNodeStore` (Zustand) and optionally a `ResourceService`. Refactor relevant components (`TerritoryScene`, `useTerritoryAdapter`, potentially `ResourceSystem`) to use this new structure, improving SRP and DI alignment.
 
 ---
 
 ## Initial Acceptance Criteria (Optional Placeholder)
 
-*   [Placeholder: Clicking on a hex adjacent to the home base hex registers an input event.]
-*   [Placeholder: Clicking an adjacent, uncontrolled hex updates the game state to mark that hex as the 'selected target'.]
-*   [Placeholder: Clicking the home base hex or an already controlled hex does not change the 'selected target' state (or deselects).]
-*   [Placeholder: Clicking a non-adjacent hex does not change the 'selected target' state.]
-*   [Placeholder: Only one hex can be the 'selected target' at a time.]
+*   [Placeholder: A Zustand store (`ResourceNodeStore` or similar) exists to manage the state of individual resource nodes (capacity, respawn timers, etc.).]
+*   [Placeholder: A Service layer (`ResourceService` or similar) potentially exists to encapsulate complex logic related to node state updates, if needed.]
+*   [Placeholder: `TerritoryScene` no longer directly manages node capacity/respawn state.]
+*   [Placeholder: Gathering logic interacts with the new store/service to update node state.]
+*   [Placeholder: Existing `ResourceSystem` is refactored or replaced to align with the new architecture.]
+*   [Placeholder: Relevant adapters (`useTerritoryAdapter`) interact with the new store/service instead of direct scene manipulation for node state.]
 
 ---
 
 ## Notes / Context
 
-*   Focuses on the input handling and state management for selecting a target hex.
-*   Visual feedback for selection is handled in Story 6.
-*   Interaction with the `Expand Combat` button is handled in Story 7.
-*   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
+*   This is a prerequisite technical story added based on architect feedback to improve architectural alignment before implementing node mechanics.
+*   Focus is on establishing the correct state management structure (Store/Service) and refactoring interactions.
+*   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown and subsequent architectural review.
 
 ---
 

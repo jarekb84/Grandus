@@ -1,4 +1,4 @@
-# User Story: Implement Adjacent Hex Selection
+# User Story: Place Home Base Visually in Home Hex
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
 **Epic Goal:** Align home base and initial Stone node within specific hexes in Territory View. Implement hex selection to target the `Expand Combat` action specifically at an adjacent hex. Set up the initial home Stone node to be depletable/limited (e.g., 1 Stone capacity, slow respawn) as per the loop requirements. *(Refines existing Territory view for targeted actions and correct initial state).*
@@ -7,25 +7,21 @@
 
 ## Story Goal
 
-Allow the player to click on adjacent, uncontrolled hexes in the Territory View to select them as a potential target.
+Visually represent the player's Home Base centered within its designated starting hex in the Territory View.
 
 ---
 
 ## Initial Acceptance Criteria (Optional Placeholder)
 
-*   [Placeholder: Clicking on a hex adjacent to the home base hex registers an input event.]
-*   [Placeholder: Clicking an adjacent, uncontrolled hex updates the game state to mark that hex as the 'selected target'.]
-*   [Placeholder: Clicking the home base hex or an already controlled hex does not change the 'selected target' state (or deselects).]
-*   [Placeholder: Clicking a non-adjacent hex does not change the 'selected target' state.]
-*   [Placeholder: Only one hex can be the 'selected target' at a time.]
+*   [Placeholder: The Home Base entity is visible on the Territory View map.]
+*   [Placeholder: The Home Base entity is positioned visually within the boundaries of the designated starting hex.]
+*   [Placeholder: The Home Base entity appears centered (or appropriately positioned according to design) within the hex.]
 
 ---
 
 ## Notes / Context
 
-*   Focuses on the input handling and state management for selecting a target hex.
-*   Visual feedback for selection is handled in Story 6.
-*   Interaction with the `Expand Combat` button is handled in Story 7.
+*   This story focuses solely on the visual placement based on hex coordinates.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
 
 ---

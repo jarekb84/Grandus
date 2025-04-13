@@ -2,7 +2,7 @@
 
 **Trigger:** Input includes an Epic definition and a list of proposed Story goals/titles. (Received via `new_task` message).
 
-**Goal:** Provide strategic feedback grounded in **proactive, multi-phase discovery and analysis of the codebase**, including primary feature areas and their cross-directory dependencies/references identified by **reading file contents**. Focus on feasibility, architectural alignment (documented vs. observed), structural issues, and prerequisites. Conclude by using `attempt_completion`.
+**Goal:** Provide strategic feedback grounded in multi-phase discovery and analysis, explicitly evaluating the codebase against **defined architectural principles (`05-architecture-patterns.md`) and directory structures (`06-directory-structure.md`)**. Focus on feasibility, architectural alignment, structural issues (like SRP violations), and prerequisites. Conclude using `attempt_completion`.
 
 ## Process Steps:
 
@@ -10,9 +10,10 @@
     *   Analyze the Epic definition and Story goals/titles received in the task message.
     *   Extract key technical concepts and domain terms.
 
-2.  **Consult & Analyze Strategic Documents:**
-    *   Use `read_file` to retrieve, **READ, and thoroughly ANALYZE** the content of high-level strategic documents: `./docs/PERFORMANCE_PLAN.md` and `./docs/STATE_ARCHITECTURE.md`. Understand the documented goals, patterns, and targets.
-    *   Use `read_file` to review general development standards: `.roo/rules/01-project-overview.md`, `.roo/rules/02-development-practices.md`.
+2.  **Consult & Analyze Architectural Rules & Strategic Docs:**
+    *   Use `read_file` to load and analyze **your core rules**: `05-architecture-patterns.md` and `06-directory-structure.md`. Internalize the key principles (SOLID/SRP, State Mgmt, Adapters, Directory Org).
+    *   Use `read_file` to load and analyze strategic docs: `./docs/PERFORMANCE_PLAN.md`, `./docs/STATE_ARCHITECTURE.md`.
+    *   Use `read_file` to review general standards: `.roo/rules/01-project-overview.md`, `.roo/rules/02-development-practices.md`.
 
 3.  **Phase 1: Initial Target Identification:**
     *   Use keywords and conventions (and potentially `list_files` on `src` or relevant subdirs if needed for orientation) to identify promising primary directories (e.g., `src/features/feature-name/`).
@@ -29,26 +30,25 @@
     *   List the referencing files found from the output.
 
 6.  **Phase 4: Reference Context Analysis:**
-    *   For each significant referencing file identified by `search_files`:
-        *   Use `read_file` (specifying the `path`) to **READ and ANALYZE its content thoroughly.**
-        *   Determine **HOW the imported symbol is USED** within this file.
-        *   Identify the **purpose** of this interaction.
-        *   **Explicitly look for unexpected interactions or misplaced responsibilities.** Note potential architectural smells.
+    *   For each significant referencing file found by `search_files`:
+        *   Use `read_file` to **READ and ANALYZE its content thoroughly.**
+        *   Determine **HOW the imported symbol is USED** and **WHAT OTHER RESPONSIBILITIES** this file handles.
+        *   **Evaluate against SRP:** Does this file mix unrelated concerns (e.g., UI rendering + core logic setup)? Compare against `05-architecture-patterns.md`. Explicitly note potential SRP violations.
+        *   Identify the purpose of the interaction and other potential issues.
 
 7.  **Phase 5: Synthesis & Story Plan Evaluation:**
-    *   Combine findings from Phase 2 (potentially informed by Phase 1's `list_code_definition_names`) and the detailed usage context from Phase 4 to create a holistic understanding.
-    *   **Evaluate the proposed Story Plan against this synthesized understanding:**
+    *   Combine findings, explicitly noting adherence or violations of architectural principles (SRP, state separation, adapter usage etc. from `05-architecture-patterns.md`) identified in Phase 4.
+    *   Evaluate the proposed Story Plan against this synthesized understanding:
         *   **For Each Story Goal:**
-            *   Map the goal to the relevant primary files AND any significant referencing files where usage was analyzed.
-            *   Assess feasibility/impact considering the *full picture*.
-            *   Identify structural/architectural concerns based on the combined analysis.
-            *   Compare the observed structure with documented standards/patterns.
-            *   Identify prerequisites based on the *holistic view*.
+            *   Map goal to relevant primary/referencing files.
+            *   Assess feasibility/impact.
+            *   Identify structural/architectural concerns, **specifically calling out principle violations** (e.g., "Implementing this story in `Foo.tsx` would exacerbate its existing SRP violation...").
+            *   Compare observed structure vs. standards (`05-architecture-patterns.md`, `06-directory-structure.md`, strategic docs).
+            *   Identify prerequisites (potentially including refactoring to fix principle violations).
 
 8.  **Synthesize Overall Findings & Assess Strategic Docs:**
-    *   Consolidate analysis, focusing on cross-cutting issues and architectural smells revealed by detailed Phase 4 analysis.
-    *   Re-evaluate `./docs/` plans based on the **synthesized reality of the code**.
-    *   Prepare the final Markdown report summarizing all findings.
+    *   Consolidate analysis, focusing on violations of architectural principles (`05...`) and directory structure (`06...`).
+    *   Prepare the final Markdown report.
 
 9.  **Signal Completion:**
     *   Package the entire generated Markdown report into a single string variable.
@@ -57,12 +57,12 @@
 
 ## (Internal Note: Output Format for Markdown Report within `attempt_completion`)
 
-The Markdown report generated and placed inside the `"report"` key of the `attempt_completion` result should follow this structure:
-
 ```markdown
 ## Epic Review: [Epic Title/ID]
 
-### Strategic Document Analysis Summary:
+### Architectural Rules & Strategic Doc Analysis Summary:
+*   **`05-architecture-patterns.md`:** [Key principles noted, e.g., SRP, State Separation, Adapters]
+*   **`06-directory-structure.md`:** [Key org principles noted]
 *   **`STATE_ARCHITECTURE.md`:** [Key relevant principles/patterns identified...]
 *   **`PERFORMANCE_PLAN.md`:** [Key relevant targets/guidelines identified...]
 
@@ -70,12 +70,12 @@ The Markdown report generated and placed inside the `"report"` key of the `attem
 *   **Phase 1 (Primary Target):** [Identified paths, mention if `list_code_definition_names` was used and key findings from it]
 *   **Phase 2 (Primary Analysis):** [Key files analyzed via `read_file`, key exports identified...]
 *   **Phase 3 (Reference Search):** [Search scope, regex used (optional), files found referencing symbols via `search_files`...]
-*   **Phase 4 (Reference Analysis):** [Summary of findings FROM READING referencing files via `read_file`, e.g., purpose of reference, issues found...]
-*   **Phase 5 (Synthesis):** [Overall structure description based on combined findings...]
+*   **Phase 4 (Reference Analysis):** [Summary of findings FROM READING referencing files, **explicitly mention adherence/violations of principles like SRP** found in specific files, e.g., "`Foo.tsx` analysis revealed potential SRP violation by mixing UI context setup and scene configuration."]
+*   **Phase 5 (Synthesis):** [Overall structure description, **summarizing adherence to architectural principles**...]
 
 ### Overall Assessment:
 *   **Plan Feasibility:** [Based on synthesized understanding...]
-*   **Architectural Alignment (Observed):** [Based on synthesized understanding vs. docs/rules, highlighting specific deviations found...]
+*   **Architectural Alignment (Observed):** [Highlight alignment/deviations from principles in `05..`, structure in `06..`, and strategic docs, e.g., "Significant SRP concerns noted in `Foo.tsx`."]
 *   **Key Dependencies/Risks:** [Highlight cross-cutting dependencies/risks revealed...]
 
 ### High-Level Plan Alignment & Status (`./docs/` files vs. Discovered Code):
@@ -85,12 +85,12 @@ The Markdown report generated and placed inside the `"report"` key of the `attem
 
 ### Story-Specific Feedback:
 *   **Story: [Story Goal/Title 1]**
-    *   **Assessment:** [Feasible / Concerns - considering discovered dependencies/issues]
+   *   **Assessment:** [Feasible / Concerns - considering discovered dependencies/issues]
     *   **Relevant Discovered Code & Usage:** [Primary files + Key referencing files relevant, summarizing HOW symbols are used based on Phase 4 analysis.]
-    *   **Structural/Architectural Concerns:** [Concerns arising from the interaction...]
-    *   **Prerequisites/Suggestions:** [Prerequisites considering impacts...]
+    *   **Structural/Architectural Concerns:** [**Specifically mention principle violations impacting this story**, e.g., "Requires interacting with `Foo.tsx` which has SRP issues."]
+    *   **Prerequisites/Suggestions:** [e.g., "Recommend prerequisite story to refactor `GameContext.tsx` to address SRP violation."]
 *   **Story: [Story Goal/Title 2]**
     *   [...]
 
 ### Proposed Prerequisite Technical Stories:
-*   [List identified refactoring needs or state "None identified"]
+*   [List refactoring needs, **especially those addressing principle violations** like SRP.]

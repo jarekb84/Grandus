@@ -1,4 +1,4 @@
-# User Story: Implement Adjacent Hex Selection
+# User Story: Add Visual Feedback for Selected Hex
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
 **Epic Goal:** Align home base and initial Stone node within specific hexes in Territory View. Implement hex selection to target the `Expand Combat` action specifically at an adjacent hex. Set up the initial home Stone node to be depletable/limited (e.g., 1 Stone capacity, slow respawn) as per the loop requirements. *(Refines existing Territory view for targeted actions and correct initial state).*
@@ -7,25 +7,23 @@
 
 ## Story Goal
 
-Allow the player to click on adjacent, uncontrolled hexes in the Territory View to select them as a potential target.
+Provide clear visual feedback (e.g., highlighting or outlining) when a player selects an adjacent hex.
 
 ---
 
 ## Initial Acceptance Criteria (Optional Placeholder)
 
-*   [Placeholder: Clicking on a hex adjacent to the home base hex registers an input event.]
-*   [Placeholder: Clicking an adjacent, uncontrolled hex updates the game state to mark that hex as the 'selected target'.]
-*   [Placeholder: Clicking the home base hex or an already controlled hex does not change the 'selected target' state (or deselects).]
-*   [Placeholder: Clicking a non-adjacent hex does not change the 'selected target' state.]
-*   [Placeholder: Only one hex can be the 'selected target' at a time.]
+*   [Placeholder: When an adjacent, uncontrolled hex is selected (state from Story 5), its visual representation changes (e.g., border highlight, color tint).]
+*   [Placeholder: Only the currently selected hex shows the selection feedback.]
+*   [Placeholder: If no hex is selected, or a non-selectable hex is clicked, no selection feedback is shown (or existing feedback is removed).]
+*   [Placeholder: The visual feedback is clearly distinguishable.]
 
 ---
 
 ## Notes / Context
 
-*   Focuses on the input handling and state management for selecting a target hex.
-*   Visual feedback for selection is handled in Story 6.
-*   Interaction with the `Expand Combat` button is handled in Story 7.
+*   Focuses purely on the visual rendering aspect of hex selection.
+*   Depends on the selection state logic implemented in Story 5.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
 
 ---
