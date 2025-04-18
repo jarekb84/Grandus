@@ -89,4 +89,4 @@ Project Context (if available in Epic):
 
 ---
 
-**status:** plan_approved
+**status:** coding_complete

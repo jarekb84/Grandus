@@ -46,11 +46,13 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **(Processing handled by loop logic)**
 
     *   **If `status` is `plan_approved` or `ready_for_coding`:**
-        *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Story is ready for coding."
-        *   **Action:** **[Placeholder]** Delegate to `code-executor`.
-        *   `<!-- TODO: Define new_task call for code-executor -->`
-        *   `<!-- Goal should instruct code-executor to update status to coding_complete/needs_code_review on success -->`
-        *   **(For now): Report to user that this step is not yet implemented and halt processing.**
+        *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Delegating implementation to `code-executor`."
+        *   **Action:** Delegate to `code-executor`.
+        *   **`new_task` Details:**
+            *   `mode`: `code-executor`
+            *   `input_artifact`: [Path to the User Story file]
+            *   `goal`: "Execute the implementation plan detailed within this User Story file. Apply the necessary code changes to the codebase. **Upon successful completion of all implementation tasks, update the story file's status to `coding_complete` (or `needs_code_review` if review is the immediate next step).** Ensure all code changes are saved/staged as appropriate."
+        *   **(Processing handled by loop logic):** Await `attempt_completion`. On success, re-read status and continue. On failure, set status to `blocked` and halt.
 
     *   **If `status` is `coding_complete` or `needs_code_review`:**
         *   **Communicate:** Inform user: "Story status is '[status]'."
