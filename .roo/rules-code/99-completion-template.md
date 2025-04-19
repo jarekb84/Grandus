@@ -1,1 +1,1 @@
-.roo/templates/99-completion-template.md
+../templates/99-completion-template.md
