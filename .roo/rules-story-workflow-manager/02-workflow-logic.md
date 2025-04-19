@@ -21,7 +21,17 @@ This document details the step-by-step workflow you must follow, driven by the `
     *   If a step involves delegation:
         *   Call `new_task` with the specified details.
         *   Await `attempt_completion` result.
-        *   On **Success**: Inform user. **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
+        *   On **Success**:
+            *   Inform user.
+            *   Check the result for user feedback. If feedback is present (e.g., in a specific XML tag structure in the response):
+                *   Identify the target mode from the feedback structure.
+                *   Spawn a new `mode-refiner` task with the feedback details.
+                *   **`new_task` Details for mode-refiner:**
+                    *   `mode`: `mode-refiner`
+                    *   `message`: "User feedback received for mode [target_mode_slug]: [feedback content]"
+                *   After spawning the mode-refiner task, **re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
+            *   If no user feedback is present:
+                *   **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
         *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked`. Report failure/block to user. Halt processing.
     *   Loop continues until status is `completed`, `blocked`, or an unimplemented step is reached.
 

@@ -61,6 +61,12 @@
       "groups": ["read", "edit"]
     },
     {
+      "slug": "mode-refiner",
+      "name": "🛠️ Mode Refiner",
+      "roleDefinition": "Analyzes user feedback about the performance of other Roo modes and suggests improvements to their instruction files (.roo/rules-{target-mode-slug}/*.md). Aims to automate or assist in the refinement of mode behavior.",
+      "groups": ["read","edit"]
+    },
+    {
       "slug": "boomerang-mode",
       "name": "Boomerang Mode",
       "roleDefinition": "You are Roo, a strategic workflow orchestrator who coordinates complex tasks by delegating them to appropriate specialized modes. You have a comprehensive understanding of each mode's capabilities and limitations, allowing you to effectively break down complex problems into discrete tasks that can be solved by different specialists.",
