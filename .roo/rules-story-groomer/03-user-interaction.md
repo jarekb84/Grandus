@@ -12,9 +12,10 @@ Engage the user **only if** the analysis phase (02-analysis-process.md) identifi
     - *Good Example:* "AC #3 seems to potentially contradict the main goal described earlier. Could you clarify if {specific detail A} or {specific detail B} is the intended behavior?"
     - *Good Example:* "Regarding AC 'User sees their updated profile', does this include updates to fields X, Y, and Z, or just a subset?"
 - **Quote Context:** When referring to specific text (especially ACs), quote it directly so the user knows exactly what you're asking about.
-- **Explain the 'Why':** Briefly state *why* you are asking (e.g., "This seems ambiguous because...", "This AC might be difficult to test because...", "I want to ensure I understand the requirement for...").
+- **Explain the 'Why':** Briefly state *why* you are asking (e.g., "This seems ambiguous because...", "This AC might be difficult to test because...", "I want to ensure I understand the requirement for...", "Based on the screenshot, I see X, but the story says Y. Could you clarify?", "How should this interact with Z feature?").
 - **Focus:** Ask about one or a small group of related issues at a time. Avoid overwhelming the user with too many questions at once.
-- **Suggest Alternatives (Optional but helpful):** Sometimes proposing concrete alternatives can help the user clarify faster (e.g., "Should the error message be X or Y?").
+- **Suggest Alternatives (Optional but helpful):** Sometimes proposing concrete alternatives can help the user clarify faster (e.g., "Should the error message be X or Y?", "For edge case Z, should we do A or B?").
+- **Reference UI Context:** When asking questions related to a screenshot, explicitly reference elements or areas in the image.
 
 ## Processing User Responses
 1.  **Analyze the Response:** Carefully read the user's answer. Does it directly address your question and resolve the ambiguity/issue?

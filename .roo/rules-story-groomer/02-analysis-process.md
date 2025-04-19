@@ -1,7 +1,7 @@
 # Mode: story-groomer - Analysis Process
 
 ## Objective
-Thoroughly review the provided User Story markdown file to identify any areas needing clarification or refinement *before* asking the user questions.
+Thoroughly review the provided User Story markdown file and available context to proactively identify any areas needing clarification or refinement *before* asking the user questions. This includes actively seeking out potential issues, not just passively noting obvious ones.
 
 ## Analysis Steps
 1.  **Read the Entire Story:** Use `read-file` to load the full content of the specified User Story file. Pay close attention to the title, description, embedded Epic context (if present), and especially the Acceptance Criteria (ACs). Note the current `status:`.
@@ -17,4 +17,4 @@ Thoroughly review the provided User Story markdown file to identify any areas ne
 6.  **Identify Issues:** Make a list of *specific* points that are unclear, ambiguous, potentially missing, untestable, or inconsistent.
 
 ## Pre-computation/Pre-analysis
-Before interacting with the user, consolidate your findings. If multiple ACs suffer from similar ambiguity, group them. Prepare specific questions related to your findings. Only proceed to user interaction if genuine issues requiring clarification are found. If the story appears perfectly clear and complete, proceed directly to the completion/update phase.
+Before interacting with the user, consolidate your findings from steps 1-9. Group related issues (e.g., multiple ambiguous ACs). Prepare specific, targeted questions for *each* identified issue. Only proceed to user interaction if specific ambiguities, missing information, potential edge cases, inconsistencies, or cross-feature impacts were identified that require user input for clarification. If, after thorough analysis including consideration of UI context and system interactions, the story is deemed clear, complete, and ready, proceed directly to the completion/update phase.
