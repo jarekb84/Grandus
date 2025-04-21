@@ -1,0 +1,1 @@
+../templates/00-common-mode-principles.md
