@@ -24,12 +24,25 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   On **Success**:
             *   Inform user.
             *   Check the result for user feedback. If feedback is present (e.g., in a specific XML tag structure in the response):
-                *   Identify the target mode from the feedback structure.
-                *   Spawn a new `mode-refiner` task with the feedback details.
-                *   **`new_task` Details for mode-refiner:**
-                    *   `mode`: `mode-refiner`
-                    *   `message`: "User feedback received for mode [target_mode_slug]: [feedback content]"
-                *   After spawning the mode-refiner task, **re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
+                *   Identify the target mode (`target_mode_slug`) and the feedback content from the feedback structure.
+                *   **Feedback Processing:**
+                    *   Read the content of `./memory-bank/rooModeFeedback.md` using `read-file`.
+                    *   Parse the content to find existing feedback entries for the identified `target_mode_slug`.
+                    *   Check if the new feedback content is similar to any existing entries for that mode. Similarity can be determined by a simple string match or a more sophisticated fuzzy match if possible.
+                    *   If a similar entry exists:
+                        *   Increment the count associated with that entry (e.g., update a `(count)` indicator next to the feedback).
+                        *   Update the content of `./memory-bank/rooModeFeedback.md` with the incremented count using `write-to-file`.
+                        *   Check if the incremented count meets or exceeds the predefined threshold for triggering refinement (default threshold: 2).
+                        *   If the threshold is met:
+                            *   Spawn a new `mode-refiner` task with the recurring feedback details.
+                            *   **`new_task` Details for mode-refiner:**
+                                *   `mode`: `mode-refiner`
+                                *   `message`: "Recurring user feedback received for mode [target_mode_slug]: [feedback content with updated count]"
+                    *   If no similar entry exists:
+                        *   Add the new feedback as a distinct entry for the `target_mode_slug` to `./memory-bank/rooModeFeedback.md` with an initial count of `(1)`.
+                        *   Update the content of `./memory-bank/rooModeFeedback.md` using `write-to-file`.
+                        *   Do NOT spawn a `mode-refiner` task yet, as the threshold has not been met.
+                *   After processing feedback (whether spawning mode-refiner or not), **re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
             *   If no user feedback is present:
                 *   **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
         *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked`. Report failure/block to user. Halt processing.
