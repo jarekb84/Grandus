@@ -51,11 +51,12 @@
     *   Prepare the final Markdown report.
 
 9.  **Signal Completion:**
-    *   Package the entire generated Markdown report into a single string variable.
-    *   Determine the final status signal (`PLAN_REVIEW_COMPLETE_OK`, `PLAN_REVIEW_COMPLETE_WITH_RECOMMENDATIONS`, `PLAN_REQUIRES_SIGNIFICANT_REVISION`).
-    *   **Call the `attempt_completion` tool.** Set the `result` parameter to a JSON string containing the status signal and the full Markdown report (using the format specified in the internal note below).
+    *   Summarize any relevant user feedback observed during the process, adhering to the **Feedback Principle** in `00-common-mode-principles.md`.
+    *   Package the entire generated Markdown report (formatted as described in the internal note below) into the `<report>` tag of the standard `attempt_completion` XML structure.
+    *   Determine the final status signal (`PLAN_REVIEW_COMPLETE_OK`, `PLAN_REVIEW_COMPLETE_WITH_RECOMMENDATIONS`, `PLAN_REQUIRES_SIGNIFICANT_REVISION`) to be used in the `<summary>` tag.
+    *   **Call the `attempt_completion` tool.** Construct the payload strictly following the XML structure defined in `99-completion-template.md`. Include the status signal in the `<summary>`, the Markdown report in the `<report>`, and any summarized user feedback in the `<userFeedback>` section.
 
-## (Internal Note: Output Format for Markdown Report within `attempt_completion`)
+## (Internal Note: Format for the Markdown content within the `<report>` tag)
 
 ```markdown
 ## Epic Review: [Epic Title/ID]

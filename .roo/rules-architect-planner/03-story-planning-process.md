@@ -42,17 +42,12 @@
     *   Prepare the final Markdown technical plan summarizing all findings and steps.
 
 8.  **Signal Completion:**
-    *   Package the entire generated Markdown technical plan (containing analysis summary, code discovery summary including principle evaluation, refactoring, steps, compliance, testing guidance, dependencies, complexity estimate) into a single string variable.
-    *   Determine the final status signal (`PLAN_GENERATED_READY`, `PLAN_GENERATED_NEEDS_REFACTORING_FIRST`, `PLAN_BLOCKED_NEEDS_CLARIFICATION`, `STORY_INFEASIBLE_AS_WRITTEN`).
-    *   **Call the `attempt_completion` tool.** Set the `result` parameter to a JSON string containing the status signal and the full Markdown report. Example format for the `result` parameter string:
-        ```json
-        {
-          "status": "PLAN_GENERATED_READY",
-          "report": "## Technical Plan: [User Story Title/ID]\n\n### 1. Story Analysis Summary:\n*   ...\n\n### 2. Code Discovery & Analysis Summary (Story Scope):\n*   Phase 1 (Primary Target): ...\n*   Phase 2 (Primary Analysis): ...\n*   Phase 3 (Reference Search): ...\n*   Phase 4 (Reference Analysis): ...\n*   Phase 5 (Synthesis): ...\n\n### 3. Required Refactoring (If Any):\n*   ...\n\n### 4. Implementation Steps:\n*   Task 1: ...\n*   Task 2: ...\n\n### 5. Architectural & Standards Compliance:\n*   ...\n\n### 6. Manual Testing Guidance:\n*   ...\n\n### 7. Dependencies:\n*   ...\n\n### 8. (Optional) Complexity Estimate:\n*   ...\n"
-        }
-        ```
+    *   Summarize any relevant user feedback observed during the process, adhering to the **Feedback Principle** in `00-common-mode-principles.md`.
+    *   Package the entire generated Markdown technical plan (containing analysis summary, code discovery summary including principle evaluation, refactoring, steps, compliance, testing guidance, dependencies, complexity estimate), formatted as described in the internal note below, into the `<report>` tag of the standard `attempt_completion` XML structure.
+    *   Determine the final status signal (`PLAN_GENERATED_READY`, `PLAN_GENERATED_NEEDS_REFACTORING_FIRST`, `PLAN_BLOCKED_NEEDS_CLARIFICATION`, `STORY_INFEASIBLE_AS_WRITTEN`) to be used in the `<summary>` tag.
+    *   **Call the `attempt_completion` tool.** Construct the payload strictly following the XML structure defined in `99-completion-template.md`. Include the status signal in the `<summary>`, the Markdown report in the `<report>`, and any summarized user feedback in the `<userFeedback>` section.
 
-## (Internal Note: Output Format for Markdown Report within `attempt_completion`)
+## (Internal Note: Format for the Markdown content within the `<report>` tag)
 
 The Markdown report generated and placed inside the `"report"` key of the `attempt_completion` result should follow this structure:
 
