@@ -7,36 +7,41 @@
 ## Update Process
 1.  **Prepare Final Content:** Collate all the agreed-upon changes to the story description and Acceptance Criteria based on the analysis and user interaction (if any).
 2.  **Modify Status:** Locate the `status:` field in the story's markdown content. Change its value to `groomed`. This is a **mandatory** step.
-3.  **Write to File:** Use the `write-to-file` tool to overwrite the original User Story markdown file with the updated content (including the refined text and the new `status: groomed` line). Ensure the *entire file content* is written correctly, preserving formatting and unchanged sections.
+3.  **Write to File:** Use the `write-to-file` tool to overwrite the original User Story markdown file with the updated content (including the refined text and the new `status: groomed` line).
 
 ## Signal Completion
-1.  **Use `attempt_completion`:** Once the file has been successfully updated.
-2.  **Format the Result:** Provide a concise summary confirming the outcome. Include:
-    - Confirmation that grooming is complete.
-    - The name/ID of the story groomed.
-    - The final status (`groomed`).
-    - Optionally, a brief note on whether clarifications were made or if the story was clear initially.
-    - **Example Success (No Changes):**
-      ```json
-      {
-        "result": "User Story 'STORY-ID: Implement Login Page' reviewed and found clear. No changes needed. Status updated to 'groomed'. Ready for technical planning.",
-        "status": "success"
-      }
-      ```
-    - **Example Success (With Changes):**
-      ```json
-      {
-        "result": "User Story 'STORY-ID: User Profile Update' successfully groomed. Clarified ACs regarding password complexity rules based on user feedback. Status updated to 'groomed'. Ready for technical planning.",
-        "status": "success"
-      }
-      ```
-    - **Example Failure (Rare - if file write failed, etc.):**
-      ```json
-      {
-        "result": "Failed to update User Story 'STORY-ID: Example Story'. Error writing file: [specific error if known]. Grooming incomplete.",
-        "status": "failure"
-      }
+Once the story file has been successfully updated with the refined content and `status: groomed`, signal completion using the `attempt_completion` tool.
+
+**Structure of the `attempt_completion` payload:**
+Use the standard XML structure defined in `../../templates/99-completion-template.md`.
+
+**Populating the `<success>` block:**
+- **`<summary>`:** Provide a concise summary (e.g., "User Story '[Story ID]' successfully groomed. Status updated to 'groomed'."). Mention if clarifications were made.
+- **`<report>`:** (Optional) Can include a brief markdown report if needed, but often the summary and feedback are sufficient.
+- **`<artifacts_modified>`:** Include a `<file>` element for the groomed story file (e.g., `<file path="./docs/stories/[story-file-name].md"/>`).
+- **`<userFeedback>`:** This is where the summarized feedback collected during the interaction phase (as per `03-user-interaction.md`) should be included.
+    - Add a `<feedback>` element with `target_mode_slug="story-groomer"`.
+    - Inside the `<feedback>` element, add a `<comment>` section.
+    - Populate the `<comment>` with the summarized list of feedback points. Generalize the feedback and avoid including full transcript details.
+    - **Example `<userFeedback>` structure:**
+      ```xml
+      <userFeedback>
+          <feedback target_mode_slug="story-groomer">
+              <comment><![CDATA[
+Summary of Grooming Feedback:
+- User asked for clarification on date formatting requirements.
+- User corrected the expected value for field 'X'.
+- User provided a screenshot to illustrate the current UI state relevant to AC #2.
+              ]]></comment>
+          </feedback>
+      </userFeedback>
       ```
 
+**Populating the `<error>` block:**
+(Use if the file update or other critical step failed)
+- **`<message>`:** Provide a clear error message.
+- **`<details>`:** (Optional) Add technical details about the failure.
+- **`<userFeedback>`:** (Optional) Include any feedback provided by the user even in case of error, if relevant.
+
 ## Post-Completion
-This mode's responsibility for *this specific story* ends upon successful completion signalling. The story, now marked as `groomed`, is ready for the `architect-planner` mode or the next step in the workflow.
+This mode's responsibility for *this specific story* ends upon successful completion signalling via `attempt_completion`. The story, now marked as `groomed`, is ready for the `architect-planner` mode or the next step in the workflow.

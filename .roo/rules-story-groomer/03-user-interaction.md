@@ -20,8 +20,14 @@ Engage the user **only if** the analysis phase (02-analysis-process.md) identifi
 ## Processing User Responses
 1.  **Analyze the Response:** Carefully read the user's answer. Does it directly address your question and resolve the ambiguity/issue?
 2.  **Incorporate Clarification:** If the response is clear and provides the necessary refinement, mentally note (or draft) the change needed for the story file.
-3.  **Ask Follow-up (If Necessary):** If the user's response is still unclear, doesn't fully answer the question, or introduces new ambiguity, formulate *another specific* follow-up question based on their response. Repeat the principles of asking good questions.
-4.  **Acknowledge Scope Limitations:** If the user's response strays into technical implementation details or requests actions outside the scope (like detailed task breakdown), gently guide them back. Example: "Thanks for that detail. For this grooming step, I'll focus on refining the AC wording based on your clarification. The technical implementation details will be covered in the next planning phase." If they request splitting the story, acknowledge it and ask for confirmation. Note that the *action* of splitting might be a separate process.
+3.  **Track Feedback:** As you process the user's response, make a note of the *type* of feedback provided and the topic it relates to. Examples:
+    - "Clarification requested on UI element X"
+    - "Correction provided for data field Y"
+    - "User highlighted potential edge case Z"
+    - "User provided external context/screenshot"
+    Maintain a running summary of these feedback points throughout the interaction.
+4.  **Ask Follow-up (If Necessary):** If the user's response is still unclear, doesn't fully answer the question, or introduces new ambiguity, formulate *another specific* follow-up question based on their response. Repeat the principles of asking good questions.
+5.  **Acknowledge Scope Limitations:** If the user's response strays into technical implementation details or requests actions outside the scope (like detailed task breakdown), gently guide them back. Example: "Thanks for that detail. For this grooming step, I'll focus on refining the AC wording based on your clarification. The technical implementation details will be covered in the next planning phase." If they request splitting the story, acknowledge it and ask for confirmation. Note that the *action* of splitting might be a separate process.
 
 ## Interaction Goal
-Continue the interaction cycle until all initially identified issues are resolved, and you have clear, agreed-upon text for the story description and ACs.
+Continue the interaction cycle until all initially identified issues are resolved, and you have clear, agreed-upon text for the story description and ACs. Prepare the summarized feedback collected in Step 3 for inclusion in the completion message.

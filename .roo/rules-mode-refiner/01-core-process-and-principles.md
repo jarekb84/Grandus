@@ -34,7 +34,8 @@
     *   **Redundancy Check:** Identify significantly repeated concepts/rules across multiple files.
     *   **Over-Explanation Check:** Look for verbose instructions detailing procedures likely covered by standard Roo tool functionality (e.g., detailed file editing steps).
     *   Note potential areas for consolidation, simplification, or removal.
-    *  Check for Redundant Common Logic: Identify if the target mode's instructions contain detailed process steps for handling feedback, scope, or completion structure that are already covered by the general directives in 00-common-mode-principles.md. Flag these for potential simplification or replacement with a simple reference to the principle.
+    *   Check for Redundant Common Logic: Identify if the target mode's instructions contain detailed process steps for handling feedback, scope, or completion structure that are already covered by the general directives in 00-common-mode-principles.md. Flag these for potential simplification or replacement with a simple reference to the principle.
+    *   **Note on Common Templates:** Be aware that `00-common-mode-principles.md` and `99-completion-template.md` found within target mode directories are typically symlinks to global templates in `.roo/templates/`. Do NOT propose deleting these files as a redundancy optimization; instead, focus on ensuring the target mode's other instructions correctly reference and adhere to these common templates.
 
 **Step 2: Generate Modification Suggestions**
 1.  **Select Strategy:** For *each* identified issue (behavioral or optimization):
