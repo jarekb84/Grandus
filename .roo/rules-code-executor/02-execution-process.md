@@ -21,11 +21,16 @@ When you receive a task via the `new_task` tool call, follow these steps meticul
     *   Apply any task-specific context or coding standards provided in the instructions.
     *   **Crucially:** Do **not** introduce any changes unrelated to the specific task instructions. Avoid refactoring surrounding code, fixing unrelated potential issues, or adding comments not directly related to the change unless explicitly requested.
 
-4.  **Perform Basic Self-Check (Optional but Recommended):**
-    *   If feasible within your processing capabilities, perform a quick sanity check on the changes *you just made*.
-    *   This could involve checking for obvious syntax errors in the newly added/modified code snippet.
+4.  **Apply Changes to Files:**
+    *   Use the `write_to_file` or `apply_diff` tool to write the implemented code changes to the specified file(s) on disk.
+    *   **Wait for User Confirmation:** You *must* wait for the user's response confirming that the file writing tool call was successful before proceeding.
+    *   **Error Condition:** If the file writing tool call fails, proceed immediately to step 6 (Reporting Failure).
+
+5.  **Perform Basic Self-Check (Optional but Recommended):**
+    *   If feasible within your processing capabilities and *after* the file changes have been confirmed written to disk, perform a quick sanity check on the changes.
+    *   This could involve checking for obvious syntax errors in the newly added/modified code snippet within the file content.
     *   This is *not* a full validation, compilation, or test run. It's a minimal check to catch immediate, obvious errors *within the modified lines*.
 
-5.  **Prepare Output and Signal Completion:**
-    *   **On Success:** If steps 1-4 were completed successfully, prepare the modified code content. Proceed to `04-output-completion.md` for formatting instructions and signal completion using `attempt_completion` with a success status and the modified code.
-    *   **On Failure (from Steps 1, 2, or if Implementation is Blocked):** If you encountered an error condition described above, do **not** attempt to make partial changes or guess the user's intent. Instead, prepare an error report. Use the `attempt_completion` tool call with a failure status and a clear message explaining *why* the task could not be completed (e.g., "File not found: [path]", "Instructions unclear: ambiguity regarding variable [X]", "Code structure mismatch: function [Y] not found").
+6.  **Prepare Output and Signal Completion:**
+    *   **On Success:** If steps 1-5 were completed successfully, including successful file writing confirmed by the user, proceed to `04-output-completion.md` for instructions on formatting the `attempt_completion` payload and signal completion using `attempt_completion` with a success status.
+    *   **On Failure (from Steps 1, 2, 4, or if Implementation is Blocked):** If you encountered an error condition described above or the file writing step failed, do **not** attempt to make partial changes or guess the user's intent. Instead, prepare an error report. Use the `attempt_completion` tool call with a failure status and a clear message explaining *why* the task could not be completed (e.g., "File not found: [path]", "Instructions unclear: ambiguity regarding variable [X]", "File writing failed: [error details]", "Code structure mismatch: function [Y] not found"). Format the payload according to `99-completion-template.md`.
