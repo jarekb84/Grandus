@@ -22,29 +22,39 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   Call `new_task` with the specified details.
         *   Await `attempt_completion` result.
         *   On **Success**:
-            *   Inform user.
-            *   Check the result for user feedback. If feedback is present (e.g., in a specific XML tag structure in the response):
-                *   Identify the target mode (`target_mode_slug`) and the feedback content from the feedback structure.
-                *   **Feedback Processing:**
-                    *   Read the content of `./memory-bank/rooModeFeedback.md` using `read-file`.
-                    *   Parse the content to find existing feedback entries for the identified `target_mode_slug`.
-                    *   Check if the new feedback content is similar to any existing entries for that mode. Similarity can be determined by a simple string match or a more sophisticated fuzzy match if possible.
-                    *   If a similar entry exists:
-                        *   Increment the count associated with that entry (e.g., update a `(count)` indicator next to the feedback).
+            *   Inform user of the successful completion of the delegated task.
+            *   **Process User Feedback (if present):**
+                *   Check the `attempt_completion` result for user feedback (expected in a specific XML tag structure).
+                *   If feedback is present:
+                    *   Identify the target mode (`target_mode_slug`) and the specific feedback content.
+                    *   Analyze the `specific feedback content` received. Based on the `target_mode_slug` and the nature of the feedback, attempt to identify a *general theme or pattern* that this specific instance represents.
+                    *   **Example Generalizations (for story-groomer feedback):**
+                        *   Specific: "Removed placeholder text in AC." -> General: "AC contains placeholder text or lacks clarity."
+                        *   Specific: "Only the single stone node should remain visible..." -> General: "Visuals presented in story context are misleading or contain unexpected elements."
+                        *   Specific: "Stone node should not overlap home base..." -> General: "Visuals/AC are inconsistent with story intent or project principles."
+                        *   Specific: "Node needs to be separate from home base..." -> General: "Story context lacks essential technical/design requirements."
+                    *   If you are uncertain about the best generalized description for the feedback:
+                        *   Use `ask_followup_question` to present 2-3 potential generalized descriptions to the user and ask which one best captures the issue for future mode refinement. Include your recommended option.
+                        *   **STOP** processing this story's workflow until the user provides the generalized feedback description. (The workflow will resume once the user's response is received).
+                    *   **(Assuming the generalized feedback description is determined, either by your analysis or user input):** Read the content of `./memory-bank/rooModeFeedback.md` using `read-file`.
+                    *   Parse the content to find existing *generalized* feedback entries for the identified `target_mode_slug`.
+                    *   Check if the determined *generalized* feedback is similar to any existing *generalized* entries for that mode. Similarity should be based on the generalized description.
+                    *   If a similar *generalized* entry exists:
+                        *   Increment the count associated with that entry (e.g., update a `(count)` indicator next to the generalized feedback).
                         *   Update the content of `./memory-bank/rooModeFeedback.md` with the incremented count using `write-to-file`.
                         *   Check if the incremented count meets or exceeds the predefined threshold for triggering refinement (default threshold: 2).
                         *   If the threshold is met:
-                            *   Spawn a new `mode-refiner` task with the recurring feedback details.
+                            *   Spawn a new `mode-refiner` task with the recurring generalized feedback details.
                             *   **`new_task` Details for mode-refiner:**
                                 *   `mode`: `mode-refiner`
-                                *   `message`: "Recurring user feedback received for mode [target_mode_slug]: [feedback content with updated count]"
-                    *   If no similar entry exists:
-                        *   Add the new feedback as a distinct entry for the `target_mode_slug` to `./memory-bank/rooModeFeedback.md` with an initial count of `(1)`.
-                        *   Update the content of `./memory-bank/rooModeFeedback.md` using `write-to-file`.
+                                *   `message`: "Recurring user feedback received for mode [target_mode_slug] (count [updated count]): [generalized feedback description]"
+                    *   If no similar *generalized* entry exists:
+                        *   Add the *generalized* feedback as a distinct entry for the `target_mode_slug` to `./memory-bank/rooModeFeedback.md` with an initial count of `(1)`. Include the specific feedback as an example under the generalized entry if helpful for context, but the primary entry is the generalization.
+                        *   Update the content of `./memory-bank/rooModeFeedback.md` using `write_to_file`.
                         *   Do NOT spawn a `mode-refiner` task yet, as the threshold has not been met.
-                *   After processing feedback (whether spawning mode-refiner or not), **re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
-            *   If no user feedback is present:
-                *   **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist). Continue the loop with the new status.
+                *   Else (If no feedback is present):
+                    *   No feedback processing is required.
+            *   **Continue Workflow:** **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist during their task completion). Continue the loop with the new status.
         *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked`. Report failure/block to user. Halt processing.
     *   Loop continues until status is `completed`, `blocked`, or an unimplemented step is reached.
 
