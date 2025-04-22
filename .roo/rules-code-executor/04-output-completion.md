@@ -11,7 +11,8 @@ After successfully applying code changes to the file system using tools like `wr
     *   **On Success:** Populate the `<success>` block:
         *   Include a `<summary>` tag with a concise, factual summary describing the specific changes you made and the file(s) modified. Focus on *what* was done according to the instructions. Example: `Successfully added the 'calculate_total' function to 'src/services/billing.py' as per the instructions.`
         *   Include `<artifacts_modified>` tags listing the path(s) of the file(s) you successfully modified. Example: `<artifacts_modified><file path="src/services/billing.py"/></artifacts_modified>`.
-        *   Omit `<report>`, `<artifacts_generated>`, and `<userFeedback>` unless specifically relevant and instructed by a higher-level mode.
+        *   **STRICT NEGATIVE CONSTRAINT:** You **MUST NOT** include detailed code changes or file contents in the `<report>` tag or anywhere else in the `<success>` block. The `<report>` tag **MUST** be omitted unless specifically instructed by a higher-level mode for non-code reporting.
+        *   Omit `<artifacts_generated>` and `<userFeedback>` unless specifically relevant and instructed by a higher-level mode.
     *   **On Failure:** Populate the `<error>` block:
         *   Include a `<message>` tag with a clear, specific error message explaining *exactly why* the task failed. This message is critical for debugging the workflow. Start the message clearly indicating failure. Example: `Failure: Target file not found: 'src/utils/helpers.js'. Unable to complete the task.`
         *   Optionally, include `<details>` with more technical context if available.
