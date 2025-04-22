@@ -4,6 +4,11 @@
 
 **Goal:** Create a detailed, actionable technical plan, ensuring feasibility, adherence to standards, and identifying specific code changes, **grounded in analysis evaluated against architectural principles (`05-architecture-patterns.md`) and directory structures (`06-directory-structure.md`)**. Conclude using `attempt_completion`.
 
+## Process Overview:
+This process is divided into two distinct phases:
+* **Phase 1 (Steps 1-5):** Analysis, option identification, and user consensus
+* **Phase 2 (Steps 6-10):** Detailed planning for the approved implementation option
+
 ## Process Steps:
 
 1.  **Deep Dive into Story Requirements:**
@@ -23,66 +28,137 @@
     *   Determine *how* the implementation *must* adhere to these applicable standards and patterns within the scope of this story, based on the synthesized, principle-evaluated understanding from Step 2.
     *   Explicitly note where the implementation needs to follow a specific pattern or guideline within the context of the discovered code.
 
-4.  **Identify Necessary Refactoring:**
-    *   Based on the detailed code analysis (Step 2, including principle evaluation in Phase 4/5) and standards requirements (Step 3), identify any *specific* refactoring required (potentially to address principle violations before implementing the story).
+4.  **Analyze Implementation Options:**
+    *   Based on the code discovery (Step 2) and architectural standards (Step 3), identify 2-3 distinct technical approaches or options for implementing the User Story.
+    *   For each option, clearly articulate:
+        *   Key characteristics and approach.
+        *   Potential benefits (Pros).
+        *   Potential drawbacks (Cons).
+        *   Key tradeoffs involved (e.g., development effort, performance impact, maintainability, adherence to patterns).
+    *   Select a recommended option based on the analysis, justifying the choice against architectural principles, project goals, and the identified tradeoffs.
 
-5.  **Define Implementation Plan:**
-    *   Outline the step-by-step technical tasks required for the code changes.
+5.  **Present Options & Get User Consensus:**
+    *   Package the analysis summary, code discovery summary, and implementation options analysis into a concise report.
+    *   Present this initial report to the user using the `attempt_completion` tool with a status signal of `IMPLEMENTATION_OPTIONS_FOR_REVIEW`.
+    *   Explicitly ask the user to:
+        *   Review the identified options and their tradeoffs
+        *   Approve the recommended option, select an alternative option, or provide additional context/requirements
+        *   Engage in discussion about the architectural approaches before proceeding
+    *   Wait for user feedback and confirmation before proceeding to Phase 2.
+    *   Document the selected option and any additional context/requirements provided by the user to inform the detailed planning phase.
+    *   **Note:** This step creates a checkpoint for user input before detailed planning begins, ensuring alignment on the architectural approach.
+
+### Phase 2: Detailed Planning for Approved Option
+
+6.  **Identify Necessary Refactoring:**
+    *   Based on the detailed code analysis (Step 2, including principle evaluation in Phase 4/5), standards requirements (Step 3), and the user-approved implementation option, identify any *specific* refactoring required (potentially to address principle violations before implementing the story).
+
+7.  **Define Implementation Plan:**
+    *   Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**.
     *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
     *   Detail *what* changes are needed (e.g., new functions/methods, modifications to existing ones, class structure changes), ensuring they align with principles from `05-architecture-patterns.md`. Consider the impact on referenced code based on Phase 4 analysis.
     *   Define necessary configuration changes.
 
-6.  **Consider Dependencies & Integration:**
+8.  **Consider Dependencies & Integration:**
     *   Based on the synthesis in Step 2, detail how this change will integrate with other parts of the system, specifically the components identified and analyzed through reference analysis.
     *   Note any upstream or downstream impacts confirmed through analysis.
     *   List any new library dependencies required.
 
-7.  **(Optional) Estimate Complexity:**
+9.  **(Optional) Estimate Complexity:**
     *   Provide a rough estimate of technical complexity (e.g., Low, Medium, High) based on the scope of changes identified across all analyzed files (primary and referencing).
     *   Prepare the final Markdown technical plan summarizing all findings and steps.
 
-8.  **Signal Completion:**
+10. **Present Final Technical Plan:**
     *   Summarize any relevant user feedback observed during the process, adhering to the **Feedback Principle** in `00-common-mode-principles.md`.
-    *   Package the entire generated Markdown technical plan (containing analysis summary, code discovery summary including principle evaluation, refactoring, steps, compliance, testing guidance, dependencies, complexity estimate), formatted as described in the internal note below, into the `<report>` tag of the standard `attempt_completion` XML structure.
-    *   Determine the final status signal (`PLAN_GENERATED_READY`, `PLAN_GENERATED_NEEDS_REFACTORING_FIRST`, `PLAN_BLOCKED_NEEDS_CLARIFICATION`, `STORY_INFEASIBLE_AS_WRITTEN`) to be used in the `<summary>` tag.
+    *   Package the generated Markdown detailed technical plan (containing analysis summary, code discovery summary, the approved implementation option, refactoring, detailed implementation steps, compliance, testing guidance, dependencies, complexity estimate), formatted as described in the internal note below, into the `<report>` tag of the standard `attempt_completion` XML structure.
+    *   Determine the final status signal (e.g., `DETAILED_PLAN_GENERATED_READY`, `PLAN_BLOCKED_NEEDS_CLARIFICATION`, `STORY_INFEASIBLE_AS_WRITTEN`) to be used in the `<summary>` tag.
     *   **Call the `attempt_completion` tool.** Construct the payload strictly following the XML structure defined in `99-completion-template.md`. Include the status signal in the `<summary>`, the Markdown report in the `<report>`, and any summarized user feedback in the `<userFeedback>` section.
 
-## (Internal Note: Format for the Markdown content within the `<report>` tag)
+## (Internal Note: Report Formats for Phase 1 and Phase 2)
 
-The Markdown report generated and placed inside the `"report"` key of the `attempt_completion` result should follow this structure:
+### Phase 1 Report Format (Step 5: Present Options & Get User Consensus)
+
+The Markdown report for Phase 1, presenting implementation options for user review, should follow this structure:
 
 ```markdown
-## Technical Plan: [User Story Title/ID]
+## Implementation Options: [User Story Title/ID]
 
 ### 1. Story Analysis Summary:
 *   [Brief summary of technical requirements]
 *   [Any assumptions made]
 
-### 2. Code Discovery & Analysis Summary (Story Scope):
-*   **Phase 1 (Primary Target):** [List primary files/modules identified, mention if `list_code_definition_names` used]
-*   **Phase 2 (Primary Analysis):** [Summarize key findings within primary files via `read_file`, identify key symbols involved]
-*   **Phase 3 (Reference Search):** [List files found via `search_files` referencing key symbols relevant to story changes]
-*   **Phase 4 (Reference Analysis):** [Summarize how references impact/are impacted BY READING FILES via `read_file`, **explicitly mention adherence/violations of architectural principles like SRP** found in specific files.]
-*   **Phase 5 (Synthesis):** [Summarize the current state relevant to implementing this story, including interactions confirmed by reading, **noting alignment with principles**.]
+### 2. Code Discovery & Analysis Summary:
+*   **Key Affected Components:** [List primary files/modules that will be affected]
+*   **Current Architecture:** [Summarize relevant existing architecture patterns and structures]
+*   **Technical Context:** [Highlight key insights from code analysis relevant to implementation decisions]
 
-### 3. Required Refactoring (If Any):
-*   [List specific, localized refactoring tasks based on Step 2 findings, potentially including those needed to fix principle violations found.]
+### 3. Implementation Options Analysis:
+*   **Option 1: [Brief Name]**
+    *   Approach: [Describe the technical approach]
+    *   Pros: [List benefits]
+    *   Cons: [List drawbacks]
+    *   Tradeoffs: [Describe key tradeoffs]
+*   **Option 2: [Brief Name]**
+    *   Approach: [Describe the technical approach]
+    *   Pros: [List benefits]
+    *   Cons: [List drawbacks]
+    *   Tradeoffs: [Describe key tradeoffs]
+*   *(Add Option 3 if applicable)*
+
+### 4. Recommended Option:
+*   **Recommendation:** [State the recommended option number/name]
+*   **Rationale:** [Justify the recommendation based on analysis, principles, and tradeoffs]
+
+### 5. Next Steps:
+*   Upon approval of an implementation approach, a detailed technical plan will be developed including specific refactoring needs, implementation steps, testing guidance, and dependencies.
+*   **Please review the options and respond with:**
+    *   Approval of the recommended option, or
+    *   Selection of an alternative option, or
+    *   Request for additional information/context about the options
+```
+
+### Phase 2 Report Format (Step 10: Present Final Technical Plan)
+
+The Markdown report for Phase 2, presenting the detailed technical plan for the approved option, should follow this structure:
+
+```markdown
+## Detailed Technical Plan: [User Story Title/ID]
+
+### 1. Approved Implementation Approach:
+*   **Selected Option:** [Name of the user-approved option]
+*   **Key Characteristics:** [Brief recap of the selected approach]
+*   **User Feedback:** [Summarize any additional context/requirements provided by the user during option review]
+
+### 2. Required Refactoring:
+*   [List specific, localized refactoring tasks required before implementation]
 *   *(If none, state "None identified")*
 
-### 4. Implementation Steps:
+### 3. Detailed Implementation Steps:
 *   **Task 1:** [e.g., Modify file X adhering to pattern Y from `05-architecture-patterns.md`...]
-*   **Task 2:** [e.g., Modify file Y: Description of change...]
-*   *(Break down into logical, actionable steps, considering all impacted files and ensuring alignment with architectural principles.)*
+    *   [Specific details about changes needed]
+    *   [Files affected]
+    *   [Acceptance criteria for this task]
+*   **Task 2:** [e.g., Create new module Y...]
+    *   [Specific details about implementation]
+    *   [Files to create/modify]
+    *   [Acceptance criteria for this task]
+*   *(Break down into comprehensive, actionable steps with sufficient detail for implementation)*
 
-### 5. Architectural & Standards Compliance:
-*   [Note adherence to principles in `05..`, structure in `06..`, etc.]
-*   [Highlight any necessary deviations and justification.]
+### 4. Architectural & Standards Compliance:
+*   [Note how the implementation adheres to principles in `05..`, structure in `06..`, etc.]
+*   [Highlight any necessary deviations and justification]
 
-### 6. Manual Testing Guidance:
-*   [Provide brief pointers for manual verification, including impacts on areas using the changed code identified in Phase 4.]
+### 5. Testing Guidance:
+*   **Unit Tests:** [Specific areas requiring unit tests]
+*   **Integration Tests:** [Integration points to test]
+*   **Manual Verification:** [Steps for manual verification]
 
-### 7. Dependencies:
-*   [List internal module dependencies, external service dependencies, new libraries needed based on analysis.]
+### 6. Dependencies & Integration Points:
+*   **Module Dependencies:** [List internal module dependencies]
+*   **External Dependencies:** [List external service dependencies]
+*   **New Libraries:** [List any new libraries needed]
 
-### 8. (Optional) Complexity Estimate:
-*   [e.g., Medium]
+### 7. Complexity Estimate:
+*   **Overall Complexity:** [e.g., Medium]
+*   **Estimated Effort:** [Rough estimate of implementation effort]
+```
