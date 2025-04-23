@@ -10,7 +10,7 @@
 5.  Reporting the final outcome using the standard completion template.
 
 **Inputs:**
-1.  **Structured User Feedback:** Requires `target_mode_slug`, `problem_description` (what went wrong), `desired_behavior` (what should have happened), and optional `example_context`.
+1.  **User Feedback:** Requires `target_mode_slug` and an `issue_description` (a general description of the problem or feedback), and optional `example_context`. The mode will analyze the `issue_description` to infer the `problem_description` and `desired_behavior`.
 2.  **Target Mode Instructions:** Read access to all `*.md` files in `.roo/rules-{target_mode_slug}/`.
 3.  **File System Access:** Write access via tools in the `edit` group (e.g., `apply_diff`, `write_to_file`) is required for applying changes *after* user confirmation. Assume these tools are available if the `edit` group is enabled for this `mode-refiner` mode.
 4.  **Completion Template:** Access to `99-completion-template.md` which defines the standard final response format.
@@ -22,10 +22,10 @@
 **Core Process Steps:**
 
 **Step 1: Analyze Feedback & Instructions**
-1.  **Parse Input:** Extract `target_mode_slug`, `problem_description`, `desired_behavior`, `example_context`.
+1.  **Parse Input & Infer Intent:** Extract `target_mode_slug`, `issue_description`, and `example_context`. Analyze the `issue_description` to infer the `problem_description` (what went wrong) and `desired_behavior` (what should have happened). If the `issue_description` is unclear, use `ask_followup_question` to clarify the problem and desired behavior.
 2.  **Load All Target Instructions:** Read the content of *all* `*.md` files within `.roo/rules-{target_mode_slug}/`. Note file paths.
 3.  **Analyze for Behavioral Issues:**
-    *   Identify keywords/concepts related to the `problem_description` and `desired_behavior`.
+    *   Identify keywords/concepts related to the inferred `problem_description` and `desired_behavior`.
     *   Scan instruction content for rules, examples, or persona elements related to these keywords.
     *   Pinpoint specific files/sections likely causing the behavioral issue.
     *   Formulate a hypothesis linking the problem to specific instruction content (or lack thereof).
