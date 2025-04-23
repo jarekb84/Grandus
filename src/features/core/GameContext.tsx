@@ -8,7 +8,6 @@ import React, {
 import { GameMode } from "@/features/shared/types/GameMode";
 import { EntityType } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
-import { generateInitialEntities } from "@/features/shared/utils/entityGenerator";
 import { useCurrencyStore } from "../shared/stores/Currency.store";
 import { WaveRewards } from "../combat/Wave";
 import { useResourcesStore } from "@/features/shared/stores/Resources.store";
@@ -66,9 +65,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [activeSceneKey, setActiveSceneKey] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const initialEntitiesRef = useRef<ReturnType<
-    typeof generateInitialEntities
-  > | null>(null);
   const { addEntity } = useGameState();
   const [currentGameMode, setCurrentGameMode] = useState<GameMode | null>(
     GameMode.TERRITORY,
@@ -89,6 +85,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         "@/features/combat/Combat.scene"
       );
 
+      const { initialTerritoryEntitiesData } = await import(
+        "@/features/territory/initialEntityData"
+      );
+
+      const { convertInitialEntityDataToEntity } = await import(
+        "@/features/territory/initialEntityConverter"
+      );
+
       // --- Define Scene Classes INSIDE the async function after Phaser and base scenes are loaded ---
       class ConfiguredTerritoryScene extends BaseTerritoryScene {
         constructor() {
@@ -100,13 +104,26 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
         }
         override create(): void {
           super.create();
-          const entities = initialEntitiesRef.current;
-          if (entities) {
-            entities.forEach((entity) => {
-              addEntity(entity);
-              this.addEntity(entity);
-            });
-          }
+
+          // Add initial entities based on defined data using the converter
+          const hexSize = this.hexSize;
+          const centerX = this.centerX;
+          const centerY = this.centerY;
+
+          initialTerritoryEntitiesData.forEach((entityData) => {
+            // Use the converter function to get the scene-ready Entity object
+            const sceneEntity = convertInitialEntityDataToEntity(
+              entityData,
+              hexSize,
+              centerX,
+              centerY,
+            );
+
+            addEntity(sceneEntity); // Add to global game state
+            this.addEntity(sceneEntity); // Add to Phaser scene
+          });
+
+          // Initial entities are now properly managed through initialTerritoryEntitiesData
         }
       }
 
@@ -129,11 +146,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
           super.create();
           this.setAutoShooting(false);
         }
-      }
-
-      // Generate entities only once
-      if (!initialEntitiesRef.current) {
-        initialEntitiesRef.current = generateInitialEntities();
       }
 
       const config: Phaser.Types.Core.GameConfig = {

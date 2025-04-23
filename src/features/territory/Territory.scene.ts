@@ -40,10 +40,10 @@ export class TerritoryScene extends Phaser.Scene {
     // We'll create textures in create() instead
   }
 
-  private hexSize = 72;
+  public hexSize = 72;
 
-  private centerX: number = 0;
-  private centerY: number = 0;
+  public centerX: number = 0;
+  public centerY: number = 0;
   create(): void {
     this.centerX = this.cameras.main.centerX;
     this.centerY = this.cameras.main.centerY;
@@ -211,14 +211,6 @@ export class TerritoryScene extends Phaser.Scene {
 
     const sprites = this.createSpritesForEntity(entity);
     this.entities.set(entity.id, sprites);
-
-    if (entity.id === "base1" || entity.id === "player1") {
-      const centerPos = this.hexToPixelCoords(0, 0, this.centerX, this.centerY);
-      sprites.main.x = centerPos.x;
-      sprites.main.y = centerPos.y;
-      sprites.outline.x = centerPos.x;
-      sprites.outline.y = centerPos.y;
-    }
 
     if (entity.type === EntityType.RESOURCE_NODE) {
       sprites.main.setInteractive();
