@@ -51,10 +51,14 @@ This file provides specific details on how to interact with the specialist modes
 
 *   **Purpose:** To review the code changes made for the story.
 *   **Trigger Status:** `coding_complete`, `needs_code_review`.
-*   `<!-- TODO: Detail interaction specifics for code-reviewer -->`
-    *   `<!-- Inputs: Story file, diff/commit info, code context -->`
-    *   `<!-- Goal: Review code quality, adherence to plan, correctness -->`
-    *   `<!-- Expected Status Update: review_passed or needs_revision (might loop back or require specific handling) -->`
+*   **Input via `new_task`:**
+    *   `mode`: `code-reviewer`
+    *   `input_artifact`: Path to the User Story file (contains the plan and context). The `code-reviewer` should be able to access the codebase to review the changes made by the `code-executor`.
+    *   `goal`: "Review the code changes implemented for this User Story. Identify any necessary modifications based on coding standards, the technical plan, and overall code quality. **Apply these modifications directly to the codebase using available tools (e.g., `apply_diff`, `write_to_file`).** Upon successful review and application of changes, update the story file's status to `review_passed` (or `needs_user_feedback` if user validation is required next)."
+*   **Expected Outcome on Success:**
+    *   `attempt_completion` indicates success.
+    *   The specialist mode (`code-reviewer`) has applied necessary code modifications AND set the User Story file's `status:` field to `review_passed` or `needs_user_feedback`.
+*   **Handling Failure:** `attempt_completion` indicates failure. Workflow manager sets status to `blocked`.
 
 ## Interaction with `user-feedback`
 

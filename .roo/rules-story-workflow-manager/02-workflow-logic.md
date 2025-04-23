@@ -88,11 +88,13 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **(Processing handled by loop logic):** Await `attempt_completion`. On success, re-read status and continue. On failure, set status to `blocked` and halt.
 
     *   **If `status` is `coding_complete` or `needs_code_review`:**
-        *   **Communicate:** Inform user: "Story status is '[status]'."
-        *   **Action:** **[Placeholder]** Delegate to `code-reviewer`.
-        *   `<!-- TODO: Define new_task call for code-reviewer -->`
-        *   `<!-- Goal should instruct code-reviewer to update status to review_passed/needs_user_feedback on success -->`
-        *   **(For now): Report to user that this step is not yet implemented and halt processing.**
+        *   **Communicate:** Inform user: "Story status is '[status]'. Delegating to `code-reviewer` for code review and necessary modifications."
+        *   **Action:** Delegate to `code-reviewer`.
+        *   **`new_task` Details:**
+            *   `mode`: `code-reviewer`
+            *   `input_artifact`: [Path to the User Story file]
+            *   `goal`: "Review the code changes implemented for this User Story. Identify any necessary modifications based on coding standards or the technical plan. **Apply these modifications directly to the codebase.** Upon successful review and application of changes, update the story file's status to `review_passed` (or `needs_user_feedback` if user validation is required next)."
+        *   **(Processing handled by loop logic):** Await `attempt_completion`. On success, re-read status and continue. On failure, set status to `blocked` and halt.
 
     *   `<!-- ... (Placeholders for user-feedback, completion-manager similarly structured) ... -->`
 
