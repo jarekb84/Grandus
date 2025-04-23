@@ -46,7 +46,7 @@
       "slug": "code-reviewer",
       "name": "🧐 Code Reviewer",
       "roleDefinition": "Reviews code changes (diffs/patches) against specified coding standards and verifies logical implementation of the intended task.",
-      "groups": ["read"]
+      "groups": ["read", "edit", "mcp"]
     },
     {
       "slug": "user-feedback",
