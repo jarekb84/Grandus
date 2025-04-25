@@ -40,12 +40,19 @@ This file provides specific details on how to interact with the specialist modes
 
 ## Interaction with `code-executor`
 
-*   **Purpose:** To write and apply the code changes needed to implement the story based on the technical plan.
-*   **Trigger Status:** `plan_approved`, `ready_for_coding`.
-*   `<!-- TODO: Detail interaction specifics for code-executor -->`
-    *   `<!-- Inputs: Story file, relevant source code files/context -->`
-    *   `<!-- Goal: Implement the plan, apply changes (e.g., via apply-diff) -->`
-    *   `<!-- Expected Status Update: coding_complete or needs_code_review -->`
+*   **Purpose:** To implement a *single* technical task from the User Story's plan.
+*   **Trigger Status:** `plan_approved`, `ready_for_coding` (Managed by the loop in `02-workflow-logic.md`).
+*   **Input via `new_task`:**
+    *   `mode`: `code-executor`
+    *   `input_artifact`: Path to the User Story file.
+    *   `goal`: "Find the next incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Upon successful completion and code application, update *only that specific task's status* to 'complete' within the story file (e.g., check the box `- [x]` or update a status tag). **Do NOT change the overall story status field.**"
+*   **Expected Outcome on Success:**
+    *   `attempt_completion` indicates success.
+    *   The specialist mode (`code-executor`) has:
+        *   Applied code changes for *one specific task*.
+        *   Updated *that task's status* within the User Story file.
+        *   Left the *overall story status* unchanged.
+*   **Handling Failure:** `attempt_completion` indicates failure. Workflow manager sets status to `blocked`.
 
 ## Interaction with `code-reviewer`
 

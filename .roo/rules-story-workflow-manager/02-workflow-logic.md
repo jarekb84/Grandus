@@ -79,13 +79,24 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **(Processing handled by loop logic)**
 
     *   **If `status` is `plan_approved` or `ready_for_coding`:**
-        *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Delegating implementation to `code-executor`."
-        *   **Action:** Delegate to `code-executor`.
-        *   **`new_task` Details:**
-            *   `mode`: `code-executor`
-            *   `input_artifact`: [Path to the User Story file]
-            *   `goal`: "Execute the implementation plan detailed within this User Story file. Apply the necessary code changes to the codebase. **Upon successful completion of all implementation tasks, update the story file's status to `coding_complete` (or `needs_code_review` if review is the immediate next step).** Ensure all code changes are saved/staged as appropriate."
-        *   **(Processing handled by loop logic):** Await `attempt_completion`. On success, re-read status and continue. On failure, set status to `blocked` and halt.
+        *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Initiating task-by-task implementation via `code-executor`."
+        *   **Action:** Enter Task Execution Sub-Loop:
+            1.  **Read Story File:** Use `read-file` to get the current content of the User Story file.
+            2.  **Find Next Task:** Parse the content to find the *first* task listed (e.g., under a `## Tasks` section) that is *not* marked as complete (e.g., status is not `complete`, or checkbox `- [ ]` is unchecked).
+            3.  **If Incomplete Task Found:**
+                *   **Communicate:** Inform user: "Delegating Task: '[Task Description]' to `code-executor`."
+                *   **Delegate:** Call `new_task` for `code-executor`.
+                *   **`new_task` Details:**
+                    *   `mode`: `code-executor`
+                    *   `input_artifact`: [Path to the User Story file]
+                    *   `goal`: "Find the next incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Upon successful completion and code application, update *only that specific task's status* to 'complete' within the story file (e.g., check the box `- [x]` or update a status tag). **Do NOT change the overall story status field.**"
+                *   **Await Result:** Wait for `attempt_completion` from `code-executor`.
+                *   **On Success:** Go back to Step 1 of this sub-loop (Read Story File) to check for the next task.
+                *   **On Failure:** Update the main story status to `blocked` using `write-to-file`. Report failure/block to user. Halt processing.
+            4.  **If No Incomplete Task Found:**
+                *   **Communicate:** Inform user: "All implementation tasks reported complete by `code-executor`. Updating story status."
+                *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to the next appropriate state (e.g., `coding_complete` or `needs_code_review`).
+                *   **Continue Workflow:** Exit this sub-loop and proceed to the next step in the main workflow based on the new overall story status.
 
     *   **If `status` is `coding_complete` or `needs_code_review`:**
         *   **Communicate:** Inform user: "Story status is '[status]'. Delegating to `code-reviewer` for code review and necessary modifications."
