@@ -21,11 +21,11 @@ This process is divided into two distinct phases:
     *   **Phase 2: Primary Target Analysis:** Use `read_file` to analyze the content of these primary files. Understand their internal logic, structure, and identify the key symbols involved or modified by this story. Use `list_code_definition_names` output (if run) to aid symbol identification.
     *   **Phase 3: Cross-Codebase Reference Search:** Use `search_files` to find files that **import or reference** the key symbols identified in Phase 2 relevant to this story's changes. Define appropriate `regex` and `path`.
     *   **Phase 4: Reference Context Analysis:** For each significant referencing file found in Phase 3 relevant to this story's changes: Use `read_file` to **READ and ANALYZE its content.** Understand **HOW** the symbol is used, **WHAT OTHER RESPONSIBILITIES** the file handles, and **evaluate usage context against principles like SRP** from `05-architecture-patterns.md`. Note violations.
-    *   **Phase 5: Synthesis:** Combine insights from Phase 2 and Phase 4 specific to this story. Form a clear picture of the immediate code context, including relevant interactions, dependencies, and **adherence to architectural principles**, confirmed by reading the code.
+    *   **Phase 5: Synthesis:** Combine insights from Phase 2 and Phase 4 specific to this story. Form a clear picture of the immediate code context, including relevant interactions, dependencies, and **adherence to architectural principles (including Functional Design & Testability)**, confirmed by reading the code.
 
 3.  **Apply Architectural & Coding Standards:**
-    *   Use `read_file` to consult *your specific rules*: `05-architecture-patterns.md` (principles), `06-directory-structure.md` (organization), relevant strategic docs (`./docs/`), general rules (`.roo/rules/`).
-    *   Determine *how* the implementation *must* adhere to these applicable standards and patterns within the scope of this story, based on the synthesized, principle-evaluated understanding from Step 2.
+    *   Use `read_file` to consult *your specific rules*: `05-architecture-patterns.md` (principles like SOLID, **Functional Design & Testability**, State Separation), `06-directory-structure.md` (organization), relevant strategic docs (`./docs/`), general rules (`.roo/rules/`).
+    *   Determine *how* the implementation *must* adhere to these applicable standards and patterns (especially regarding **testability, coupling, and function signatures**) within the scope of this story, based on the synthesized, principle-evaluated understanding from Step 2.
     *   Explicitly note where the implementation needs to follow a specific pattern or guideline within the context of the discovered code.
 
 4.  **Analyze Implementation Options:**
@@ -34,8 +34,8 @@ This process is divided into two distinct phases:
         *   Key characteristics and approach.
         *   Potential benefits (Pros).
         *   Potential drawbacks (Cons).
-        *   Key tradeoffs involved (e.g., development effort, performance impact, maintainability, adherence to patterns).
-    *   Select a recommended option based on the analysis, justifying the choice against architectural principles, project goals, and the identified tradeoffs.
+        *   Key tradeoffs involved (e.g., development effort, performance impact, maintainability, **testability, coupling**, adherence to patterns).
+    *   Select a recommended option based on the analysis, justifying the choice against architectural principles (including **Functional Design & Testability**), project goals, and the identified tradeoffs.
 
 5.  **Present Options & Get User Consensus:**
     *   Package the analysis summary, code discovery summary, and implementation options analysis into a concise report.
@@ -56,7 +56,7 @@ This process is divided into two distinct phases:
 7.  **Define Implementation Plan:**
     *   Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**.
     *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
-    *   Detail *what* changes are needed (e.g., new functions/methods, modifications to existing ones, class structure changes), ensuring they align with principles from `05-architecture-patterns.md`. Consider the impact on referenced code based on Phase 4 analysis.
+    *   Detail *what* changes are needed (e.g., new functions/methods, modifications to existing ones, class structure changes), ensuring they align with principles from `05-architecture-patterns.md`. **Specifically consider function signatures (preferring simple inputs) and plan for any necessary adapter/glue code.** Consider the impact on referenced code based on Phase 4 analysis.
     *   Define necessary configuration changes.
     *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
         *   **Identify & List Call Sites:** Explicitly list *all* identified call sites (from Step 2, Phase 3/4 analysis) for the code being moved or refactored.
@@ -157,7 +157,7 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 *   *(Break down into comprehensive, actionable steps with sufficient detail for implementation)*
 
 ### 4. Architectural & Standards Compliance:
-*   [Note how the implementation adheres to principles in `05..`, structure in `06..`, etc.]
+*   [Note how the implementation adheres to principles in `05..` (SOLID, **Functional Design/Testability**, State Separation), structure in `06..`, etc.]
 *   [Highlight any necessary deviations and justification]
 
 ### 5. Testing Guidance:

@@ -18,6 +18,20 @@
 - Implement plugin-like architectures for game systems.
 - Define clear interfaces between components.
 
+# Functional Design & Testability
+
+- **Prefer Pure Functions:** Aim for functions that produce the same output for the same inputs and have no side effects where possible.
+- **Minimize Side Effects:** Isolate necessary side effects (like state updates, API calls, Phaser scene manipulations) into specific modules or functions, clearly demarcating them.
+- **Simple Function Signatures:**
+    - Avoid passing large, complex objects (e.g., entire state stores, complex entity instances like Phaser GameObjects) directly into core logic functions.
+    - Instead, pass only the necessary primitive data types (strings, numbers, booleans) or small, focused data transfer objects (DTOs) required for the function's specific task.
+- **Use Adapters/Glue Code:** If a function needs data derived from a complex object, create a dedicated piece of "glue code" (an adapter function, a method within a class, or a dedicated module) that extracts/transforms the required simple data *before* calling the core logic function. This decouples the core logic from the complex data structure's specific shape.
+- **Benefits:** This approach leads to:
+    - **Improved Testability:** Functions with simple inputs/outputs are significantly easier to unit test without complex setup or mocking.
+    - **Reduced Coupling:** Core logic doesn't depend directly on the structure of large, potentially volatile objects or external systems (like Phaser). Changes in one area are less likely to break unrelated logic.
+    - **Enhanced Reusability:** Functions become more self-contained and reusable in different contexts.
+    - **Easier Reasoning:** Simpler inputs and outputs make the function's behavior easier to understand, predict, and maintain.
+
 # State Management & Communication
 
 *   **State Separation Principle:** CRITICAL - Keep high-frequency game state (e.g., entity positions, physics) strictly within Phaser scenes. Only sync lower-frequency summary data or necessary UI state to React/Zustand periodically (e.g., every 10-15 frames) to avoid performance bottlenecks caused by React re-renders. (Ref: PERFORMANCE_PLAN.MD, STATE_ARCHITECTURE.MD)
