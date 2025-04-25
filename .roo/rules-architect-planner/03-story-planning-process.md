@@ -58,6 +58,13 @@ This process is divided into two distinct phases:
     *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
     *   Detail *what* changes are needed (e.g., new functions/methods, modifications to existing ones, class structure changes), ensuring they align with principles from `05-architecture-patterns.md`. Consider the impact on referenced code based on Phase 4 analysis.
     *   Define necessary configuration changes.
+    *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
+        *   **Identify & List Call Sites:** Explicitly list *all* identified call sites (from Step 2, Phase 3/4 analysis) for the code being moved or refactored.
+        *   **Document Current Behavior & Dependencies:** Briefly document the essential current behavior, inputs, outputs, side-effects, and state dependencies of the code being moved.
+        *   **Plan Call Site Updates:** For *each* call site, provide explicit instructions on how it must be updated (e.g., change import path, adjust arguments, handle returned values differently).
+        *   **Plan Dependency Injection:** Specify how necessary state or dependencies will be provided to the code in its new location (e.g., pass as arguments, import required stores/services).
+        *   **Add Verification Task:** Include a specific task in the plan like: "Verify function `[New Function Name]` in file `[New File Path]` behaves identically to its previous implementation in `[Old File Path]` regarding inputs `[List Inputs]`, outputs/side-effects `[List Outputs/Effects]`. Test scenarios X, Y, Z."
+        *   **Scope Constraint (Pure Refactoring Only):** If the story is *purely* for refactoring (no functional changes intended), explicitly state that the implementation must *not* introduce new logic, properties, or behavior not present in the original code.
 
 8.  **Consider Dependencies & Integration:**
     *   Based on the synthesis in Step 2, detail how this change will integrate with other parts of the system, specifically the components identified and analyzed through reference analysis.
@@ -134,14 +141,19 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 *   *(If none, state "None identified")*
 
 ### 3. Detailed Implementation Steps:
-*   **Task 1:** [e.g., Modify file X adhering to pattern Y from `05-architecture-patterns.md`...]
-    *   [Specific details about changes needed]
-    *   [Files affected]
-    *   [Acceptance criteria for this task]
-*   **Task 2:** [e.g., Create new module Y...]
+*   *(If applicable, include Refactoring Safety details here or reference them clearly)*
+*   **Task 1:** [e.g., Refactor function Z from file A to file B, ensuring behavior preservation as per Refactoring Safety Protocol]
+    *   [Details: Implement function Z in file B]
+    *   [Details: Update call site in file C: change import, adjust arguments...]
+    *   [Details: Update call site in file D: change import...]
+    *   [Files affected: file A, file B, file C, file D]
+    *   [Acceptance criteria: Function Z operates correctly from file B, call sites updated]
+*   **Task 2:** [e.g., Implement new feature X using refactored function Z]
     *   [Specific details about implementation]
     *   [Files to create/modify]
     *   [Acceptance criteria for this task]
+*   **Task 3:** [Verification Task - Example]
+    *   Verify function `newFunctionName` in `src/features/new/module.ts` behaves identically to its previous implementation in `src/features/old/utils.ts` regarding inputs `(data: string, count: number)` and side-effects `(updates sharedState.value)`. Manually test by clicking the 'Process' button and observing the state update in the console.
 *   *(Break down into comprehensive, actionable steps with sufficient detail for implementation)*
 
 ### 4. Architectural & Standards Compliance:
