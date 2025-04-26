@@ -54,17 +54,17 @@ This process is divided into two distinct phases:
     *   Based on the detailed code analysis (Step 2, including principle evaluation in Phase 4/5), standards requirements (Step 3), and the user-approved implementation option, identify any *specific* refactoring required (potentially to address principle violations before implementing the story).
 
 7.  **Define Implementation Plan:**
-    *   **Define Tasks as Thin Vertical Slices:** Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**. Crucially, each task MUST adhere to the following principles:
-        *   **Atomicity:** Represent the *smallest possible* unit of change that delivers a verifiable piece of functionality or structure.
+    *   **Define Tasks as Thin Vertical Slices:** Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**. Crucially, each task MUST adhere to the following principles, **in alignment with the project's guidelines in `.roo/rules/02-development-practices.md`**:
+        *   **Atomicity & Verticality:** Represent the *smallest possible* unit of change that delivers a verifiable piece of *integrated behavior* or refactoring.
         *   **Verifiability:** Result in a state where the application **compiles, builds, and runs without errors or regressions**. Each task must be independently testable/verifiable.
         *   **Layered Implementation:** Tasks must build upon each other sequentially. Task N+1 starts from the working state left by Task N.
-        *   **No Dead Code:** Avoid introducing code in one task that is only intended to be completed or used in a subsequent task. All code within a task should contribute to its verifiable outcome.
+        *   **Immediately Usable (No Dead Code):** Avoid introducing code (files, functions, classes, state) in one task that is only intended to be completed or *used* in a subsequent task. All code within a task must contribute directly to its verifiable behavioral outcome. **If new structures (like stores or services) are created, they must be integrated and used for at least one minimal piece of functionality within the SAME task.**
         *   **Strict Separation:** Tasks involving *only* refactoring (moving/restructuring existing code without changing behavior) MUST be separate from tasks introducing *new* functionality or behavior.
     *   **Task Details:** For each task:
         *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
-        *   Detail *what* specific, minimal changes are needed (e.g., create file, add function signature, implement minimal logic, update single call site), ensuring alignment with `05-architecture-patterns.md`. Consider function signatures and adapter code.
+        *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. Consider function signatures and adapter code.
         *   Define necessary configuration changes for *that task*.
-        *   Explicitly state the acceptance criteria, including "Application compiles and runs without errors or regressions."
+        *   Explicitly state the acceptance criteria, focusing on the *behavioral outcome* and including "Application compiles and runs without errors or regressions."
     *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
         *   **Break Down Refactoring:** If refactoring is complex, break it down into multiple, sequential "thin vertical slice" tasks (e.g., Task 1: Create new file/structure, Task 2: Move function A, Task 3: Update call sites for A & Verify, Task 4: Move function B...).
         *   **Identify & List Call Sites:** For the specific code being moved *in a given task*, explicitly list the relevant call sites identified (from Step 2, Phase 3/4 analysis).
@@ -148,25 +148,8 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 *   [List specific, localized refactoring tasks required before implementation]
 *   *(If none, state "None identified")*
 
-### 3. Detailed Implementation Steps (Thin Vertical Slices):
-*   *(Refactoring Safety Protocol applies to relevant tasks below)*
-*   **Task 1: Setup New Store Structure**
-    *   Details: Create new file `src/features/resources/resourceNode.store.ts`. Define basic Zustand store structure (e.g., initial empty state `{ nodes: {} }`, basic actions object).
-    *   Files affected: `src/features/resources/resourceNode.store.ts` (new)
-    *   Acceptance criteria: New store file exists. Store is importable without errors. Application compiles and runs without errors or regressions.
-*   **Task 2: Import Store into Component**
-    *   Details: Import the newly created `useResourceNodeStore` into `src/features/territory/Territory.scene.ts`. Call the hook within the component setup (e.g., `const store = useResourceNodeStore();`). Log the initial store state to console for verification.
-    *   Files affected: `src/features/territory/Territory.scene.ts`
-    *   Acceptance criteria: Store is successfully imported and initialized in the component. Initial state is logged correctly. Application compiles and runs without errors or regressions.
-*   **Task 3: Migrate `nodeId` State**
-    *   Details: Add `selectedNodeId: null | string` to the store's state slice. Create a `setSelectedNodeId(id: string | null)` action in the store. Replace the existing `useState` for `selectedNodeId` in `Territory.scene.ts` with usage of `store.selectedNodeId` and `store.setSelectedNodeId`.
-    *   Files affected: `src/features/resources/resourceNode.store.ts`, `src/features/territory/Territory.scene.ts`
-    *   Acceptance criteria: `selectedNodeId` state is now managed by the Zustand store. Selecting a node in the UI correctly updates the store state. Application compiles and runs without errors or regressions.
-*   **Task 4: Migrate `nodeData` Fetching Logic** (Example - could be further broken down)
-    *   Details: Add `nodeData: Record<string, NodeData>` to store state. Create an action `fetchNodeData(nodeId: string)` in the store that performs the necessary fetch/lookup and updates `nodeData`. Replace the component's local data fetching logic with calls to this store action.
-    *   Files affected: `src/features/resources/resourceNode.store.ts`, `src/features/territory/Territory.scene.ts`
-    *   Acceptance criteria: Node data fetching is handled by the store. UI correctly displays data fetched via the store. Application compiles and runs without errors or regressions.
-*   *(Continue breaking down the remaining migration/implementation into similarly small, verifiable, sequential tasks)*
+### 3. Detailed Implementation Tasks (Thin Vertical Slices):
+[list out each task as a thin vertical slice of functionality, along with the details necessary to implement it]
 
 ### 4. Architectural & Standards Compliance:
 *   [Note how the implementation adheres to principles in `05..` (SOLID, **Functional Design/Testability**, State Separation), structure in `06..`, etc.]
