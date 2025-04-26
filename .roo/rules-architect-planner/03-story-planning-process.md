@@ -60,6 +60,10 @@ This process is divided into two distinct phases:
         *   **Layered Implementation:** Tasks must build upon each other sequentially. Task N+1 starts from the working state left by Task N.
         *   **Immediately Usable (No Dead Code):** Avoid introducing code (files, functions, classes, state) in one task that is only intended to be completed or *used* in a subsequent task. All code within a task must contribute directly to its verifiable behavioral outcome. **If new structures (like stores or services) are created, they must be integrated and used for at least one minimal piece of functionality within the SAME task.**
         *   **Strict Separation:** Tasks involving *only* refactoring (moving/restructuring existing code without changing behavior) MUST be separate from tasks introducing *new* functionality or behavior.
+        *   **CRITICAL: Vertical Slice Validation:** For each task, explicitly verify it implements a complete vertical slice by asking:
+            1. "Does this task create any files, classes, or services that aren't used within this same task?" If yes, restructure the task.
+            2. "Does this task deliver a small but complete unit of behavior that can be observed in the running application?" If no, restructure the task.
+            3. "Could the files created in this task be considered 'dead code' until a future task is implemented?" If yes, restructure the task.
     *   **Task Details:** For each task:
         *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
         *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. Consider function signatures and adapter code.
@@ -73,6 +77,75 @@ This process is divided into two distinct phases:
         *   **Plan Dependency Injection:** Specify how necessary state or dependencies will be provided to the code in its new location *for that task*.
         *   **Add Verification Step:** Include specific verification steps *within the task's acceptance criteria* (e.g., "Verify function `[New Function Name]` in `[New File Path]` is callable and produces expected minimal output/effect. Verify call site in `[File X]` compiles and runs.").
         *   **Scope Constraint (Pure Refactoring Task):** Explicitly state within any refactoring task that it must *not* introduce new logic, properties, or behavior not present in the original code being moved/restructured in *that specific task*.
+
+### Example: Horizontal vs. Vertical Task Slicing
+
+**INCORRECT (Horizontal Slicing) - Resource System Refactoring Example:**
+```
+Task 1: Create ResourceNodeStore
+- Create store file with state and actions
+- Define types and interfaces
+[No integration with existing code]
+
+Task 2: Create ResourceNodeService
+- Implement service that uses the store
+- Define methods for node management
+[No integration with existing code]
+
+Task 3: Refactor ResourceSystem to use the service
+- Modify ResourceSystem to use the new service
+[First actual integration point]
+```
+
+This approach creates "horizontal slices" or "dead code" - files that aren't used until later tasks.
+
+**CORRECT (Vertical Slicing) - Resource System Refactoring Example:**
+```
+Task 1: Implement Basic Node State Management
+- Create minimal ResourceNodeStore with only essential state/actions
+- Create minimal ResourceNodeService with only getNodeState/depleteNode methods
+- Modify ResourceSystem to use these for a single behavior (e.g., node depletion)
+- Update one gathering method to use the new system
+- Verify the complete behavior works end-to-end
+
+Task 2: Add Node Respawn Functionality
+- Add respawn timer state to ResourceNodeStore
+- Add respawn methods to ResourceNodeService
+- Integrate respawn functionality into ResourceSystem
+- Verify respawn behavior works end-to-end
+
+Task 3: Refactor Node Availability Checks
+- Add node availability methods to ResourceNodeService
+- Update UI adapter to use these methods
+- Verify availability checks work end-to-end
+```
+
+This approach creates "vertical slices" where each task delivers complete, working functionality.
+
+### Guidelines for Refactoring as Vertical Slices
+
+When planning refactoring tasks (especially for architectural improvements like introducing stores/services), follow these principles:
+
+1. **Start with Behavior, Not Structure:** Begin by identifying a specific, minimal behavior to refactor (e.g., "refactor node depletion" rather than "create node store").
+
+2. **Minimal Viable Implementation:** For each new architectural component (store, service, etc.), implement only what's needed for the specific behavior being refactored in that task.
+
+3. **Complete the Circuit:** Every task must include:
+   - Creating any new structures needed
+   - Implementing minimal functionality in those structures
+   - Modifying existing code to use the new structures
+   - Verifying the behavior works end-to-end
+
+4. **Incremental Expansion:** Subsequent tasks should expand on the initial implementation by:
+   - Adding more state/actions to stores
+   - Adding more methods to services
+   - Refactoring additional behaviors to use the expanded functionality
+
+5. **Avoid These Red Flags:**
+   - Tasks that only create files without using them
+   - Tasks that implement services/stores without integrating them
+   - Multiple tasks required before a feature works again
+   - "Preparatory" tasks that only set up structure for later tasks
 
 8.  **Consider Dependencies & Integration:**
     *   Based on the synthesis in Step 2, detail how this change will integrate with other parts of the system, specifically the components identified and analyzed through reference analysis.
@@ -149,7 +222,14 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 *   *(If none, state "None identified")*
 
 ### 3. Detailed Implementation Tasks (Thin Vertical Slices):
-[list out each task as a thin vertical slice of functionality, along with the details necessary to implement it]
+*   **Task 1: [Brief name focusing on behavior implemented]**
+    *   **Files:** [List files to create/modify]
+    *   **Changes:** [Detail specific changes]
+    *   **Vertical Slice Behavior:** [Explicitly describe the complete, observable behavior this task delivers]
+    *   **Integration Points:** [Explain how new components are used within this task]
+    *   **Acceptance Criteria:** [Include behavioral outcomes and verification steps]
+
+*   [Additional tasks following the same pattern]
 
 ### 4. Architectural & Standards Compliance:
 *   [Note how the implementation adheres to principles in `05..` (SOLID, **Functional Design/Testability**, State Separation), structure in `06..`, etc.]
