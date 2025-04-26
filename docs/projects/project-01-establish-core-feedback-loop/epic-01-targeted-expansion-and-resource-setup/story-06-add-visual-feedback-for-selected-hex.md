@@ -23,7 +23,8 @@ Provide clear visual feedback (e.g., highlighting or outlining) when a player se
 ## Notes / Context
 
 *   Focuses purely on the visual rendering aspect of hex selection.
-*   Depends on the selection state logic implemented in Story 5.
+*   Depends on the hex interaction and state management system implemented in Story 05a.
+*   Depends on the selection logic implemented in Story 5.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
 
 ---

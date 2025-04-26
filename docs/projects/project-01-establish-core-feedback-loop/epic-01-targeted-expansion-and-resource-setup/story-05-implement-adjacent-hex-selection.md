@@ -24,6 +24,7 @@ Allow the player to click on adjacent, uncontrolled hexes in the Territory View 
 ## Notes / Context
 
 *   Focuses on the input handling and state management for selecting a target hex.
+*   Depends on the hex interaction and state management system implemented in Story 05a.
 *   Visual feedback for selection is handled in Story 6.
 *   Interaction with the `Expand Combat` button is handled in Story 7.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
