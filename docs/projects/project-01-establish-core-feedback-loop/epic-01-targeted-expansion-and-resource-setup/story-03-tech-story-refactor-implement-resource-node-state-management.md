@@ -7,18 +7,21 @@
 
 ## Story Goal
 
-Establish state management for resource node capacity/respawn according to `STATE_ARCHITECTURE.md`. Create `ResourceNodeStore` (Zustand) and optionally a `ResourceService`. Refactor relevant components (`TerritoryScene`, `useTerritoryAdapter`, potentially `ResourceSystem`) to use this new structure, improving SRP and DI alignment.
+Establish state management for resource node capacity/respawn according to `STATE_ARCHITECTURE.md`. Create `ResourceNodeStore` (Zustand) and potentially a `ResourceService`. Refactor relevant components (`TerritoryScene`, `useTerritoryAdapter`, potentially `ResourceSystem`) to use this new structure, improving SRP and DI alignment.
 
 ---
 
-## Initial Acceptance Criteria (Optional Placeholder)
+## Acceptance Criteria
 
-*   [Placeholder: A Zustand store (`ResourceNodeStore` or similar) exists to manage the state of individual resource nodes (capacity, respawn timers, etc.).]
-*   [Placeholder: A Service layer (`ResourceService` or similar) potentially exists to encapsulate complex logic related to node state updates, if needed.]
-*   [Placeholder: `TerritoryScene` no longer directly manages node capacity/respawn state.]
-*   [Placeholder: Gathering logic interacts with the new store/service to update node state.]
-*   [Placeholder: Existing `ResourceSystem` is refactored or replaced to align with the new architecture.]
-*   [Placeholder: Relevant adapters (`useTerritoryAdapter`) interact with the new store/service instead of direct scene manipulation for node state.]
+*   A Zustand store (`ResourceNodeStore` or similar) exists and is responsible for managing the state of individual resource nodes (e.g., capacity, respawn timers).
+*   Logic related to resource node state transitions (e.g., depletion, respawn initiation/completion) is encapsulated outside of direct scene/component manipulation, likely within the `ResourceNodeStore` or an associated `ResourceService` if deemed necessary during technical planning.
+*   `TerritoryScene` no longer directly manages or mutates resource node capacity or respawn state.
+*   Gathering logic interacts with the new state management structure (`ResourceNodeStore` and/or `ResourceService`) to correctly update node state upon resource collection.
+*   The existing `ResourceSystem`'s responsibilities related to node state are either integrated into the new structure or the system is appropriately refactored/replaced to avoid redundant state management, as determined during technical planning.
+*   Relevant adapters (e.g., `useTerritoryAdapter`) interact with the new state management structure for accessing or triggering updates to node state, rather than manipulating scene objects directly for this purpose.
+*   The implementation aligns with the patterns described in `STATE_ARCHITECTURE.MD`.
+
+*(Note: The specific implementation details regarding the necessity and exact role of `ResourceService`, the final state of `ResourceSystem`, and the full scope of adapters to refactor will be finalized during the `architect-planner` phase based on code analysis.)*
 
 ---
 
@@ -27,6 +30,10 @@ Establish state management for resource node capacity/respawn according to `STAT
 *   This is a prerequisite technical story added based on architect feedback to improve architectural alignment before implementing node mechanics.
 *   Focus is on establishing the correct state management structure (Store/Service) and refactoring interactions.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown and subsequent architectural review.
+
+## Status
+
+status: done_grooming
 
 ---
 

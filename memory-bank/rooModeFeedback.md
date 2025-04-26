@@ -5,8 +5,17 @@
     *   User clarified that the Stone node should not be strictly centered in the hex.
     *   User specified that the placement should allow visual space for the player character to move between the Home Base and the Stone node within the same hex.
     *   User requested an explicit AC to ensure only the Home Base and initial Stone node are displayed initially, and specifically mentioned the removal of other nodes.
+*   Grooming identified implementation ambiguities best resolved during technical planning (1)
+    *   Specific feedback: User clarified that specific implementation decisions (e.g., mandatory ResourceService, ResourceSystem fate, adapter scope) for this technical refactoring story should be deferred to the architect-planner phase, as they require deeper code analysis.
+
+## architect-planner Feedback
+
+*   User questioned potential premature architecture but accepted the Store+Service approach after justification based on project standards and future needs (1)
+    *   Specific feedback: User provided detailed feedback on implementation options, questioning potential premature architecture but ultimately okay with proceeding with Option 2 (Store+Service) after re-evaluation.
 
 ## code-executor Feedback
 
 *   Implemented code introduces architectural issues that require further refinement (1)
     *   i missed some architectual issues when looking at the output of the code executor, can you spin up a new architecture task so that i can refine the ideas implemented
+*   Code Executor lacks the necessary tools or permissions to perform file deletion tasks (1)
+    *   Specific Example: User manually completed Task 7 (file deletion) in story-03-tech-story-refactor-implement-resource-node-state-management.md as the mode lacked permission/tool for it.
