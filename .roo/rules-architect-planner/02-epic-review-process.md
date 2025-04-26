@@ -33,7 +33,7 @@
     *   For each significant referencing file found by `search_files`:
         *   Use `read_file` to **READ and ANALYZE its content thoroughly.**
         *   Determine **HOW the imported symbol is USED** and **WHAT OTHER RESPONSIBILITIES** this file handles.
-        *   **Evaluate against SRP:** Does this file mix unrelated concerns (e.g., UI rendering + core logic setup)? Compare against `05-architecture-patterns.md`. Explicitly note potential SRP violations.
+        *   **Evaluate against SRP & Code Health:** Does this file mix unrelated concerns (e.g., UI rendering + core logic setup)? Compare against `05-architecture-patterns.md`. Explicitly note potential SRP violations. **Also, note if the file appears excessively large (e.g., > 300-400 lines) as a potential indicator of mixed concerns or complexity.**
         *   Identify the purpose of the interaction and other potential issues.
 
 7.  **Phase 5: Synthesis & Story Plan Evaluation:**
@@ -94,4 +94,4 @@
     *   [...]
 
 ### Proposed Prerequisite Technical Stories:
-*   [List refactoring needs, **especially those addressing principle violations** like SRP.]
+*   [List proposed technical stories. **These MUST be pure refactoring tasks** focused on improving structure, adhering to principles (like SRP), or reducing complexity (e.g., breaking down large files). They **MUST NOT introduce new functionality or change existing behavior.** Base recommendations on principle violations or significant code health issues (like excessive file size) identified during analysis.]
