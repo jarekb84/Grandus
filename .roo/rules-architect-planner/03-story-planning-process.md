@@ -54,17 +54,25 @@ This process is divided into two distinct phases:
     *   Based on the detailed code analysis (Step 2, including principle evaluation in Phase 4/5), standards requirements (Step 3), and the user-approved implementation option, identify any *specific* refactoring required (potentially to address principle violations before implementing the story).
 
 7.  **Define Implementation Plan:**
-    *   Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**.
-    *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
-    *   Detail *what* changes are needed (e.g., new functions/methods, modifications to existing ones, class structure changes), ensuring they align with principles from `05-architecture-patterns.md`. **Specifically consider function signatures (preferring simple inputs) and plan for any necessary adapter/glue code.** Consider the impact on referenced code based on Phase 4 analysis.
-    *   Define necessary configuration changes.
+    *   **Define Tasks as Thin Vertical Slices:** Outline the step-by-step technical tasks required for the code changes **for the user-approved option from Step 5**. Crucially, each task MUST adhere to the following principles:
+        *   **Atomicity:** Represent the *smallest possible* unit of change that delivers a verifiable piece of functionality or structure.
+        *   **Verifiability:** Result in a state where the application **compiles, builds, and runs without errors or regressions**. Each task must be independently testable/verifiable.
+        *   **Layered Implementation:** Tasks must build upon each other sequentially. Task N+1 starts from the working state left by Task N.
+        *   **No Dead Code:** Avoid introducing code in one task that is only intended to be completed or used in a subsequent task. All code within a task should contribute to its verifiable outcome.
+        *   **Strict Separation:** Tasks involving *only* refactoring (moving/restructuring existing code without changing behavior) MUST be separate from tasks introducing *new* functionality or behavior.
+    *   **Task Details:** For each task:
+        *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
+        *   Detail *what* specific, minimal changes are needed (e.g., create file, add function signature, implement minimal logic, update single call site), ensuring alignment with `05-architecture-patterns.md`. Consider function signatures and adapter code.
+        *   Define necessary configuration changes for *that task*.
+        *   Explicitly state the acceptance criteria, including "Application compiles and runs without errors or regressions."
     *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
-        *   **Identify & List Call Sites:** Explicitly list *all* identified call sites (from Step 2, Phase 3/4 analysis) for the code being moved or refactored.
-        *   **Document Current Behavior & Dependencies:** Briefly document the essential current behavior, inputs, outputs, side-effects, and state dependencies of the code being moved.
-        *   **Plan Call Site Updates:** For *each* call site, provide explicit instructions on how it must be updated (e.g., change import path, adjust arguments, handle returned values differently).
-        *   **Plan Dependency Injection:** Specify how necessary state or dependencies will be provided to the code in its new location (e.g., pass as arguments, import required stores/services).
-        *   **Add Verification Task:** Include a specific task in the plan like: "Verify function `[New Function Name]` in file `[New File Path]` behaves identically to its previous implementation in `[Old File Path]` regarding inputs `[List Inputs]`, outputs/side-effects `[List Outputs/Effects]`. Test scenarios X, Y, Z."
-        *   **Scope Constraint (Pure Refactoring Only):** If the story is *purely* for refactoring (no functional changes intended), explicitly state that the implementation must *not* introduce new logic, properties, or behavior not present in the original code.
+        *   **Break Down Refactoring:** If refactoring is complex, break it down into multiple, sequential "thin vertical slice" tasks (e.g., Task 1: Create new file/structure, Task 2: Move function A, Task 3: Update call sites for A & Verify, Task 4: Move function B...).
+        *   **Identify & List Call Sites:** For the specific code being moved *in a given task*, explicitly list the relevant call sites identified (from Step 2, Phase 3/4 analysis).
+        *   **Document Current Behavior & Dependencies:** Briefly document the essential current behavior, inputs, outputs, side-effects, and state dependencies of the code being moved *in that task*.
+        *   **Plan Call Site Updates:** For *each* relevant call site, provide explicit instructions on how it must be updated *within that task*.
+        *   **Plan Dependency Injection:** Specify how necessary state or dependencies will be provided to the code in its new location *for that task*.
+        *   **Add Verification Step:** Include specific verification steps *within the task's acceptance criteria* (e.g., "Verify function `[New Function Name]` in `[New File Path]` is callable and produces expected minimal output/effect. Verify call site in `[File X]` compiles and runs.").
+        *   **Scope Constraint (Pure Refactoring Task):** Explicitly state within any refactoring task that it must *not* introduce new logic, properties, or behavior not present in the original code being moved/restructured in *that specific task*.
 
 8.  **Consider Dependencies & Integration:**
     *   Based on the synthesis in Step 2, detail how this change will integrate with other parts of the system, specifically the components identified and analyzed through reference analysis.
@@ -140,21 +148,25 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 *   [List specific, localized refactoring tasks required before implementation]
 *   *(If none, state "None identified")*
 
-### 3. Detailed Implementation Steps:
-*   *(If applicable, include Refactoring Safety details here or reference them clearly)*
-*   **Task 1:** [e.g., Refactor function Z from file A to file B, ensuring behavior preservation as per Refactoring Safety Protocol]
-    *   [Details: Implement function Z in file B]
-    *   [Details: Update call site in file C: change import, adjust arguments...]
-    *   [Details: Update call site in file D: change import...]
-    *   [Files affected: file A, file B, file C, file D]
-    *   [Acceptance criteria: Function Z operates correctly from file B, call sites updated]
-*   **Task 2:** [e.g., Implement new feature X using refactored function Z]
-    *   [Specific details about implementation]
-    *   [Files to create/modify]
-    *   [Acceptance criteria for this task]
-*   **Task 3:** [Verification Task - Example]
-    *   Verify function `newFunctionName` in `src/features/new/module.ts` behaves identically to its previous implementation in `src/features/old/utils.ts` regarding inputs `(data: string, count: number)` and side-effects `(updates sharedState.value)`. Manually test by clicking the 'Process' button and observing the state update in the console.
-*   *(Break down into comprehensive, actionable steps with sufficient detail for implementation)*
+### 3. Detailed Implementation Steps (Thin Vertical Slices):
+*   *(Refactoring Safety Protocol applies to relevant tasks below)*
+*   **Task 1: Setup New Store Structure**
+    *   Details: Create new file `src/features/resources/resourceNode.store.ts`. Define basic Zustand store structure (e.g., initial empty state `{ nodes: {} }`, basic actions object).
+    *   Files affected: `src/features/resources/resourceNode.store.ts` (new)
+    *   Acceptance criteria: New store file exists. Store is importable without errors. Application compiles and runs without errors or regressions.
+*   **Task 2: Import Store into Component**
+    *   Details: Import the newly created `useResourceNodeStore` into `src/features/territory/Territory.scene.ts`. Call the hook within the component setup (e.g., `const store = useResourceNodeStore();`). Log the initial store state to console for verification.
+    *   Files affected: `src/features/territory/Territory.scene.ts`
+    *   Acceptance criteria: Store is successfully imported and initialized in the component. Initial state is logged correctly. Application compiles and runs without errors or regressions.
+*   **Task 3: Migrate `nodeId` State**
+    *   Details: Add `selectedNodeId: null | string` to the store's state slice. Create a `setSelectedNodeId(id: string | null)` action in the store. Replace the existing `useState` for `selectedNodeId` in `Territory.scene.ts` with usage of `store.selectedNodeId` and `store.setSelectedNodeId`.
+    *   Files affected: `src/features/resources/resourceNode.store.ts`, `src/features/territory/Territory.scene.ts`
+    *   Acceptance criteria: `selectedNodeId` state is now managed by the Zustand store. Selecting a node in the UI correctly updates the store state. Application compiles and runs without errors or regressions.
+*   **Task 4: Migrate `nodeData` Fetching Logic** (Example - could be further broken down)
+    *   Details: Add `nodeData: Record<string, NodeData>` to store state. Create an action `fetchNodeData(nodeId: string)` in the store that performs the necessary fetch/lookup and updates `nodeData`. Replace the component's local data fetching logic with calls to this store action.
+    *   Files affected: `src/features/resources/resourceNode.store.ts`, `src/features/territory/Territory.scene.ts`
+    *   Acceptance criteria: Node data fetching is handled by the store. UI correctly displays data fetched via the store. Application compiles and runs without errors or regressions.
+*   *(Continue breaking down the remaining migration/implementation into similarly small, verifiable, sequential tasks)*
 
 ### 4. Architectural & Standards Compliance:
 *   [Note how the implementation adheres to principles in `05..` (SOLID, **Functional Design/Testability**, State Separation), structure in `06..`, etc.]
