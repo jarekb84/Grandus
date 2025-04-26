@@ -9,10 +9,9 @@ After successfully applying code changes to the file system using tools like `wr
 *   **`result` (required) parameter:**
     *   This parameter contains the XML payload.
     *   **On Success:** Populate the `<success>` block:
-        *   Include a `<summary>` tag with a concise, factual summary describing the specific changes you made and the file(s) modified. Focus on *what* was done according to the instructions. Example: `Successfully added the 'calculate_total' function to 'src/services/billing.py' as per the instructions.`
-        *   Include `<artifacts_modified>` tags listing the path(s) of the file(s) you successfully modified. Example: `<artifacts_modified><file path="src/services/billing.py"/></artifacts_modified>`.
-        *   **STRICT NEGATIVE CONSTRAINT:** You **MUST NOT** include detailed code changes or file contents in the `<report>` tag or anywhere else in the `<success>` block. The `<report>` tag **MUST** be omitted unless specifically instructed by a higher-level mode for non-code reporting.
-        *   Omit `<artifacts_generated>` and `<userFeedback>` unless specifically relevant and instructed by a higher-level mode.
+        *   Include a `<summary>` tag with a minimal confirmation. Example: `Task completed successfully.`
+        *   **Include a mandatory `<tasks_remaining type="boolean">` tag.** Set its value to `true` if other incomplete tasks were found in the story file after completing the current one, and `false` otherwise. This value MUST be determined during the execution process (see `02-execution-process.md`). Example: `<tasks_remaining type="boolean">true</tasks_remaining>`
+        *   Include `<userFeedback>`
     *   **On Failure:** Populate the `<error>` block:
         *   Include a `<message>` tag with a clear, specific error message explaining *exactly why* the task failed. This message is critical for debugging the workflow. Start the message clearly indicating failure. Example: `Failure: Target file not found: 'src/utils/helpers.js'. Unable to complete the task.`
         *   Optionally, include `<details>` with more technical context if available.
@@ -26,10 +25,20 @@ After successfully applying code changes to the file system using tools like `wr
     ```xml
     <result>
         <success>
-            <summary><![CDATA[Successfully added the 'calculate_total' function to 'src/services/billing.py' as per the instructions.]]></summary>
-            <artifacts_modified>
-                <file path="src/services/billing.py"/>
-            </artifacts_modified>
+            <summary><![CDATA[Task completed successfully.]]></summary>
+            <!-- Value determined by checking story file after task completion -->
+            <tasks_remaining type="boolean">true</tasks_remaining>
+            <!-- artifacts_modified is intentionally omitted -->
+        </success>
+    </result>
+    ```
+
+    ```xml
+    <result>
+        <success>
+            <summary><![CDATA[Task completed successfully.]]></summary>
+             <!-- Example when it's the last task -->
+            <tasks_remaining type="boolean">false</tasks_remaining>
         </success>
     </result>
     ```
@@ -45,7 +54,7 @@ After successfully applying code changes to the file system using tools like `wr
     ```
 
 ## No Pre-Completion Code Output: Strict Reminder
-You do **not** output the modified file content directly in your response message before calling `attempt_completion`. The file content is handled by the file writing tools (`write_to_file`, `apply_diff`). Your `attempt_completion` signal is purely for reporting status and listing modified files via paths in `<artifacts_modified>`.
+You do **not** output the modified file content directly in your response message before calling `attempt_completion`. The file content is handled by the file writing tools (`write_to_file`, `apply_diff`). Your `attempt_completion` signal is purely for reporting status (success/failure) and whether more tasks remain (`<tasks_remaining>`). It should NOT contain lists of modified files.
 
 ## No Meta-Tasks: Strict Reminder
 Your role ends with applying the code changes and providing the `attempt_completion` signal. You do **not**:

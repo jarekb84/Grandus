@@ -6,33 +6,11 @@ This file defines the standard XML structure to be used within the `<attempt_com
 <attempt_completion>
     <result>
         <!-- EITHER <success> OR <error> should be present, not both -->
-
         <success>
             <!-- Mandatory: Short summary of the successful outcome -->
-            <summary><![CDATA[Concise summary of success (e.g., Task completed, Plan generated, Files created)]]></summary>
-
-            <!-- Optional: Detailed report, often Markdown or potentially structured data -->
-            <report format="markdown"><![CDATA[## Detailed Report Title
-            - Point 1
-            - Point 2
-            (Can be empty if no detailed report is generated)
-            ]]></report>
-
-            <!-- Optional: List of files created -->
-            <artifacts_generated>
-                <file path="./docs/projects/proj-a/project-01-alpha.md"/>
-                <file path="./docs/projects/proj-a/project-02-beta.md"/>
-                <!-- Add more <file> elements as needed -->
-            </artifacts_generated>
-
-            <!-- Optional: List of files significantly modified (if not handled before the call) -->
-            <artifacts_modified>
-                 <file path="./src/feature/component.tsx"/>
-                 <file path="./src/utils/helper.ts"/>
-                 <!-- Add more <file> elements as needed -->
-            </artifacts_modified>
-
+            <summary><![CDATA[Concise summary of success (e.g., Task completed, Plan generated)]]></summary>
              <!-- Optional: Structured user feedback about the mode's performance -->
+             <!-- This IS generally useful for the workflow manager and refinement processes. -->
             <userFeedback>
                 <!-- target_mode_slug helps the orchestrator route the feedback -->
                 <feedback target_mode_slug="architect-planner">

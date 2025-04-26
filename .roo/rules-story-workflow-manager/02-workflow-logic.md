@@ -54,8 +54,13 @@ This document details the step-by-step workflow you must follow, driven by the `
                         *   Do NOT spawn a `mode-refiner` task yet, as the threshold has not been met.
                 *   Else (If no feedback is present):
                     *   No feedback processing is required.
-            *   **Continue Workflow:** **Re-read the story file** using `read-file` to get the *new* status (which should have been updated by the specialist during their task completion). Continue the loop with the new status.
-        *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked`. Report failure/block to user. Halt processing.
+            *   **Continue Workflow:**
+                *   **Check the completion payload** from the specialist mode.
+                *   **Specifically for `code-executor` success:** Parse the payload for the mandatory `<tasks_remaining type="boolean">` value.
+                    *   If `tasks_remaining` is `true`: **Do NOT re-read the story file.** Immediately proceed to delegate the next task to `code-executor` again (see Step 3, `ready_for_coding` status logic).
+                    *   If `tasks_remaining` is `false`: Proceed to the logic for handling the completion of the coding phase (e.g., update overall status, potentially read file once before update).
+                *   **For other modes or `code-executor` failure:** Re-read the story file using `read-file` to get the *new* status (which should have been updated by the specialist or set to `blocked`). Continue the loop with the new status.
+        *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked` (if not already done). Report failure/block to user. Halt processing.
     *   Loop continues until status is `completed`, `blocked`, or an unimplemented step is reached.
 
 3.  **Workflow Steps by Status:**
@@ -80,23 +85,28 @@ This document details the step-by-step workflow you must follow, driven by the `
 
     *   **If `status` is `plan_approved` or `ready_for_coding`:**
         *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Initiating task-by-task implementation via `code-executor`."
-        *   **Action:** Enter Task Execution Sub-Loop:
-            1.  **Read Story File:** Use `read-file` to get the current content of the User Story file.
-            2.  **Find Next Task:** Parse the content to find the *first* task listed (e.g., under a `## Tasks` section) that is *not* marked as complete (e.g., status is not `complete`, or checkbox `- [ ]` is unchecked).
-            3.  **If Incomplete Task Found:**
-                *   **Communicate:** Inform user: "Delegating Task: '[Task Description]' to `code-executor`."
+        *   **Action:** Initiate Task Execution Sequence:
+            1.  **Initial Delegation:**
+                *   **Communicate:** Inform user: "Delegating first implementation task to `code-executor`."
                 *   **Delegate:** Call `new_task` for `code-executor`.
                 *   **`new_task` Details:**
                     *   `mode`: `code-executor`
                     *   `input_artifact`: [Path to the User Story file]
-                    *   `goal`: "Find the next incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Upon successful completion and code application, update *only that specific task's status* to 'complete' within the story file (e.g., check the box `- [x]` or update a status tag). **Do NOT change the overall story status field.**"
-                *   **Await Result:** Wait for `attempt_completion` from `code-executor`.
-                *   **On Success:** Go back to Step 1 of this sub-loop (Read Story File) to check for the next task.
-                *   **On Failure:** Update the main story status to `blocked` using `write-to-file`. Report failure/block to user. Halt processing.
-            4.  **If No Incomplete Task Found:**
-                *   **Communicate:** Inform user: "All implementation tasks reported complete by `code-executor`. Updating story status."
-                *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to the next appropriate state (e.g., `coding_complete` or `needs_code_review`).
-                *   **Continue Workflow:** Exit this sub-loop and proceed to the next step in the main workflow based on the new overall story status.
+                    *   `goal`: "Find the *first* incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Update *only that specific task's status* to 'complete' within the story file. Check if *other* incomplete tasks remain and report this via a `<tasks_remaining type="boolean">` tag in your `attempt_completion` success payload."
+            2.  **Await Result & Loop:**
+                *   Wait for `attempt_completion` from `code-executor`.
+                *   **On Success:**
+                    *   **(Process User Feedback if present - as per existing logic)**
+                    *   Parse the `<success>` payload for the `<tasks_remaining>` value.
+                    *   If `tasks_remaining` is `true`:
+                        *   **Communicate:** Inform user: "`code-executor` completed a task, more remain. Delegating next."
+                        *   **Delegate Again:** Call `new_task` for `code-executor` with the exact same details as the initial delegation. **Do NOT read the story file here.** Go back to Step 2 (Await Result & Loop).
+                    *   If `tasks_remaining` is `false`:
+                        *   **Communicate:** Inform user: "`code-executor` completed the final task. Updating story status."
+                        *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to the next appropriate state (e.g., `coding_complete` or `needs_code_review`). (Reading the file once *might* be prudent here before writing, to ensure no external changes occurred, but prioritize avoiding reads).
+                        *   **Continue Workflow:** Exit this sequence and proceed to the next step in the main workflow based on the new overall story status.
+                *   **On Failure:**
+                    *   Update the main story status to `blocked` using `write-to-file`. Report failure/block to user. Halt processing.
 
     *   **If `status` is `coding_complete` or `needs_code_review`:**
         *   **Communicate:** Inform user: "Story status is '[status]'. Delegating to `code-reviewer` for code review and necessary modifications."

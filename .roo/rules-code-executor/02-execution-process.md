@@ -31,20 +31,16 @@ When you receive a task via the `new_task` tool call, follow these steps meticul
 
 5.  **Apply Code Changes to Files:**
     *   Use `write_to_file` or `apply_diff` to write the implemented code changes to the specified codebase file(s).
-    *   **Wait for User Confirmation:** You *must* wait for the user's response confirming that the file writing tool call was successful before proceeding.
-    *   **Error Condition:** If the file writing tool call fails, proceed immediately to step 7 (Reporting Failure).
 
-6.  **Update Task Status in Story File:**
+6.  **Update Specific Task Status in Story File:**
     *   **On Success of Step 5:** Re-read the User Story file content (if necessary, to ensure you have the latest version before modifying).
     *   Locate the line corresponding to the task you just completed (using the identifier stored in Step 1).
     *   Modify this line to mark the task as complete (e.g., change `- [ ]` to `- [x]`, update `(status: pending)` to `(status: complete)`).
     *   Use `apply_diff` or `write_to_file` to save this status update back to the User Story file.
-    *   **Wait for User Confirmation:** You *must* wait for the user's response confirming this *second* file writing tool call (for the story file) was successful.
-    *   **Error Condition:** If this file writing tool call fails, proceed to step 7 (Reporting Failure), reporting the inability to update the task status.
-
-7.  **Perform Basic Self-Check (Optional but Recommended):**
-    *   After code changes (Step 5) are confirmed written, perform a quick sanity check on the *code* changes as before.
-
-8.  **Prepare Output and Signal Completion:**
-    *   **On Success:** If steps 1-7 were completed successfully (including both code file writing and story file task status update confirmed by the user), proceed to `04-output-completion.md` for formatting the `attempt_completion` payload. Signal completion using `attempt_completion` with a success status. **Do NOT modify the overall story status field in your completion payload.**
-    *   **On Failure (from Steps 1, 2, 3, 5, 6, or if Implementation is Blocked):** Prepare an error report explaining *why* the task could not be completed (e.g., "Task identification failed: No incomplete task found", "File not found: [path]", "Instructions unclear for task: [task description]", "Code file writing failed", "Story file task status update failed"). Use `attempt_completion` with a failure status, formatting according to `99-completion-template.md`.
+7.  **Check for Remaining Tasks:**
+    *   **On Success of Step 6:** Parse the current User Story file content (which should be up-to-date from the previous step).
+    *   Check if there are any *other* tasks listed (e.g., under `## Tasks`) that are still marked as incomplete.
+    *   Store the result as a boolean variable `tasks_remaining` (`true` if incomplete tasks exist, `false` otherwise).
+9.  **Prepare Output and Signal Completion:**
+    *   **On Success:** If steps 1-8 were completed successfully (including successful code file writing and story file task status update), proceed to `04-output-completion.md` for formatting the `attempt_completion` payload. Include the value of `tasks_remaining` determined in Step 7. Signal completion using `attempt_completion` with a success status. **Do NOT modify the overall story status field.**
+    *   **On Failure (from Steps 1, 2, 3, 5, 6, or if Implementation is Blocked):** Prepare an error report explaining *why* the task could not be completed. Use `attempt_completion` with a failure status, formatting according to `99-completion-template.md`.
