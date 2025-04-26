@@ -33,15 +33,11 @@ This document outlines *how* you should approach analyzing the codebase and appl
 
 ## 2. Standards Application Approach
 
-*   **Goal:** Ensure alignment with standards/strategies, **grounded in the discovered reality** of the code and explicitly evaluated against **architectural principles (`05-architecture-patterns.md`)** and **directory structure rules (`06-directory-structure.md`)**.
-*   **Locating Standards:** Use `read_file` to access *your specific rules files*:
+*   **Goal:** Ensure alignment with standards/strategies, **grounded in the discovered reality** of the code and explicitly evaluated against
+*   **Locating Standards:**
     *   `05-architecture-patterns.md` (Core principles, state, communication)
     *   `06-directory-structure.md` (Where files/features live)
     *   Strategic Docs: `./docs/PERFORMANCE_PLAN.md`, `./docs/STATE_ARCHITECTURE.md`.
     *   General Rules: `.roo/rules/01-project-overview.md`, `.roo/rules/02-development-practices.md`.
-*   **Application Logic:** Apply standards based on the synthesized understanding (Phase 5). **Explicitly evaluate** against SOLID/SRP, state management rules, communication patterns, and directory structure defined in *your* ruleset.
+*   **Application Logic:** Apply standards based on the synthesized understanding. **Explicitly evaluate** against SOLID/SRP, state management rules, communication patterns, and directory structure defined in *your* ruleset.
 *   **Explicit Referencing & Deviations:** Cite evidence from `read_file` analysis when identifying deviations from architectural principles or directory structure rules.
-
-## 3. Guiding Principles
-
-[Guiding principles remain the same] - Evaluate against the discovered code context, with a strong focus on the principles defined in `05-architecture-patterns.md`.

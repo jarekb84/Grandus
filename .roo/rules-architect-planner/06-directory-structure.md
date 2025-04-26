@@ -1,32 +1,32 @@
 ## Directory Organization Principles
-- Features are the primary organizational unit.
-- All files related to a feature should be in that feature's directory.
-- Use descriptive file names with purpose-based suffixes.
-- Create sub-feature directories only when a feature area becomes complex.
-- Keep cross-cutting functionality in shared directories.
+- Organize primarily by **feature**.
+- Place all feature-related files within the feature's directory.
+- Use descriptive file names with suffixes (e.g., `.store.ts`, `.scene.ts`).
+- Create sub-feature directories for complexity.
+- Use `shared/` for cross-cutting concerns (types, utils, generic UI).
 
 ## Pattern
 ```
 src/
   features/                     # All game features
-    {feature-name}/             # Each specific game feature
-      {Feature}.tsx             # Root React component for the feature
-      {Feature}.scene.ts        # Phaser scene for the feature (if applicable)
-      {Feature}.store.ts        # State management for the feature
-      {domain-object}.ts        # Domain-specific logic files
+    {feature-name}/             # Specific game feature
+      {Feature}.tsx             # Feature Root UI Component
+      {Feature}.scene.ts        # Feature Phaser Scene (if applicable)
+      {Feature}.store.ts        # Feature State (Zustand)
+      {domain-object}.ts        # Feature Domain Logic
 
-      # Sub-features pattern (when needed)
-      {sub-feature}/            # A distinct part of the feature
-        {SubFeature}.tsx        # UI components
-        {SubFeature}.store.ts   # State management for sub-feature
+      # Optional Sub-feature structure
+      {sub-feature}/            # Distinct sub-part
+        {SubFeature}.tsx        # Sub-feature UI
+        {SubFeature}.store.ts   # Sub-feature State
 
     shared/                     # Cross-cutting concerns
-      types.ts                  # Shared type definitions
-      utils.ts                  # Shared utility functions
-      ui/                       # Reusable UI components
-        {Component}.tsx         # Generic UI components
+      types.ts                  # Shared Types
+      utils.ts                  # Shared Utilities
+      ui/                       # Reusable Generic UI
+        {Component}.tsx
 
-  app/                          # Next.js pages (Assuming this is the project root structure, adjust if needed)
+  app/                          # Root application structure
 ```
 
 ## Current Implementation Examples (Illustrative)
@@ -34,25 +34,25 @@ src/
 src/
   features/
     combat/
-      Combat.tsx                # Combat UI root component
-      Combat.scene.ts           # Combat game scene
-      Combat.store.ts           # Combat state management
-      Player.ts                 # Player entity logic
-      Enemy.ts                  # Enemy entity logic
+      Combat.tsx                # Combat UI Root
+      Combat.scene.ts           # Combat Phaser Scene
+      Combat.store.ts           # Combat State
+      Player.ts                 # Player Logic
+      Enemy.ts                  # Enemy Logic
 
     gathering/
-      Gathering.tsx             # Gathering UI root component
-      Gathering.scene.ts        # Gathering game scene
-      Resource.store.ts         # Resource management
-      ResourceNode.ts           # Resource node logic
+      Gathering.tsx             # Gathering UI Root
+      Gathering.scene.ts        # Gathering Phaser Scene
+      Resource.store.ts         # Resource State
+      ResourceNode.ts           # Node Logic
 
     shared/
-      types.ts                  # Shared type definitions
-      utils.ts                  # Utility functions
+      types.ts                  # Shared Types
+      utils.ts                  # Utilities
       ui/
-        Button.tsx              # Reusable button component
-        Panel.tsx               # Reusable panel component
+        Button.tsx              # Reusable Button
+        Panel.tsx               # Reusable Panel
 
   app/
-    page.tsx                    # Next.js app entry point (Adjust if not Next.js)
+    page.tsx                    # App Entry Point
 ```
