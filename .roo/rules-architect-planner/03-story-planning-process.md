@@ -60,13 +60,17 @@ This process is divided into two distinct phases:
         *   **Layered Implementation:** Tasks must build upon each other sequentially. Task N+1 starts from the working state left by Task N.
         *   **Immediately Usable (No Dead Code):** Avoid introducing code (files, functions, classes, state) in one task that is only intended to be completed or *used* in a subsequent task. All code within a task must contribute directly to its verifiable behavioral outcome. **If new structures (like stores or services) are created, they must be integrated and used for at least one minimal piece of functionality within the SAME task.**
         *   **Strict Separation:** Tasks involving *only* refactoring (moving/restructuring existing code without changing behavior) MUST be separate from tasks introducing *new* functionality or behavior.
-        *   **CRITICAL: Vertical Slice Validation:** For each task, explicitly verify it implements a complete vertical slice by asking:
-            1. "Does this task create any files, classes, or services that aren't used within this same task?" If yes, restructure the task.
+        *   **CRITICAL: Architectural Boundary Enforcement (Pre-Check):** BEFORE defining task details, perform this check:
+            *   **"Does the proposed location for this logic violate the Single Responsibility Principle or established component boundaries defined in `05-architecture-patterns.md` (e.g., placing GameContext logic in Territory.scene, violating state separation)?"**
+            *   **If YES:** REJECT this task structure. Redefine the task(s) to respect the boundaries. This may involve creating new files, services, or adapters (following patterns in `05`) and integrating them minimally within the same task slice. **Architectural correctness takes precedence over avoiding minimal initial setup.**
+        *   **CRITICAL: Vertical Slice Validation:** After passing the boundary check, explicitly verify the *refined* task implements a complete vertical slice by asking:
+            1. "Does this task create any files, classes, or services that aren't *minimally integrated and used* within this same task?" If yes, restructure the task to include minimal usage.
             2. "Does this task deliver a small but complete unit of behavior that can be observed in the running application?" If no, restructure the task.
-            3. "Could the files created in this task be considered 'dead code' until a future task is implemented?" If yes, restructure the task.
+            3. "Could the files created in this task be considered 'dead code' until a future task is implemented?" If yes, restructure the task to include minimal usage.
+        *   **Note on Slicing vs. Architecture:** The "no dead code" / "immediately usable" principle ensures incremental progress but **must not** justify violating core architectural boundaries (SRP, State Separation). Creating a new, correctly placed file/module and integrating it minimally *is* a valid vertical slice.
     *   **Task Details:** For each task:
-        *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, including primary targets and potentially referencing files identified in Step 2).
-        *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. Consider function signatures and adapter code.
+        *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, respecting boundaries validated above, including primary targets and potentially referencing files identified in Step 2).
+        *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. **Strongly prefer using Adapters (per `05`) for cross-boundary interactions over direct modifications.** Consider function signatures and adapter code.
         *   Define necessary configuration changes for *that task*.
         *   Explicitly state the acceptance criteria, focusing on the *behavioral outcome* and including "Application compiles and runs without errors or regressions."
     *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
