@@ -11,6 +11,8 @@ This process is divided into two distinct phases:
 
 ## Process Steps:
 
+Let's think through this step-by-step to ensure a thorough analysis and plan.
+
 1.  **Deep Dive into Story Requirements:**
     *   Analyze the User Story definition received in the task message: acceptance criteria, goals, constraints, referenced designs, etc.
     *   Clarify any ambiguities; if necessary, state assumptions made.
