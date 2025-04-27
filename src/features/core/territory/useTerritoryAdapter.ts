@@ -59,38 +59,30 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       }
 
       setIsGathering(true);
-      try {
-        const resourceNodes = scene.getAllResourceNodesData();
-        if (!resourceNodes || resourceNodes.length === 0) {
-          setIsGathering(false);
-          return;
-        }
 
-        const nearestNode = findNearestNodeOfType(
-          playerPosition,
-          type,
-          resourceNodes,
-        );
-
-        if (nearestNode) {
-          const result = await orchestrateGathering({
-            playerId,
-            resourceType: type,
-            targetNode: nearestNode,
-            scene,
-          });
-
-          if (result.gathered) {
-            addResource(result.resourceType, result.amount);
-          }
-        }
-      } catch (error) {
-        console.error(
-          `Adapter: Error during gatherResource for type ${type}:`,
-          error,
-        );
-      } finally {
+      const resourceNodes = scene.getAllResourceNodesData();
+      if (!resourceNodes || resourceNodes.length === 0) {
         setIsGathering(false);
+        return;
+      }
+
+      const nearestNode = findNearestNodeOfType(
+        playerPosition,
+        type,
+        resourceNodes,
+      );
+
+      if (nearestNode) {
+        const result = await orchestrateGathering({
+          playerId,
+          resourceType: type,
+          targetNode: nearestNode,
+          scene,
+        });
+
+        if (result.gathered) {
+          addResource(result.resourceType, result.amount);
+        }
       }
     },
     [gameInstance, isGathering, addResource, hasAvailableNodeType],

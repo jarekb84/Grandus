@@ -49,56 +49,46 @@ export const orchestrateGathering = async ({
   // Access position correctly from the target node data
   const targetPosition = { x: targetNode.position.x, y: targetNode.position.y };
 
-  const nodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);  
+  const nodeState = useResourceNodeStore
+    .getState()
+    .getNodeCapacity(targetNode.id);
   if (!nodeState || nodeState.currentCapacity <= 0) {
-      return { gathered: false };
-  }
-
-  try {
-    // Move player to the target node - Use correct moveEntityTo signature
-    await scene.moveEntityTo(playerId, targetPosition.x, targetPosition.y);
-
-    const gatheringDuration = 1000; // milliseconds
-    const nodeYield = targetNode.yields.find(
-      (y) => y.resourceType === resourceType,
-    );
-    const yieldAmount = nodeYield ? nodeYield.baseAmount : 1;
-
-    // Wait for the gathering duration using Phaser's timer
-    await new Promise((resolve) =>
-      scene.time.delayedCall(gatheringDuration, resolve),
-    );
-    
-    useResourceNodeStore.getState().decrementNodeCapacity(targetNode.id, yieldAmount);
-
-    const updatedNodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);
-    if (updatedNodeState && updatedNodeState.currentCapacity < updatedNodeState.maxCapacity && !updatedNodeState.isRespawning) {        
-        const duration = targetNode.respawnDuration;
-        
-        useResourceNodeStore.getState().startRespawn(targetNode.id, duration);        
-    }
-
-    // Move player to home base
-    await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);
-
-    return { gathered: true, resourceType: resourceType, amount: yieldAmount };
-  } catch (error) {
-    console.error(
-      `GatheringService: Error during orchestration for player ${playerId} and node ${targetNode.id}:`,
-      error,
-    );
-    // Attempt to move the player back to the home position even if gathering failed mid-way
-    // Use the homePosition calculated earlier
-    if (homePosition) {
-      try {
-        await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);
-      } catch (moveError) {
-        console.error(
-          `GatheringService: Critical Error - Failed to move player ${playerId} back to home (${homePosition.x}, ${homePosition.y}) after gathering error:`,
-          moveError,
-        );
-      }
-    }
     return { gathered: false };
   }
+
+  // Move player to the target node - Use correct moveEntityTo signature
+  await scene.moveEntityTo(playerId, targetPosition.x, targetPosition.y);
+
+  const gatheringDuration = 1000; // milliseconds
+  const nodeYield = targetNode.yields.find(
+    (y) => y.resourceType === resourceType,
+  );
+  const yieldAmount = nodeYield ? nodeYield.baseAmount : 1;
+
+  // Wait for the gathering duration using Phaser's timer
+  await new Promise((resolve) =>
+    scene.time.delayedCall(gatheringDuration, resolve),
+  );
+
+  useResourceNodeStore
+    .getState()
+    .decrementNodeCapacity(targetNode.id, yieldAmount);
+
+  const updatedNodeState = useResourceNodeStore
+    .getState()
+    .getNodeCapacity(targetNode.id);
+  if (
+    updatedNodeState &&
+    updatedNodeState.currentCapacity < updatedNodeState.maxCapacity &&
+    !updatedNodeState.isRespawning
+  ) {
+    const duration = targetNode.respawnDuration;
+
+    useResourceNodeStore.getState().startRespawn(targetNode.id, duration);
+  }
+
+  // Move player to home base
+  await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);
+
+  return { gathered: true, resourceType: resourceType, amount: yieldAmount };
 };

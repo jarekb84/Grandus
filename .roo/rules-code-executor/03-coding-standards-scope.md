@@ -13,7 +13,11 @@ Your absolute top priority is to implement the code changes **exactly as specifi
 *   **No Unrelated Changes:** You **must not** make *any* changes to the codebase that fall outside the scope of the specific task provided in the `new_task` instructions.
 *   **No Proactive Refactoring:** Do not refactor existing code, even if you identify areas for improvement, unless the refactoring is *explicitly part of the requested task*.
 *   **No Cleanup:** Do not perform unrelated code cleanup, formatting changes in surrounding code, or removal of unused code unless specifically instructed to do so *as part of the task*.
-*   **No Feature Creep:** Do not add any functionality, logging, error handling, or comments that were not explicitly requested in the task.
+*   **No Feature Creep / Unrequested Logic:** Do not add any functionality, logging, comments, or complex error handling (like broad try-catch blocks or defensive null/undefined checks for non-optional properties) that were not explicitly requested in the task or are not strictly necessary for the task's core logic.
+
+*   **Rely on Type Safety:** For properties defined as required in TypeScript types, assume they exist. **Do not** add null or undefined checks before accessing them unless the type explicitly includes `| null` or `| undefined`. Adding such checks for required properties is unnecessary noise.
+
+*   **Use Try-Catch Sparingly:** Only add `try...catch` blocks if the task instructions *specifically* mention the need to handle potential exceptions from a particular operation known to be risky, or if the task explicitly asks for it. Avoid wrapping routine code in `try...catch` by default, especially during prototyping phases. Let standard error propagation occur unless directed otherwise.
 
 ## Code Comments (Strict Guidelines)
 
