@@ -3,6 +3,7 @@ import { GameMode } from "@/features/shared/types/GameMode";
 import Inventory from "@/features/shared/ui/Inventory";
 import ModeSelector from "./ModeSelector";
 import GameContent from "./GameContent";
+import StateVisualizer from "../debug/StateVisualizer";
 import { useInventoryAdapter } from "./inventory/useInventoryAdapter";
 import { GameProvider } from "./GameContext";
 import { useGameContext } from "./useGameContext";
@@ -36,6 +37,7 @@ const GameUI = (): React.ReactElement => {
         </div>
 
         <GameContent currentMode={currentGameMode ?? GameMode.TERRITORY} />
+        <StateVisualizer />
       </div>
     </div>
   );
