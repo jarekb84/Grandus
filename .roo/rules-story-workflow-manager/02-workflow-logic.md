@@ -80,15 +80,19 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **`new_task` Details:**
             *   `mode`: `architect-planner`
             *   `input_artifact`: [Path to the User Story file]
-            *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Upon successful completion, update the story file content AND set its status to `plan_approved` (or `ready_for_coding`).**"
+            *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Upon successful completion, update the story file content AND set its status to `plan_approved`.**"
         *   **(Processing handled by loop logic)**
 
-    *   **If `status` is `plan_approved` or `ready_for_coding`:**
-        *   **Communicate:** Inform user: "Story status is '[status]'. Technical plan approved. Initiating task-by-task implementation via `code-executor`."
-        *   **Action:** Initiate Task Execution Sequence:
-            1.  **Initial Delegation:**
-                *   **Communicate:** Inform user: "Delegating first implementation task to `code-executor`."
-                *   **Delegate:** Call `new_task` for `code-executor`.
+    *   **If `status` is `plan_approved`:**
+        *   **Communicate:** Inform user: "Story status is 'plan_approved'. Plan approved. Updating status to 'Coding In Progress' and initiating implementation."
+        *   **Action:**
+            1.  **Update Status:** Use `write-to-file` to update the overall story status to `coding_in_progress`.
+            2.  **Initiate Coding:** Proceed immediately to the `coding_in_progress` step logic below (effectively starting the code execution loop).
+
+    *   **If `status` is `coding_in_progress`:**
+        *   **Communicate:** Inform user: "Story status is 'Coding In Progress'. Delegating next available implementation task to `code-executor`."
+        *   **Action:** Execute or Continue Task Execution Sequence:
+            1.  **Delegate Task:** Call `new_task` for `code-executor`.
                 *   **`new_task` Details:**
                     *   `mode`: `code-executor`
                     *   `input_artifact`: [Path to the User Story file]
@@ -100,24 +104,30 @@ This document details the step-by-step workflow you must follow, driven by the `
                     *   Parse the `<success>` payload for the `<tasks_remaining>` value.
                     *   If `tasks_remaining` is `true`:
                         *   **Communicate:** Inform user: "`code-executor` completed a task, more remain. Delegating next."
-                        *   **Delegate Again:** Call `new_task` for `code-executor` with the exact same details as the initial delegation. **Do NOT read the story file here.** Go back to Step 2 (Await Result & Loop).
+                        *   **Delegate Again:** Call `new_task` for `code-executor` with the exact same details. **Do NOT read the story file here.** Go back to Step 1 (Delegate Task) in this `coding_in_progress` block.
                     *   If `tasks_remaining` is `false`:
-                        *   **Communicate:** Inform user: "`code-executor` completed the final task. Updating story status."
-                        *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to the next appropriate state (e.g., `coding_complete` or `needs_code_review`). (Reading the file once *might* be prudent here before writing, to ensure no external changes occurred, but prioritize avoiding reads).
-                        *   **Continue Workflow:** Exit this sequence and proceed to the next step in the main workflow based on the new overall story status.
+                        *   **Communicate:** Inform user: "`code-executor` completed the final task. Updating story status to 'Code Complete'."
+                        *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to `code_complete`.
+                        *   **Continue Workflow:** Exit this sequence. Re-read the story file using `read-file` to confirm the new `code_complete` status and proceed to the next step in the main workflow loop.
                 *   **On Failure:**
                     *   Update the main story status to `blocked` using `write-to-file`. Report failure/block to user. Halt processing.
 
-    *   **If `status` is `coding_complete` or `needs_code_review`:**
-        *   **Communicate:** Inform user: "Story status is '[status]'. Delegating to `code-reviewer` for code review and necessary modifications."
-        *   **Action:** Delegate to `code-reviewer`.
-        *   **`new_task` Details:**
-            *   `mode`: `code-reviewer`
-            *   `input_artifact`: [Path to the User Story file]
-            *   `goal`: "Review the code changes implemented for this User Story. Identify any necessary modifications based on coding standards or the technical plan. **Apply these modifications directly to the codebase.** Upon successful review and application of changes, update the story file's status to `review_passed` (or `needs_user_feedback` if user validation is required next)."
-        *   **(Processing handled by loop logic):** Await `attempt_completion`. On success, re-read status and continue. On failure, set status to `blocked` and halt.
-
-    *   `<!-- ... (Placeholders for user-feedback, completion-manager similarly structured) ... -->`
+    *   **If `status` is `code_complete`:**
+        *   **Communicate:** Inform user: "Coding phase complete for [Story File Path]."
+        *   **Action:** Ask user for next steps.
+            *   Use `ask_followup_question` with:
+                *   `question`: "Is there anything else you'd like me to do for this story?"
+                *   `follow_up`:
+                    *   `<suggest>No, create commit message and proceed to completion.</suggest>`
+                    *   `<suggest>Yes, I have further instructions.</suggest>`
+            *   **Await User Response:**
+                *   If user selects "No":
+                    *   **Communicate:** Inform user: "Okay, providing commit message suggestion and marking story as complete."
+                    *   **Commit Message:**  Generate a concise commit message (5-10 words) summarizing the changes from [Story File Path]."
+                    *   **Update Status:** Use `write-to-file` to update the story status to `completed`.                    
+                *   If user selects "Yes":
+                    *   **Communicate:** Inform user: "Okay, awaiting your further instructions for [Story File Path]."
+                    *   **Action:** Halt processing and wait for the user's next message.
 
     *   **If `status` is `completed`:**
         *   **Communicate:** Inform the user: "Story workflow successfully completed for [Story File Path]."

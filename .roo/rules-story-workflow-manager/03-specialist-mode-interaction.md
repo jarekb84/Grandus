@@ -30,57 +30,24 @@ This file provides specific details on how to interact with the specialist modes
 *   **Input via `new_task`:**
     *   `mode`: `architect-planner`
     *   `input_artifact`: Path to the User Story file.
-    *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Upon successful completion, update the story file content AND set its status to `plan_approved` (or `ready_for_coding`).**"
+    *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Upon successful completion, update the story file content AND set its status to `plan_approved`.**"
 *   **Expected Outcome on Success:**
-    *   `attempt_completion` indicates success.
-    *   The specialist mode (`architect-planner`) has updated the User Story file to include the plan AND set its `status:` field to `plan_approved` or `ready_for_coding`.
+*   `attempt_completion` indicates success.
+*   The specialist mode (`architect-planner`) has updated the User Story file to include the plan AND set its `status:` field to `plan_approved`.
 *   **Handling Failure:** `attempt_completion` indicates failure. Workflow manager sets status to `blocked`.
-
-`<!-- ... (Placeholders for other modes, ensuring their goals specify self-updating status on success) ... -->`
 
 ## Interaction with `code-executor`
 
 *   **Purpose:** To implement a *single* technical task from the User Story's plan.
-*   **Trigger Status:** `plan_approved`, `ready_for_coding` (Managed by the loop in `02-workflow-logic.md`).
+*   **Trigger Status:** `coding_in_progress` (Managed by the loop in `02-workflow-logic.md`).
 *   **Input via `new_task`:**
-    *   `mode`: `code-executor`
-    *   `input_artifact`: Path to the User Story file.
-    *   `goal`: "Find the next incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Upon successful completion and code application, update *only that specific task's status* to 'complete' within the story file (e.g., check the box `- [x]` or update a status tag). **Do NOT change the overall story status field.**"
+*   `mode`: `code-executor`
+*   `input_artifact`: Path to the User Story file.
+*   `goal`: "Find the *first* incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Upon successful completion and code application, update *only that specific task's status* to 'complete' within the story file (e.g., check the box `- [x]` or update a status tag). **Do NOT change the overall story status field.** Check if *other* incomplete tasks remain and report this via a `<tasks_remaining type="boolean">` tag in your `attempt_completion` success payload."
 *   **Expected Outcome on Success:**
-    *   `attempt_completion` indicates success.
-    *   The specialist mode (`code-executor`) has:
-        *   Applied code changes for *one specific task*.
-        *   Updated *that task's status* within the User Story file.
-        *   Left the *overall story status* unchanged.
+*   `attempt_completion` indicates success, containing the `<tasks_remaining>` flag.
+*   The specialist mode (`code-executor`) has:
+*   Applied code changes for *one specific task*.
+*   Updated *that task's status* within the User Story file.
+*   Left the *overall story status* unchanged.
 *   **Handling Failure:** `attempt_completion` indicates failure. Workflow manager sets status to `blocked`.
-
-## Interaction with `code-reviewer`
-
-*   **Purpose:** To review the code changes made for the story.
-*   **Trigger Status:** `coding_complete`, `needs_code_review`.
-*   **Input via `new_task`:**
-    *   `mode`: `code-reviewer`
-    *   `input_artifact`: Path to the User Story file (contains the plan and context). The `code-reviewer` should be able to access the codebase to review the changes made by the `code-executor`.
-    *   `goal`: "Review the code changes implemented for this User Story. Identify any necessary modifications based on coding standards, the technical plan, and overall code quality. **Apply these modifications directly to the codebase using available tools (e.g., `apply_diff`, `write_to_file`).** Upon successful review and application of changes, update the story file's status to `review_passed` (or `needs_user_feedback` if user validation is required next)."
-*   **Expected Outcome on Success:**
-    *   `attempt_completion` indicates success.
-    *   The specialist mode (`code-reviewer`) has applied necessary code modifications AND set the User Story file's `status:` field to `review_passed` or `needs_user_feedback`.
-*   **Handling Failure:** `attempt_completion` indicates failure. Workflow manager sets status to `blocked`.
-
-## Interaction with `user-feedback`
-
-*   **Purpose:** To gather feedback from the user on the implemented story (if applicable).
-*   **Trigger Status:** `review_passed`, `needs_user_feedback`.
-*   `<!-- TODO: Detail interaction specifics for user-feedback -->`
-    *   `<!-- Inputs: Story file, description of changes/demo info -->`
-    *   `<!-- Goal: Present changes, ask for user validation -->`
-    *   `<!-- Expected Status Update: user_approved -->`
-
-## Interaction with `completion-manager`
-
-*   **Purpose:** To perform final actions like merging code, closing tickets, etc.
-*   **Trigger Status:** `user_approved`, `ready_for_completion`.
-*   `<!-- TODO: Detail interaction specifics for completion-manager -->`
-    *   `<!-- Inputs: Story file, commit info -->`
-    *   `<!-- Goal: Finalize story implementation (e.g., merge PR) -->`
-    *   `<!-- Expected Status Update: completed -->`
