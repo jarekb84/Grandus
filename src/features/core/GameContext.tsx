@@ -6,9 +6,10 @@ import React, {
   useCallback,
 } from "react";
 import { GameMode } from "@/features/shared/types/GameMode";
-import { EntityType } from "@/features/shared/types/entities";
+import { EntityType, ResourceNodeEntity } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { useCurrencyStore } from "../shared/stores/Currency.store";
+import { useResourceNodeStore } from "../territory/ResourceNode.store";
 import { WaveRewards } from "../combat/Wave";
 import { GameContext } from "./gameContextTypes";
 
@@ -110,6 +111,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
             addEntity(sceneEntity); // Add to global game state
             this.addEntity(sceneEntity); // Add to Phaser scene
+
+                        if (sceneEntity.type === EntityType.RESOURCE_NODE) {
+              const { initializeNodeState } = useResourceNodeStore.getState();
+              const maxCap = (sceneEntity as ResourceNodeEntity).maxCapacity ?? 1;
+              const currentCap =
+                (sceneEntity as ResourceNodeEntity).currentCapacity ?? maxCap;
+              initializeNodeState(sceneEntity.id, maxCap, currentCap);
+            }
           });
 
           // Initial entities are now properly managed through initialTerritoryEntitiesData
@@ -162,6 +171,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     return (): void => {
       gameInstanceRef.current?.destroy(true);
       gameInstanceRef.current = null;
+      useResourceNodeStore.getState().resetStore();
       setIsInitialized(false);
       setActiveSceneKey(null);
     };

@@ -58,6 +58,8 @@ export interface ResourceNodeEntity extends BaseEntity {
     gatheringSpeedMultiplier: number;
     yieldMultiplier: number;
   };
+  maxCapacity: number;
+  currentCapacity: number;
 }
 
 export interface CharacterEntity extends BaseEntity {

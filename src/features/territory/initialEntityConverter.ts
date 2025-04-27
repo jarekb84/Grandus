@@ -42,7 +42,10 @@ export const convertInitialEntityDataToEntity = (
         buildingType: initialData.properties.buildingType || "placeholder",
       } as BuildingEntity;
 
-    case EntityType.RESOURCE_NODE:
+    case EntityType.RESOURCE_NODE: {
+      const maxCapacity = initialData.properties.maxCapacity ?? 1;
+      const currentCapacity = initialData.properties.currentCapacity ?? maxCapacity;
+
       return {
         id: initialData.id,
         type: EntityType.RESOURCE_NODE,
@@ -56,7 +59,10 @@ export const convertInitialEntityDataToEntity = (
           gatheringSpeedMultiplier: 1,
           yieldMultiplier: 1,
         },
+        maxCapacity: maxCapacity,
+        currentCapacity: currentCapacity,
       } as ResourceNodeEntity;
+    }
 
     case EntityType.CHARACTER:
       return {

@@ -20,6 +20,8 @@ export interface InitialEntityData {
     }[];
     nodeType?: import("@/features/shared/types/entities").ResourceNodeType;
     buildingType?: string;
+    maxCapacity?: number;
+    currentCapacity?: number;
   };
 }
 
@@ -45,6 +47,8 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
       color: 0x808080, // Grayish color for stone
       size: 28,
       yields: [{ resourceType: ResourceType.STONE, baseAmount: 1, chance: 1 }], // Updated yields structure
+      maxCapacity: 1,
+      currentCapacity: 1,
     },
   },
   {

@@ -1,5 +1,6 @@
 import { ResourceType, ResourceNodeEntity } from "../shared/types/entities";
 import { TerritoryScene } from "./Territory.scene";
+import { useResourceNodeStore } from "./ResourceNode.store";
 
 export type OrchestrationResult =
   | { gathered: true; resourceType: ResourceType; amount: number }
@@ -48,6 +49,11 @@ export const orchestrateGathering = async ({
   // Access position correctly from the target node data
   const targetPosition = { x: targetNode.position.x, y: targetNode.position.y };
 
+  const nodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);
+  if (!nodeState || nodeState.currentCapacity <= 0) {
+      return { gathered: false };
+  }
+
   try {
     // Move player to the target node - Use correct moveEntityTo signature
     await scene.moveEntityTo(playerId, targetPosition.x, targetPosition.y);
@@ -62,6 +68,8 @@ export const orchestrateGathering = async ({
     await new Promise((resolve) =>
       scene.time.delayedCall(gatheringDuration, resolve),
     );
+    
+    useResourceNodeStore.getState().decrementNodeCapacity(targetNode.id, yieldAmount);
 
     // Move player to home base
     await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);

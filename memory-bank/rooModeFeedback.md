@@ -14,6 +14,8 @@
     *   Specific feedback: User provided detailed feedback on implementation options, questioning potential premature architecture but ultimately okay with proceeding with Option 2 (Store+Service) after re-evaluation.
 *   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (1)
     *   Specific Example: Plan revised twice based on user feedback regarding vertical slicing for regression prevention and the need to clean up dead event wiring (onResourceGathered) in story-03b.
+*   Entity type definitions combine graphical and state concerns, leading to potential code smells and future refactoring needs (1)
+    *   Specific Example: User raised concerns about the dual purpose of Entity types (graphical vs. runtime state) and initialEntityData, identifying it as a "code smell." Acknowledged the pragmatic need for the current approach for initialization but agreed that future refactoring to bifurcate type definitions is warranted. Approved the core logic of Tasks 2 (Store Creation/Init) and 3 (Service Integration) within the plan.
 
 ## code-executor Feedback
 
