@@ -68,7 +68,7 @@ const eslintConfig = [
   },
   {
     rules: {
-      "no-console": "error",
+      "no-console":  ["error", { allow: ["warn", "error"] }],
     },
   },
   { // Ignore build output and node_modules

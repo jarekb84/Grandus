@@ -67,5 +67,4 @@ export const convertInitialEntityDataToEntity = (
         health: 100,
       } as CharacterEntity;
   }
-  throw new Error(`Unknown entity type during conversion: ${initialData.type}`);
 };

@@ -1,16 +1,10 @@
 import * as Phaser from "phaser";
-import {
-  Entity,
-  EntityType,
-  Shape,
-  ResourceYield,
-} from "@/features/shared/types/entities";
-import { ResourceType } from "@/features/shared/types/entities";
+import { Entity, EntityType, Shape } from "@/features/shared/types/entities";
+import type { ResourceNodeEntity } from "@/features/shared/types/entities";
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
   onPlayerHealthChanged?: (health: number) => void;
-  onResourceGathered?: (resourceType: ResourceType, amount: number) => void;
 }
 
 interface EntitySprites {
@@ -103,7 +97,11 @@ export class TerritoryScene extends Phaser.Scene {
     }
   }
 
-  private hexToPixelCoords(
+  /**
+   * Converts hex coordinates (q, r) to pixel coordinates (x, y) relative to a center point.
+   * Made public to allow external services (like GatheringService) to calculate standard positions.
+   */
+  public hexToPixelCoords(
     q: number,
     r: number,
     centerX: number,
@@ -291,76 +289,34 @@ export class TerritoryScene extends Phaser.Scene {
   }
 
   /**
-   * Initiates the gathering process for a specific resource type.
-   * Called from the React UI via the adapter.
-   * @param resourceType The type of resource to start gathering.
+   * Returns the current position of a specific entity.
+   * @param entityId The ID of the entity.
+   * @returns The {x, y} position or undefined if not found.
    */
-  public async initiateGathering(resourceType: ResourceType): Promise<void> {
-    const playerId = "player1";
-
-    const playerSprites = this.entities.get(playerId);
-    if (!playerSprites) {
-      return;
+  public getEntityPosition(
+    entityId: string,
+  ): { x: number; y: number } | undefined {
+    const sprites = this.entities.get(entityId);
+    if (sprites?.main) {
+      return { x: sprites.main.x, y: sprites.main.y };
     }
-    const playerPosition = { x: playerSprites.main.x, y: playerSprites.main.y };
+    return undefined;
+  }
 
-    let targetNodeSprite: Phaser.GameObjects.Sprite | null = null;
-    let minDistance = Infinity;
-    this.entities.forEach((sprites, id) => {
-      if (id === playerId) {
-        return;
-      }
-
-      const entityData = sprites.main.getData("entityData") as
+  /**
+   * Retrieves the underlying data for all resource node entities currently in the scene.
+   * @returns An array of ResourceNodeEntity data objects.
+   */
+  public getAllResourceNodesData(): ResourceNodeEntity[] {
+    const allNodeData: ResourceNodeEntity[] = [];
+    this.entities.forEach((sprites) => {
+      const entityData = sprites.main?.getData("entityData") as
         | Entity
         | undefined;
-
       if (entityData && entityData.type === EntityType.RESOURCE_NODE) {
-        const resourceNodeData = entityData;
-
-        const yieldsRequiredResource = resourceNodeData.yields?.some(
-          (yieldInfo: ResourceYield) => yieldInfo.resourceType === resourceType,
-        );
-
-        if (yieldsRequiredResource) {
-          const distance = Phaser.Math.Distance.Between(
-            playerPosition.x,
-            playerPosition.y,
-            sprites.main.x,
-            sprites.main.y,
-          );
-
-          if (distance < minDistance) {
-            minDistance = distance;
-            targetNodeSprite = sprites.main;
-          }
-        }
+        allNodeData.push(entityData);
       }
     });
-
-    if (targetNodeSprite == null) {
-      return;
-    }
-
-    const nodePosition = {
-      x: (targetNodeSprite as Phaser.GameObjects.Sprite).x,
-      y: (targetNodeSprite as Phaser.GameObjects.Sprite).y,
-    };
-
-    try {
-      await this.moveEntityTo(playerId, nodePosition.x, nodePosition.y);
-
-      await new Promise((resolve) => this.time.delayedCall(2000, resolve));
-
-      // --- START: Return player to calculated center hex ---
-      const homePos = this.hexToPixelCoords(0, 0, this.centerX, this.centerY);
-      await this.moveEntityTo(playerId, homePos.x, homePos.y);
-      // --- END: Return player to calculated center hex ---
-
-      // Report resource gathered *after* returning
-      this.sceneEvents.onResourceGathered?.(resourceType, 1);
-    } catch {
-      // TODO: Implement error handling for gathering process (move, delay, resource callback)
-    }
+    return allNodeData;
   }
 }

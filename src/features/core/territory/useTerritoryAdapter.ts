@@ -4,6 +4,9 @@ import {
   ResourceNodeType,
 } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
+import { useResourcesStore } from "@/features/shared/stores/Resources.store";
+import { findNearestNodeOfType } from "@/features/territory/gatheringUtils";
+import { orchestrateGathering } from "@/features/territory/GatheringService";
 import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 import { GameMode } from "@/features/shared/types/GameMode";
 import { useGameContext } from "@/features/core/useGameContext";
@@ -21,13 +24,17 @@ interface TerritoryAdapter {
  */
 export const useTerritoryAdapter = (): TerritoryAdapter => {
   const [isGathering, setIsGathering] = useState(false);
-  const { getNodesByType, hasAvailableNodeType } = useGameState();
+  const { hasAvailableNodeType } = useGameState();
+  const { addResource } = useResourcesStore();
   const { gameInstance, setActiveScene } = useGameContext();
+
   const gatherResource = useCallback(
     async (type: ResourceType): Promise<void> => {
       const scene = gameInstance?.scene.getScene("TerritoryScene") as
         | TerritoryScene
         | undefined;
+
+      const playerId = "player1";
 
       if (!scene || isGathering) {
         return;
@@ -38,26 +45,55 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       if (nodeType == null) {
         return;
       }
+
       if (!hasAvailableNodeType(nodeType)) {
         return;
       }
 
-      const nodes = getNodesByType(nodeType);
-      const firstNode = nodes[0];
-      if (firstNode) {
-        setIsGathering(true);
-        try {
-          void scene.initiateGathering(type);
-        } catch {
-          // TODO: Implement error handling for gather initiation failure
-        } finally {
+      const playerPosition = scene.getEntityPosition(playerId);
+      if (!playerPosition) {
+        console.error(
+          `gatherResource: Could not find player entity '${playerId}' in the scene.`,
+        );
+        return;
+      }
+
+      setIsGathering(true);
+      try {
+        const resourceNodes = scene.getAllResourceNodesData();
+        if (!resourceNodes || resourceNodes.length === 0) {
           setIsGathering(false);
+          return;
         }
-      } else {
-        // No available node found, could log or provide feedback
+
+        const nearestNode = findNearestNodeOfType(
+          playerPosition,
+          type,
+          resourceNodes,
+        );
+
+        if (nearestNode) {
+          const result = await orchestrateGathering({
+            playerId,
+            resourceType: type,
+            targetNode: nearestNode,
+            scene,
+          });
+
+          if (result.gathered) {
+            addResource(result.resourceType, result.amount);
+          }
+        }
+      } catch (error) {
+        console.error(
+          `Adapter: Error during gatherResource for type ${type}:`,
+          error,
+        );
+      } finally {
+        setIsGathering(false);
       }
     },
-    [gameInstance, isGathering, getNodesByType, hasAvailableNodeType],
+    [gameInstance, isGathering, addResource, hasAvailableNodeType],
   );
 
   const requestCombatStart = useCallback(
@@ -74,6 +110,7 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       gatherResource,
       requestCombatStart,
     }),
+    // Update dependencies for useMemo
     [isGathering, hasAvailableNodeType, gatherResource, requestCombatStart],
   );
 };

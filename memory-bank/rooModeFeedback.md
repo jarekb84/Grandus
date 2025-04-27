@@ -12,6 +12,8 @@
 
 *   User questioned potential premature architecture but accepted the Store+Service approach after justification based on project standards and future needs (1)
     *   Specific feedback: User provided detailed feedback on implementation options, questioning potential premature architecture but ultimately okay with proceeding with Option 2 (Store+Service) after re-evaluation.
+*   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (1)
+    *   Specific Example: Plan revised twice based on user feedback regarding vertical slicing for regression prevention and the need to clean up dead event wiring (onResourceGathered) in story-03b.
 
 ## code-executor Feedback
 
@@ -19,3 +21,6 @@
     *   i missed some architectual issues when looking at the output of the code executor, can you spin up a new architecture task so that i can refine the ideas implemented
 *   Code Executor lacks the necessary tools or permissions to perform file deletion tasks (1)
     *   Specific Example: User manually completed Task 7 (file deletion) in story-03-tech-story-refactor-implement-resource-node-state-management.md as the mode lacked permission/tool for it.
+*   Code requires correction based on user feedback regarding implementation details (e.g., logic correctness, adherence to original behavior, variable naming, data source usage) (2)
+    *   Specific Example: Corrected player return position in GatheringService to match original home base return logic (Story 03b, Task 2).
+    *   Specific Example: Corrected player ID usage ('player' vs 'player1') and node finding data source (scene entities via new method vs. global state) in adapter (Story 03b, Task 3).

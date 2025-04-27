@@ -10,8 +10,6 @@ import { EntityType } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { useCurrencyStore } from "../shared/stores/Currency.store";
 import { WaveRewards } from "../combat/Wave";
-import { useResourcesStore } from "@/features/shared/stores/Resources.store";
-import { ResourceType } from "@/features/shared/types/entities";
 import { GameContext } from "./gameContextTypes";
 
 // Forward declare Phaser type for use in interfaces/refs before dynamic import
@@ -52,14 +50,6 @@ const handleTerritoryHealthUpdate = (_health: number): void => {};
 const handleCombatHealthUpdate = (_health: number): void => {};
 const handleOutOfAmmo = (): void => {};
 
-const handleResourceGathered = (
-  resourceType: ResourceType,
-  amount: number,
-): void => {
-  const { addResource } = useResourcesStore.getState();
-  addResource(resourceType, amount);
-};
-
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const gameInstanceRef = useRef<PhaserGameInstance | null>(null);
   const gameContainerRef = useRef<HTMLDivElement>(null);
@@ -99,7 +89,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
           super({
             onEntityInteraction: handleEntityInteraction,
             onPlayerHealthChanged: handleTerritoryHealthUpdate,
-            onResourceGathered: handleResourceGathered,
           });
         }
         override create(): void {
