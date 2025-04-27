@@ -73,8 +73,17 @@ This process is divided into two distinct phases:
         *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. **Strongly prefer using Adapters (per `05`) for cross-boundary interactions over direct modifications.** Consider function signatures and adapter code.
         *   Define necessary configuration changes for *that task*.
         *   Explicitly state the acceptance criteria, focusing on the *behavioral outcome* and including "Application compiles and runs without errors or regressions."
+    *   **Structuring Complex Refactoring (Inside-Out Approach):**
+        *   **When to Use:** Apply this strategy when refactoring large functions (e.g., 100+ lines), complex code spanning multiple files/concepts, or areas with high risk of regression. This complements the "Thin Vertical Slice" principle by providing a way to structure a *series* of refactoring tasks.
+        *   **Core Idea:** Instead of one large refactoring task, break it down into multiple, sequential tasks that incrementally "peel away" complexity from the inside out.
+        *   **Process:**
+            1.  **Start Small:** Identify the most contained, independent logic block ("innards") within the complex area. Create a task to extract or refactor *only* this small piece (e.g., into a new helper function). Verify thoroughly.
+            2.  **Expand Incrementally:** Create subsequent tasks to refactor slightly larger chunks or the next logical layer, building upon the previously refactored code. Each task remains a verifiable "thin vertical slice".
+            3.  **Gradual Restructuring:** Continue this process until the entire complex area is restructured safely over multiple, manageable tasks.
+        *   **Goal:** Significantly reduce the risk of introducing regressions by minimizing the scope and complexity of each individual refactoring task. Use this approach to inform the breakdown of tasks defined below.
+
     *   **Refactoring Safety Protocol (Apply when tasks involve moving/refactoring existing code):**
-        *   **Break Down Refactoring:** If refactoring is complex, break it down into multiple, sequential "thin vertical slice" tasks (e.g., Task 1: Create new file/structure, Task 2: Move function A, Task 3: Update call sites for A & Verify, Task 4: Move function B...).
+        *   **Break Down Refactoring:** If refactoring is complex (consider using the **Inside-Out Approach** above to structure this breakdown), break it down into multiple, sequential "thin vertical slice" tasks (e.g., Task 1: Create new file/structure, Task 2: Move function A, Task 3: Update call sites for A & Verify, Task 4: Move function B...).
         *   **Identify & List Call Sites:** For the specific code being moved *in a given task*, explicitly list the relevant call sites identified (from Step 2, Phase 3/4 analysis).
         *   **Document Current Behavior & Dependencies:** Briefly document the essential current behavior, inputs, outputs, side-effects, and state dependencies of the code being moved *in that task*.
         *   **Plan Call Site Updates:** For *each* relevant call site, provide explicit instructions on how it must be updated *within that task*.
