@@ -6,8 +6,8 @@
 
 ## Update Process
 1.  **Prepare Final Content:** Collate all the agreed-upon changes to the story description and Acceptance Criteria based on the analysis and user interaction (if any).
-2.  **Modify Status:** Locate the `status:` field in the story's markdown content. Change its value to `groomed`. This is a **mandatory** step.
-3.  **Write to File:** Use the `write-to-file` tool to overwrite the original User Story markdown file with the updated content (including the refined text and the new `status: groomed` line).
+2.  **Update and Position Status:** Ensure the `**Status:** groomed` line exists and is the **very first line** of the final content. If the status line existed elsewhere, move it to the top. This is a **mandatory** step.
+3.  **Write to File:** Use the `write-to-file` tool to overwrite the original User Story markdown file with the updated content (ensuring the status line is first).
 
 ## Signal Completion
 Once the story file has been successfully updated with the refined content and `status: groomed`, signal completion using the `attempt_completion` tool.

@@ -1,3 +1,4 @@
+**Status:** completed
 # User Story: Place Initial Stone Node Visually in Home Hex
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
@@ -25,7 +26,7 @@ Visually represent the initial, single Stone resource node within the player's h
 
 *   This story focuses solely on the visual placement based on hex coordinates and the spatial relationship within the home hex relative to the Home Base. Mechanics (capacity, respawn) are handled in subsequent stories.
 *   This story was derived from Epic '01-Targeted-Expansion-And-Resource-Setup' as part of the initial breakdown.
-*   **Status:** done
+
 
 ---
 

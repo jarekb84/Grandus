@@ -1,3 +1,4 @@
+**Status:** completed
 # User Story: Place Home Base Visually in Home Hex
 
 **Epic:** [`epic-01-targeted-expansion-and-resource-setup.md`](./epic-01-targeted-expansion-and-resource-setup.md)
@@ -88,5 +89,3 @@ Project Context (if available in Epic):
 *   Low
 
 ---
-
-**status:** done
