@@ -49,7 +49,7 @@ export const orchestrateGathering = async ({
   // Access position correctly from the target node data
   const targetPosition = { x: targetNode.position.x, y: targetNode.position.y };
 
-  const nodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);
+  const nodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);  
   if (!nodeState || nodeState.currentCapacity <= 0) {
       return { gathered: false };
   }
@@ -58,7 +58,7 @@ export const orchestrateGathering = async ({
     // Move player to the target node - Use correct moveEntityTo signature
     await scene.moveEntityTo(playerId, targetPosition.x, targetPosition.y);
 
-    const gatheringDuration = 2000; // milliseconds
+    const gatheringDuration = 1000; // milliseconds
     const nodeYield = targetNode.yields.find(
       (y) => y.resourceType === resourceType,
     );
@@ -70,6 +70,13 @@ export const orchestrateGathering = async ({
     );
     
     useResourceNodeStore.getState().decrementNodeCapacity(targetNode.id, yieldAmount);
+
+    const updatedNodeState = useResourceNodeStore.getState().getNodeCapacity(targetNode.id);
+    if (updatedNodeState && updatedNodeState.currentCapacity < updatedNodeState.maxCapacity && !updatedNodeState.isRespawning) {        
+        const duration = targetNode.respawnDuration;
+        
+        useResourceNodeStore.getState().startRespawn(targetNode.id, duration);        
+    }
 
     // Move player to home base
     await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);

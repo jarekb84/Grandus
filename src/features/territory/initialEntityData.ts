@@ -22,6 +22,7 @@ export interface InitialEntityData {
     buildingType?: string;
     maxCapacity?: number;
     currentCapacity?: number;
+    respawnDuration?: number;
   };
 }
 
@@ -47,8 +48,9 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
       color: 0x808080, // Grayish color for stone
       size: 28,
       yields: [{ resourceType: ResourceType.STONE, baseAmount: 1, chance: 1 }], // Updated yields structure
-      maxCapacity: 1,
+      maxCapacity: 5,
       currentCapacity: 1,
+      respawnDuration: 5000,
     },
   },
   {

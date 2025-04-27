@@ -61,6 +61,7 @@ export const convertInitialEntityDataToEntity = (
         },
         maxCapacity: maxCapacity,
         currentCapacity: currentCapacity,
+        respawnDuration: initialData.properties.respawnDuration ?? 0,
       } as ResourceNodeEntity;
     }
 

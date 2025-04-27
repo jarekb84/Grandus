@@ -60,6 +60,7 @@ export interface ResourceNodeEntity extends BaseEntity {
   };
   maxCapacity: number;
   currentCapacity: number;
+  respawnDuration: number;
 }
 
 export interface CharacterEntity extends BaseEntity {

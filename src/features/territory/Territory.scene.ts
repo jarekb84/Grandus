@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import { Entity, EntityType, Shape } from "@/features/shared/types/entities";
 import type { ResourceNodeEntity } from "@/features/shared/types/entities";
+import { useResourceNodeStore } from "./ResourceNode.store"; // Added import
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
@@ -20,6 +21,7 @@ interface HexCoords {
 export class TerritoryScene extends Phaser.Scene {
   private entities: Map<string, EntitySprites> = new Map();
   private sceneEvents: MainSceneEvents;
+  private storeUnsubscribe: (() => void) | null = null; // Added for cleanup
   private static readonly SHAPE_KEYS = {
     [Shape.CIRCLE]: "circle",
     [Shape.SQUARE]: "square",
@@ -45,7 +47,52 @@ export class TerritoryScene extends Phaser.Scene {
     this.createShapeTextures();
     this.drawHexGrid();
     this.setupInputHandling();
+    this.subscribeToNodeStore();
   }
+
+  private subscribeToNodeStore(): void {
+    this.updateNodeVisuals();
+    
+    this.storeUnsubscribe = useResourceNodeStore.subscribe(
+      () => this.updateNodeVisuals(),
+    );
+  }
+
+  private updateNodeVisuals(): void {
+    const currentStates = useResourceNodeStore.getState().nodeStates;
+
+    this.entities.forEach((sprites, entityId) => {
+      // Only update visuals for resource nodes that have state
+      const entityData = sprites.main?.getData("entityData") as Entity | undefined;
+      if (entityData?.type !== EntityType.RESOURCE_NODE) {
+        return; // Skip non-resource nodes
+      }
+
+      const nodeState = currentStates.get(entityId);
+
+      if (nodeState && sprites.main) {
+        // Determine Visual State:
+        if (nodeState.currentCapacity <= 0) {
+          // Apply "Depleted" visual
+          sprites.main.setAlpha(0.3);
+          sprites.main.setTint(0x555555); // Dark grey tint
+        } else if (nodeState.isRespawning) {
+          // Apply "Replenishing" visual
+          sprites.main.setAlpha(0.8);
+          sprites.main.setTint(0xffff99); // Slight yellow tint
+        } else {
+          // Apply "Normal" visual
+          sprites.main.setAlpha(1.0);
+          sprites.main.clearTint();
+        }
+      } else if (sprites.main) {
+         // If state is missing for some reason, reset to normal
+         sprites.main.setAlpha(1.0);
+         sprites.main.clearTint();
+      }
+    });
+  }
+
 
   private drawHexGrid(): void {
     const graphics = this.add.graphics({
@@ -318,5 +365,13 @@ export class TerritoryScene extends Phaser.Scene {
       }
     });
     return allNodeData;
+  }
+
+  // Phaser Scene lifecycle method
+  shutdown(): void {    
+    if (this.storeUnsubscribe) {
+      this.storeUnsubscribe();
+      this.storeUnsubscribe = null;
+    }    
   }
 }

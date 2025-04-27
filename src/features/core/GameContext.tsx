@@ -11,6 +11,7 @@ import { useGameState } from "@/features/shared/stores/GameState.store";
 import { useCurrencyStore } from "../shared/stores/Currency.store";
 import { useResourceNodeStore } from "../territory/ResourceNode.store";
 import { WaveRewards } from "../combat/Wave";
+import { RespawnService } from "../territory/RespawnService";
 import { GameContext } from "./gameContextTypes";
 
 // Forward declare Phaser type for use in interfaces/refs before dynamic import
@@ -166,9 +167,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       setIsInitialized(true);
     };
 
+    // Initialize services that manage background processes or subscriptions
+    const respawnService = new RespawnService();
+
     void initPhaser();
 
     return (): void => {
+      respawnService.destroy();
+
+      
       gameInstanceRef.current?.destroy(true);
       gameInstanceRef.current = null;
       useResourceNodeStore.getState().resetStore();
