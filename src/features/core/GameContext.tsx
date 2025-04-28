@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { GameMode } from "@/features/shared/types/GameMode";
-import { EntityType, ResourceNodeEntity } from "@/features/shared/types/entities";
+import { EntityType, ResourceNodeEntity, LightweightEntity } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
 import { useCurrencyStore } from "../shared/stores/Currency.store";
 import { useResourceNodeStore } from "../territory/ResourceNode.store";
@@ -110,15 +110,22 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
               centerY,
             );
 
-            addEntity(sceneEntity); // Add to global game state
-            this.addEntity(sceneEntity); // Add to Phaser scene
+            const lightweightEntity: LightweightEntity = {
+              id: sceneEntity.id,
+              type: sceneEntity.type,
+            };
 
-                        if (sceneEntity.type === EntityType.RESOURCE_NODE) {
+            addEntity(lightweightEntity); // Add to global game state
+
+            this.addEntity(
+              sceneEntity.id,
+              sceneEntity.graphical,
+            ); // Add to Phaser scene
+
+            if (sceneEntity.type === EntityType.RESOURCE_NODE) {
               const { initializeNodeState } = useResourceNodeStore.getState();
-              const maxCap = (sceneEntity as ResourceNodeEntity).maxCapacity ?? 1;
-              const currentCap =
-                (sceneEntity as ResourceNodeEntity).currentCapacity ?? maxCap;
-              initializeNodeState(sceneEntity.id, maxCap, currentCap);
+              const { id, nodeType, yields, mechanics } = sceneEntity as ResourceNodeEntity;
+              initializeNodeState(id, nodeType, yields, mechanics);
             }
           });
 

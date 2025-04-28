@@ -1,30 +1,31 @@
 import { useState, useCallback, useMemo } from "react";
 import {
-  ResourceType,
+  ResourceType,  
+  EntityType,
   ResourceNodeType,
 } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
+import { useResourceNodeStore } from "@/features/territory/ResourceNode.store";
 import { useResourcesStore } from "@/features/shared/stores/Resources.store";
-import { findNearestNodeOfType } from "@/features/territory/gatheringUtils";
+import { findNearestNode } from "@/features/territory/gatheringUtils";
 import { orchestrateGathering } from "@/features/territory/GatheringService";
-import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 import { GameMode } from "@/features/shared/types/GameMode";
 import { useGameContext } from "@/features/core/useGameContext";
 import type { TerritoryScene } from "@/features/territory/Territory.scene";
 interface TerritoryAdapter {
   isGathering: boolean;
-  hasAvailableNodeType: (nodeType: ResourceNodeType) => boolean;
   gatherResource: (type: ResourceType) => Promise<void>;
   requestCombatStart: (hexId: string) => void;
 }
 
 /**
- * Adapter hook for the territory functionality (formerly gathering)
+ * Adapter hook for the territory functionality
  * Provides a clean interface for the core feature to interact with territory mechanics
  */
 export const useTerritoryAdapter = (): TerritoryAdapter => {
   const [isGathering, setIsGathering] = useState(false);
-  const { hasAvailableNodeType } = useGameState();
+  const { getEntitiesByType } = useGameState();
+  const { getNodeRuntimeState, getResourceNodeIdsOfType } = useResourceNodeStore();
   const { addResource } = useResourcesStore();
   const { gameInstance, setActiveScene } = useGameContext();
 
@@ -37,18 +38,14 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       const playerId = "player1";
 
       if (!scene || isGathering) {
+        
         return;
       }
 
-      const nodeType =
-        RESOURCE_TO_NODE_TYPE[type as keyof typeof RESOURCE_TO_NODE_TYPE];
-      if (nodeType == null) {
-        return;
-      }
-
-      if (!hasAvailableNodeType(nodeType)) {
-        return;
-      }
+      // TODO Fix this
+      // if (!hasAvailableNodeType(nodeType)) {
+      //   return;
+      // }
 
       const playerPosition = scene.getEntityPosition(playerId);
       if (!playerPosition) {
@@ -60,32 +57,50 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
 
       setIsGathering(true);
 
-      const resourceNodes = scene.getAllResourceNodesData();
-      if (!resourceNodes || resourceNodes.length === 0) {
-        setIsGathering(false);
-        return;
+      const lightweightNodes = getEntitiesByType(EntityType.RESOURCE_NODE);
+
+      // TODO Fix this, the type passed into here has an issue due to ResourceType and ResourceNodeType being different entities
+      // this is due to the yeild mechanic which could have a "Stone patch" return stone + some rarer thing like gold
+      // you can also have different node sources (ie stone patch, stone quarry, stone pile) that can all get you stone
+      // so this needs to be addressed...somehow...later...for now hardcoding it
+      const resourceNodesOfType = getResourceNodeIdsOfType(ResourceNodeType.STONE_DEPOSIT)
+
+      if (resourceNodesOfType.length === 0) {         
+         setIsGathering(false);
+         return;
       }
 
-      const nearestNode = findNearestNodeOfType(
-        playerPosition,
-        type,
-        resourceNodes,
-      );
+      const nodePositions = resourceNodesOfType.map(scene.getEntityPosition).filter((pos) => pos !== undefined);
+      
+      const nearestNode = findNearestNode(
+         playerPosition,
+         nodePositions,
+       );
 
-      if (nearestNode) {
-        const result = await orchestrateGathering({
-          playerId,
-          resourceType: type,
-          targetNode: nearestNode,
-          scene,
-        });
 
-        if (result.gathered) {
-          addResource(result.resourceType, result.amount);
+      if (nearestNode) {        
+        try {
+          const result = await orchestrateGathering({
+            playerId,
+            resourceType: type,
+            targetNodeId: nearestNode.entityId,
+            scene,
+          });
+
+          if (result.gathered) {
+            addResource(result.resourceType, result.amount);
+          }
+        } catch (error) {
+           console.error("Error during gathering orchestration:", error);
+        } finally {
+           setIsGathering(false);
         }
+      } else {
+        setIsGathering(false);
       }
     },
-    [gameInstance, isGathering, addResource, hasAvailableNodeType],
+    
+    [gameInstance, isGathering, addResource, setActiveScene, getEntitiesByType, getNodeRuntimeState],
   );
 
   const requestCombatStart = useCallback(
@@ -98,11 +113,10 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
   return useMemo(
     () => ({
       isGathering,
-      hasAvailableNodeType,
       gatherResource,
       requestCombatStart,
     }),
-    // Update dependencies for useMemo
-    [isGathering, hasAvailableNodeType, gatherResource, requestCombatStart],
+    
+    [isGathering, gatherResource, requestCombatStart],
   );
 };

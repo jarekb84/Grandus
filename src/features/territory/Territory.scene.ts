@@ -1,7 +1,10 @@
 import * as Phaser from "phaser";
-import { Entity, EntityType, Shape } from "@/features/shared/types/entities";
-import type { ResourceNodeEntity } from "@/features/shared/types/entities";
-import { useResourceNodeStore } from "./ResourceNode.store"; // Added import
+import {
+  EntityType,
+  Shape,
+  GraphicalProperties,
+} from "@/features/shared/types/entities";
+import { useResourceNodeStore } from "./ResourceNode.store";
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
@@ -18,10 +21,16 @@ interface HexCoords {
   r: number;
 }
 
+export interface EntityPosition {
+  entityId: string,
+  x: number,
+  y: number
+}
+
 export class TerritoryScene extends Phaser.Scene {
   private entities: Map<string, EntitySprites> = new Map();
   private sceneEvents: MainSceneEvents;
-  private storeUnsubscribe: (() => void) | null = null; // Added for cleanup
+  private storeUnsubscribe: (() => void) | null = null;
   private static readonly SHAPE_KEYS = {
     [Shape.CIRCLE]: "circle",
     [Shape.SQUARE]: "square",
@@ -58,21 +67,16 @@ export class TerritoryScene extends Phaser.Scene {
     );
   }
 
-  private updateNodeVisuals(): void {
+    private updateNodeVisuals(): void {
     const currentStates = useResourceNodeStore.getState().nodeStates;
 
     this.entities.forEach((sprites, entityId) => {
-      // Only update visuals for resource nodes that have state
-      const entityData = sprites.main?.getData("entityData") as Entity | undefined;
-      if (entityData?.type !== EntityType.RESOURCE_NODE) {
-        return; // Skip non-resource nodes
-      }
-
       const nodeState = currentStates.get(entityId);
 
+      // TODO Fix territory scene should not be coupled directly to the ResourceNodeStore
       if (nodeState && sprites.main) {
         // Determine Visual State:
-        if (nodeState.currentCapacity <= 0) {
+        if (nodeState.mechanics.capacity.current <= 0) {
           // Apply "Depleted" visual
           sprites.main.setAlpha(0.3);
           sprites.main.setTint(0x555555); // Dark grey tint
@@ -249,19 +253,17 @@ export class TerritoryScene extends Phaser.Scene {
     return this.textures.exists(key);
   }
 
-  addEntity(entity: Entity): void {
-    if (!this.ensureTexture(entity.properties.shape)) {
+  addEntity(
+    id: string,
+    graphical: GraphicalProperties,
+  ): void {
+    if (!this.ensureTexture(graphical.shape)) {
+      console.warn(`Texture not found for shape: ${graphical.shape}`);
       return;
     }
 
-    const sprites = this.createSpritesForEntity(entity);
-    this.entities.set(entity.id, sprites);
-
-    if (entity.type === EntityType.RESOURCE_NODE) {
-      sprites.main.setInteractive();
-      // Store the full entity data on the main sprite for later retrieval
-      sprites.main.setData("entityData", entity);
-    }
+    const sprites = this.createSpritesForEntity(graphical);
+    this.entities.set(id, sprites);
   }
 
   removeEntity(entityId: string): void {
@@ -273,9 +275,9 @@ export class TerritoryScene extends Phaser.Scene {
     }
   }
 
-  private createSpritesForEntity(entity: Entity): EntitySprites {
-    const { shape, size, color } = entity.properties;
-    const { x, y } = entity.position;
+  private createSpritesForEntity(graphical: GraphicalProperties): EntitySprites {
+    const { shape, size, color, depth } = graphical;
+    const { x, y } = graphical.position;
 
     const textureKey = TerritoryScene.SHAPE_KEYS[shape];
 
@@ -287,28 +289,17 @@ export class TerritoryScene extends Phaser.Scene {
     main.setDisplaySize(size, size);
     main.setTint(color);
 
-    switch (entity.type) {
-      case EntityType.BUILDING:
-        outline.setDepth(0);
-        main.setDepth(0);
-        break;
-      case EntityType.CHARACTER:
-        outline.setDepth(1);
-        main.setDepth(1);
-        break;
-
-      case EntityType.RESOURCE_NODE:
-        outline.setDepth(0);
-        main.setDepth(0);
-        break;
-    }
+    outline.setDepth(depth);
+    main.setDepth(depth);
 
     return { main, outline };
   }
 
-  async moveEntityTo(entityId: string, x: number, y: number): Promise<void> {
+  async moveEntityTo(entityId: string, targetEntityId: string): Promise<void> {
     const sprites = this.entities.get(entityId);
-    if (sprites == null || sprites.main == null) {
+    const targetSprite = this.entities.get(targetEntityId);
+    
+    if (sprites == null || targetSprite == null) {
       return Promise.resolve();
     }
 
@@ -320,15 +311,13 @@ export class TerritoryScene extends Phaser.Scene {
     return new Promise((resolve) => {
       this.tweens.add({
         targets: targets,
-        x,
-        y,
+        x: targetSprite.main.x,
+        y: targetSprite.main.y,
         duration: 1000,
         ease: "Power2",
         onComplete: () => {
           if (typeof resolve === "function") {
             resolve();
-          } else {
-            // Handle cases where resolve might not be a function (shouldn't happen with Promise)
           }
         },
       });
@@ -342,29 +331,12 @@ export class TerritoryScene extends Phaser.Scene {
    */
   public getEntityPosition(
     entityId: string,
-  ): { x: number; y: number } | undefined {
+  ): EntityPosition | undefined {
     const sprites = this.entities.get(entityId);
     if (sprites?.main) {
-      return { x: sprites.main.x, y: sprites.main.y };
+      return {entityId, x: sprites.main.x, y: sprites.main.y };
     }
     return undefined;
-  }
-
-  /**
-   * Retrieves the underlying data for all resource node entities currently in the scene.
-   * @returns An array of ResourceNodeEntity data objects.
-   */
-  public getAllResourceNodesData(): ResourceNodeEntity[] {
-    const allNodeData: ResourceNodeEntity[] = [];
-    this.entities.forEach((sprites) => {
-      const entityData = sprites.main?.getData("entityData") as
-        | Entity
-        | undefined;
-      if (entityData && entityData.type === EntityType.RESOURCE_NODE) {
-        allNodeData.push(entityData);
-      }
-    });
-    return allNodeData;
   }
 
   // Phaser Scene lifecycle method

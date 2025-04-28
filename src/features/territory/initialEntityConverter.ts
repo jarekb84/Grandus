@@ -5,6 +5,11 @@ import {
   BuildingEntity,
   ResourceNodeEntity,
   CharacterEntity,
+  NodeCapacity,
+  NodeGatheringMechanics,
+  NodeRespawnMechanics,
+  ResourceNodeMechanics,
+  GraphicalProperties,
 } from "@/features/shared/types/entities";
 import { InitialEntityData } from "./initialEntityData";
 import { getPixelPositionForEntity } from "./territoryUtils";
@@ -32,36 +37,60 @@ export const convertInitialEntityDataToEntity = (
   );
 
   // Convert to the appropriate entity type
+  const graphical: GraphicalProperties = {
+    position: pixelPosition,
+    shape: initialData.properties.graphical.shape,
+    size: initialData.properties.graphical.size,
+    color: initialData.properties.graphical.color,
+    depth: initialData.properties.graphical.depth,
+  };
+
   switch (initialData.type) {
     case EntityType.BUILDING:
       return {
         id: initialData.id,
         type: EntityType.BUILDING,
-        position: pixelPosition,
-        properties: initialData.properties,
+        graphical: graphical,
         buildingType: initialData.properties.buildingType || "placeholder",
       } as BuildingEntity;
 
     case EntityType.RESOURCE_NODE: {
-      const maxCapacity = initialData.properties.maxCapacity ?? 1;
-      const currentCapacity = initialData.properties.currentCapacity ?? maxCapacity;
+      const maxCap = initialData.properties.maxCapacity ?? 1;
+      const currentCap = initialData.properties.currentCapacity ?? maxCap;
+      const baseGatherMs = initialData.properties.baseGatherTimeMs ?? 1000;
+      const gatherMultiplier =
+        initialData.properties.gatheringSpeedMultiplier ?? 1;
+      const yieldMult = initialData.properties.yieldMultiplier ?? 1;
+      const respawnMs = initialData.properties.respawnDurationMs ?? 5000;
+      const respawnInc = initialData.properties.respawnCapacityIncrement ?? 1;
+
+      // Create nested structures
+      const capacity: NodeCapacity = { current: currentCap, max: maxCap };
+      const gathering: NodeGatheringMechanics = {
+        durationBaseMs: baseGatherMs,
+        durationMultiplier: gatherMultiplier,
+        yieldMultiplier: yieldMult,
+      };
+      const respawn: NodeRespawnMechanics = {
+        cycleDurationMs: respawnMs,
+        amountPerCycle: respawnInc,
+      };
+
+      // Create parent mechanics object
+      const mechanics: ResourceNodeMechanics = {
+        capacity,
+        gathering,
+        respawn,
+      };
 
       return {
         id: initialData.id,
         type: EntityType.RESOURCE_NODE,
-        position: pixelPosition,
-        properties: initialData.properties,
+        graphical: graphical,
         nodeType:
           initialData.properties.nodeType || ResourceNodeType.STONE_DEPOSIT,
         yields: initialData.properties.yields || [],
-        gatheringProperties: {
-          baseGatherTime: 1,
-          gatheringSpeedMultiplier: 1,
-          yieldMultiplier: 1,
-        },
-        maxCapacity: maxCapacity,
-        currentCapacity: currentCapacity,
-        respawnDuration: initialData.properties.respawnDuration ?? 0,
+        mechanics: mechanics,
       } as ResourceNodeEntity;
     }
 
@@ -69,8 +98,7 @@ export const convertInitialEntityDataToEntity = (
       return {
         id: initialData.id,
         type: EntityType.CHARACTER,
-        position: pixelPosition,
-        properties: initialData.properties,
+        graphical: graphical,
         health: 100,
       } as CharacterEntity;
   }

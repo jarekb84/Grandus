@@ -1,21 +1,17 @@
 import { FC } from "react";
 import {
-  ResourceType,
-  ResourceNodeType,
+  ResourceType,  
 } from "@/features/shared/types/entities";
-import { RESOURCE_TO_NODE_TYPE } from "@/features/shared/utils/resourceMapping";
 
 interface TerritoryActionsProps {
   isGathering: boolean;
-  onGather: (type: ResourceType) => void;
-  hasAvailableNodeType: (nodeType: ResourceNodeType) => boolean;
+  onGather: (type: ResourceType) => void;  
   onStartCombat: () => void;
 }
 
 const TerritoryActions: FC<TerritoryActionsProps> = ({
   isGathering,
   onGather,
-  hasAvailableNodeType,
   onStartCombat,
 }) => {
   return (
@@ -28,16 +24,10 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               <button
                 onClick={() => onGather(ResourceType.STONE)}
                 disabled={
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.STONE],
-                  )
+                  isGathering 
                 }
                 className={`flex-1 px-4 py-2 bg-gray-700 text-white rounded ${
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.STONE],
-                  )
+                  isGathering 
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-600"
                 }`}
@@ -47,16 +37,10 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               <button
                 onClick={() => onGather(ResourceType.WOOD)}
                 disabled={
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.WOOD],
-                  )
+                  isGathering 
                 }
                 className={`flex-1 px-4 py-2 bg-yellow-700 text-white rounded ${
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.WOOD],
-                  )
+                  isGathering 
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-yellow-600"
                 }`}
@@ -66,16 +50,10 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               <button
                 onClick={() => onGather(ResourceType.FOOD)}
                 disabled={
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.FOOD],
-                  )
+                  isGathering 
                 }
                 className={`flex-1 px-4 py-2 bg-green-700 text-white rounded ${
-                  isGathering ||
-                  !hasAvailableNodeType(
-                    RESOURCE_TO_NODE_TYPE[ResourceType.FOOD],
-                  )
+                  isGathering 
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-green-600"
                 }`}

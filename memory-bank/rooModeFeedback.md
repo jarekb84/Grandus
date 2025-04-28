@@ -7,15 +7,19 @@
     *   User requested an explicit AC to ensure only the Home Base and initial Stone node are displayed initially, and specifically mentioned the removal of other nodes.
 *   Grooming identified implementation ambiguities best resolved during technical planning (1)
     *   Specific feedback: User clarified that specific implementation decisions (e.g., mandatory ResourceService, ResourceSystem fate, adapter scope) for this technical refactoring story should be deferred to the architect-planner phase, as they require deeper code analysis.
+*   Groomer's proposed Acceptance Criteria were clear and required no user modification (1)
+    *   Specific Example: User confirmed proposed refined Acceptance Criteria were accurate and ready without further changes for story-04a.
 
 ## architect-planner Feedback
 
 *   User questioned potential premature architecture but accepted the Store+Service approach after justification based on project standards and future needs (1)
     *   Specific feedback: User provided detailed feedback on implementation options, questioning potential premature architecture but ultimately okay with proceeding with Option 2 (Store+Service) after re-evaluation.
-*   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (2)
+*   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (3)
     *   Specific Example: Plan revised twice based on user feedback regarding vertical slicing for regression prevention and the need to clean up dead event wiring (onResourceGathered) in story-03b.
-*   Entity type definitions combine graphical and state concerns, leading to potential code smells and future refactoring needs (1)
+    *   Specific Example: Plan revised based on user feedback for Story 04a (naming, grouping, units).
+*   Entity type definitions combine graphical and state concerns, leading to potential code smells and future refactoring needs (2)
     *   Specific Example: User raised concerns about the dual purpose of Entity types (graphical vs. runtime state) and initialEntityData, identifying it as a "code smell." Acknowledged the pragmatic need for the current approach for initialization but agreed that future refactoring to bifurcate type definitions is warranted. Approved the core logic of Tasks 2 (Store Creation/Init) and 3 (Service Integration) within the plan.
+    *   Specific Example: Plan significantly revised for Story 04a based on detailed user analysis of code smells (mixed entity properties) and proposed refactoring approach (bifurcation).
 
 ## code-executor Feedback
 

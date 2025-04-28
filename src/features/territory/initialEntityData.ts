@@ -10,9 +10,12 @@ export interface InitialEntityData {
   hexCoords: { q: number; r: number };
   hexOffsetPixels: { x: number; y: number };
   properties: {
-    shape: Shape;
-    color: number;
-    size: number;
+    graphical: {
+      shape: Shape;
+      color: number;
+      size: number;
+      depth: number,
+    };
     yields?: {
       resourceType: ResourceType;
       baseAmount: number;
@@ -20,9 +23,14 @@ export interface InitialEntityData {
     }[];
     nodeType?: import("@/features/shared/types/entities").ResourceNodeType;
     buildingType?: string;
+    // Resource Node specific properties for conversion
     maxCapacity?: number;
     currentCapacity?: number;
-    respawnDuration?: number;
+    baseGatherTimeMs?: number; // Base time in ms
+    gatheringSpeedMultiplier?: number; // Multiplier for speed (e.g., 1.1 = 10% faster)
+    yieldMultiplier?: number; // Multiplier for resource amount
+    respawnDurationMs?: number; // Time in ms for one respawn cycle
+    respawnCapacityIncrement?: number; // Amount restored per cycle
   };
 }
 
@@ -33,9 +41,12 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     hexCoords: { q: 0, r: 0 },
     hexOffsetPixels: { x: 0, y: 0 },
     properties: {
-      shape: Shape.SQUARE,
-      color: 0x00ff00,
-      size: 40,
+      graphical: {
+        shape: Shape.SQUARE,
+        color: 0x00ff00,
+        size: 40,
+        depth:0,
+      },
     },
   },
   {
@@ -44,13 +55,20 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     hexCoords: { q: 0, r: 0 },
     hexOffsetPixels: { x: 40, y: 30 },
     properties: {
-      shape: Shape.CIRCLE,
-      color: 0x808080, // Grayish color for stone
-      size: 28,
-      yields: [{ resourceType: ResourceType.STONE, baseAmount: 1, chance: 1 }], // Updated yields structure
+      graphical: {
+        shape: Shape.CIRCLE,
+        color: 0x808080, // Grayish color for stone
+        size: 28,
+        depth:0,        
+      },
+      yields: [{ resourceType: ResourceType.STONE, baseAmount: 1, chance: 1 }],
       maxCapacity: 5,
       currentCapacity: 1,
-      respawnDuration: 5000,
+      baseGatherTimeMs: 1000, // Default gather time
+      gatheringSpeedMultiplier: 1, // Default speed multiplier
+      yieldMultiplier: 1, // Default yield multiplier
+      respawnDurationMs: 5000, // Renamed from respawnDuration
+      respawnCapacityIncrement: 1, // Default increment amount
     },
   },
   {
@@ -59,9 +77,12 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     hexCoords: { q: 0, r: 0 }, // Same hex as base and stone node initially
     hexOffsetPixels: { x: -30, y: -30 }, // Offset from center
     properties: {
-      shape: Shape.CIRCLE,
-      color: 0x0000ff, // Blue color for player
-      size: 20,
+      graphical: {
+        shape: Shape.CIRCLE,
+        color: 0x0000ff, // Blue color for player
+        size: 20,
+        depth: 1,
+      },
     },
   },
 ];

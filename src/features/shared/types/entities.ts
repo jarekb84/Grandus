@@ -35,32 +35,47 @@ export interface ResourceYield {
   chance: number;
 }
 
+export interface GraphicalProperties {
+  position: Position;
+  shape: Shape;
+  size: number;
+  color: number;
+  depth: number; // similar to css z-index
+}
+
 interface BaseEntity {
   id: string;
   type: EntityType;
-  position: {
-    x: number;
-    y: number;
-  };
-  properties: {
-    shape: Shape;
-    size: number;
-    color: number;
-  };
+  graphical: GraphicalProperties;
+}
+
+export interface NodeCapacity {
+  current: number;
+  max: number;
+}
+
+export interface NodeGatheringMechanics {
+  durationBaseMs: number;
+  durationMultiplier: number;
+  yieldMultiplier: number;
+}
+
+export interface NodeRespawnMechanics {
+  cycleDurationMs: number;
+  amountPerCycle: number;
+}
+
+export interface ResourceNodeMechanics {
+  capacity: NodeCapacity;
+  gathering: NodeGatheringMechanics;
+  respawn: NodeRespawnMechanics;
 }
 
 export interface ResourceNodeEntity extends BaseEntity {
   type: EntityType.RESOURCE_NODE;
   nodeType: ResourceNodeType;
   yields: ResourceYield[];
-  gatheringProperties: {
-    baseGatherTime: number;
-    gatheringSpeedMultiplier: number;
-    yieldMultiplier: number;
-  };
-  maxCapacity: number;
-  currentCapacity: number;
-  respawnDuration: number;
+  mechanics: ResourceNodeMechanics;
 }
 
 export interface CharacterEntity extends BaseEntity {
@@ -73,4 +88,8 @@ export interface BuildingEntity extends BaseEntity {
   buildingType: string;
 }
 
+export interface LightweightEntity {
+  id: string;
+  type: EntityType;
+}
 export type Entity = ResourceNodeEntity | CharacterEntity | BuildingEntity;

@@ -1,4 +1,4 @@
-import { ResourceType, ResourceNodeEntity } from "../shared/types/entities";
+import { ResourceType } from "../shared/types/entities"; // Remove ResourceNodeEntity import if no longer needed directly
 import { TerritoryScene } from "./Territory.scene";
 import { useResourceNodeStore } from "./ResourceNode.store";
 
@@ -9,7 +9,7 @@ export type OrchestrationResult =
 interface OrchestrateGatheringParams {
   playerId: string;
   resourceType: ResourceType;
-  targetNode: ResourceNodeEntity;
+  targetNodeId: string;
   scene: TerritoryScene;
 }
 
@@ -19,51 +19,42 @@ interface OrchestrateGatheringParams {
 export const orchestrateGathering = async ({
   playerId,
   resourceType,
-  targetNode,
+  targetNodeId,
   scene,
 }: OrchestrateGatheringParams): Promise<OrchestrationResult> => {
   // Find player and home base entities from the scene context
   // Get player's starting position to ensure player exists, but don't store it for return movement
   const playerExistsCheck = scene.getEntityPosition(playerId);
 
-  // Calculate home base position (hex 0,0) using scene's public method
-  const homePosition = scene.hexToPixelCoords(
-    0,
-    0,
-    scene.centerX,
-    scene.centerY,
-  );
-
-  if (!playerExistsCheck || !targetNode || !homePosition) {
-    console.error(
-      `GatheringService: Could not find player (ID: ${playerId}), target node (ID: ${targetNode?.id}), or calculate home position.`,
-      {
-        playerFound: !!playerExistsCheck,
-        nodeFound: !!targetNode,
-        homePosCalculated: !!homePosition,
-      },
-    );
+  if (!playerExistsCheck) {
+    console.error(`GatheringService: Could not find player (ID: ${playerId})`);
     return { gathered: false };
   }
-
-  // Access position correctly from the target node data
-  const targetPosition = { x: targetNode.position.x, y: targetNode.position.y };
 
   const nodeState = useResourceNodeStore
     .getState()
-    .getNodeCapacity(targetNode.id);
-  if (!nodeState || nodeState.currentCapacity <= 0) {
+    .getNodeRuntimeState(targetNodeId);
+
+  // Check if node exists in the runtime store and has capacity
+  if (!nodeState || nodeState.mechanics.capacity.current <= 0) {
+     console.warn(`GatheringService: Target node (ID: ${targetNodeId}) not found in store or has no capacity.`);
     return { gathered: false };
   }
 
-  // Move player to the target node - Use correct moveEntityTo signature
-  await scene.moveEntityTo(playerId, targetPosition.x, targetPosition.y);
+  // Move player to the target node
+  await scene.moveEntityTo(playerId, targetNodeId);
 
-  const gatheringDuration = 1000; // milliseconds
-  const nodeYield = targetNode.yields.find(
+  // Calculate gathering duration and yield based on the fetched nodeState
+  const gatheringDuration =
+    nodeState.mechanics.gathering.durationBaseMs / // Start with base duration
+    nodeState.mechanics.gathering.durationMultiplier; // Divide by multiplier
+  const nodeYieldData = nodeState.yields.find(
     (y) => y.resourceType === resourceType,
   );
-  const yieldAmount = nodeYield ? nodeYield.baseAmount : 1;
+  // Apply yield multiplier to the base amount
+  const yieldAmount = nodeYieldData
+    ? nodeYieldData.baseAmount * nodeState.mechanics.gathering.yieldMultiplier
+    : 1; // Default to 1 if no yield found
 
   // Wait for the gathering duration using Phaser's timer
   await new Promise((resolve) =>
@@ -72,23 +63,25 @@ export const orchestrateGathering = async ({
 
   useResourceNodeStore
     .getState()
-    .decrementNodeCapacity(targetNode.id, yieldAmount);
+    .decrementNodeCapacity(targetNodeId, yieldAmount);
 
+  // Re-fetch the state to check if respawn should start
   const updatedNodeState = useResourceNodeStore
     .getState()
-    .getNodeCapacity(targetNode.id);
+    .getNodeRuntimeState(targetNodeId);
+
   if (
     updatedNodeState &&
-    updatedNodeState.currentCapacity < updatedNodeState.maxCapacity &&
+    updatedNodeState.mechanics.capacity.current < updatedNodeState.mechanics.capacity.max &&
     !updatedNodeState.isRespawning
   ) {
-    const duration = targetNode.respawnDuration;
 
-    useResourceNodeStore.getState().startRespawn(targetNode.id, duration);
+    useResourceNodeStore.getState().startRespawn(targetNodeId);
   }
 
-  // Move player to home base
-  await scene.moveEntityTo(playerId, homePosition.x, homePosition.y);
+  // Move player back to home base
+  // TODO Fix this to reference home base id that is not hardcoded
+  await scene.moveEntityTo(playerId, 'base1');
 
   return { gathered: true, resourceType: resourceType, amount: yieldAmount };
 };
