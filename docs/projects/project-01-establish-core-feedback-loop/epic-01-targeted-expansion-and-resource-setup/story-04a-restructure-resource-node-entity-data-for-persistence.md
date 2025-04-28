@@ -1,4 +1,4 @@
-**Status:** coding_in_progress
+**Status:** complete
 # User Story: Restructure Resource Node Entity Data for Persistence (04a)
 
 **Epic:** [../epic-01-targeted-expansion-and-resource-setup.md](../epic-01-targeted-expansion-and-resource-setup.md)
