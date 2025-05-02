@@ -2,7 +2,19 @@
   "mcpServers": {
     "git": {
       "command": "python",
-      "args": ["-m", "mcp_server_git", "--repository", "c:/Source/Grandus"]
+      "args": [
+        "-m",
+        "mcp_server_git",
+        "--repository",
+        "c:/Source/Grandus"
+      ]
+    },
+    "story": {
+      "command": "node",
+      "args": [".roo\\mcp-servers\\story-mcp\\story-mcp-server.js"],
+      "cwd": "C:\\Source\\Grandus",               
+      "transport": "stdio",
+      "alwaysAllow": ["initializeStatus","getStatus","setStatus","getPendingTasks","completeTask"]
     }
   }
 }

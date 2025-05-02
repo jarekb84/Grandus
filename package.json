@@ -13,11 +13,13 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "@types/uuid": "^10.0.0",
     "phaser": "^3.88.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "uuid": "^11.1.0",
+    "zod": "^3.24.3",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
