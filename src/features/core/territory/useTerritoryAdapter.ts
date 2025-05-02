@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import {
-  ResourceType,  
-  EntityType,
+  ResourceType,
   ResourceNodeType,
 } from "@/features/shared/types/entities";
 import { useGameState } from "@/features/shared/stores/GameState.store";
@@ -11,11 +10,12 @@ import { findNearestNode } from "@/features/territory/gatheringUtils";
 import { orchestrateGathering } from "@/features/territory/GatheringService";
 import { GameMode } from "@/features/shared/types/GameMode";
 import { useGameContext } from "@/features/core/useGameContext";
-import type { TerritoryScene } from "@/features/territory/Territory.scene";
+import type { TerritoryScene, EntityPosition } from "@/features/territory/Territory.scene";
 interface TerritoryAdapter {
   isGathering: boolean;
   gatherResource: (type: ResourceType) => Promise<void>;
   requestCombatStart: (hexId: string) => void;
+  hasAvailableNodeType: (resourceType: ResourceNodeType) => boolean; // Task F: Exposed selector
 }
 
 /**
@@ -25,7 +25,7 @@ interface TerritoryAdapter {
 export const useTerritoryAdapter = (): TerritoryAdapter => {
   const [isGathering, setIsGathering] = useState(false);
   const { getEntitiesByType } = useGameState();
-  const { getNodeRuntimeState, getResourceNodeIdsOfType } = useResourceNodeStore();
+  const { getResourceNodeIdsOfType, hasAvailableNodeType } = useResourceNodeStore();
   const { addResource } = useResourcesStore();
   const { gameInstance, setActiveScene } = useGameContext();
 
@@ -35,6 +35,7 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
         | TerritoryScene
         | undefined;
 
+      // TODO: Resolve hardcoded playerId 'player1' (Deferred from story-04a1)
       const playerId = "player1";
 
       if (!scene || isGathering) {
@@ -42,10 +43,13 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
         return;
       }
 
-      // TODO Fix this
-      // if (!hasAvailableNodeType(nodeType)) {
-      //   return;
-      // }
+      
+      // TODO: Resolve the ResourceType vs ResourceNodeType mismatch later. Using hardcoded STONE_DEPOSIT for now.
+      if (!hasAvailableNodeType(ResourceNodeType.STONE_DEPOSIT)) {
+        console.warn(`gatherResource: No available nodes of type ${ResourceNodeType.STONE_DEPOSIT} found.`);
+        setIsGathering(false);
+        return;
+      }
 
       const playerPosition = scene.getEntityPosition(playerId);
       if (!playerPosition) {
@@ -57,7 +61,7 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
 
       setIsGathering(true);
 
-      const lightweightNodes = getEntitiesByType(EntityType.RESOURCE_NODE);
+      //const lightweightNodes = getEntitiesByType(EntityType.RESOURCE_NODE);
 
       // TODO Fix this, the type passed into here has an issue due to ResourceType and ResourceNodeType being different entities
       // this is due to the yeild mechanic which could have a "Stone patch" return stone + some rarer thing like gold
@@ -70,7 +74,7 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
          return;
       }
 
-      const nodePositions = resourceNodesOfType.map(scene.getEntityPosition).filter((pos) => pos !== undefined);
+      const nodePositions = resourceNodesOfType.map(entityId => scene.getEntityPosition(entityId)).filter((pos): pos is EntityPosition => pos !== undefined);
       
       const nearestNode = findNearestNode(
          playerPosition,
@@ -100,7 +104,7 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       }
     },
     
-    [gameInstance, isGathering, addResource, setActiveScene, getEntitiesByType, getNodeRuntimeState],
+    [gameInstance, isGathering, addResource, setActiveScene, getEntitiesByType],
   );
 
   const requestCombatStart = useCallback(
@@ -115,8 +119,9 @@ export const useTerritoryAdapter = (): TerritoryAdapter => {
       isGathering,
       gatherResource,
       requestCombatStart,
+      hasAvailableNodeType,
     }),
-    
-    [isGathering, gatherResource, requestCombatStart],
+
+    [isGathering, gatherResource, requestCombatStart, hasAvailableNodeType],
   );
 };

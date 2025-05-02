@@ -70,10 +70,13 @@ export const convertInitialEntityDataToEntity = (
         durationBaseMs: baseGatherMs,
         durationMultiplier: gatherMultiplier,
         yieldMultiplier: yieldMult,
+        yields: initialData.properties.yields || [],
       };
       const respawn: NodeRespawnMechanics = {
         cycleDurationMs: respawnMs,
         amountPerCycle: respawnInc,
+        isRespawning: false,
+        respawnEndTime: null,
       };
 
       // Create parent mechanics object
@@ -89,7 +92,6 @@ export const convertInitialEntityDataToEntity = (
         graphical: graphical,
         nodeType:
           initialData.properties.nodeType || ResourceNodeType.STONE_DEPOSIT,
-        yields: initialData.properties.yields || [],
         mechanics: mechanics,
       } as ResourceNodeEntity;
     }

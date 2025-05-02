@@ -124,8 +124,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
 
             if (sceneEntity.type === EntityType.RESOURCE_NODE) {
               const { initializeNodeState } = useResourceNodeStore.getState();
-              const { id, nodeType, yields, mechanics } = sceneEntity as ResourceNodeEntity;
-              initializeNodeState(id, nodeType, yields, mechanics);
+              const { id, nodeType, mechanics } = sceneEntity as ResourceNodeEntity;
+              initializeNodeState(id, nodeType, mechanics);
             }
           });
 

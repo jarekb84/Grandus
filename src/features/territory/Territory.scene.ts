@@ -68,6 +68,7 @@ export class TerritoryScene extends Phaser.Scene {
   }
 
     private updateNodeVisuals(): void {
+      // TODO: Decouple scene from direct ResourceNodeStore access (Deferred from story-04a1)
     const currentStates = useResourceNodeStore.getState().nodeStates;
 
     this.entities.forEach((sprites, entityId) => {
@@ -80,7 +81,7 @@ export class TerritoryScene extends Phaser.Scene {
           // Apply "Depleted" visual
           sprites.main.setAlpha(0.3);
           sprites.main.setTint(0x555555); // Dark grey tint
-        } else if (nodeState.isRespawning) {
+        } else if (nodeState.mechanics.respawn.isRespawning) {
           // Apply "Replenishing" visual
           sprites.main.setAlpha(0.8);
           sprites.main.setTint(0xffff99); // Slight yellow tint

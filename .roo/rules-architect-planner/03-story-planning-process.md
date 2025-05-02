@@ -70,7 +70,8 @@ Let's think through this step-by-step to ensure a thorough analysis and plan.
             2. "Does this task deliver a small but complete unit of behavior that can be observed in the running application?" If no, restructure the task.
             3. "Could the files created in this task be considered 'dead code' until a future task is implemented?" If yes, restructure the task to include minimal usage.
         *   **Note on Slicing vs. Architecture:** The "no dead code" / "immediately usable" principle ensures incremental progress but **must not** justify violating core architectural boundaries (SRP, State Separation). Creating a new, correctly placed file/module and integrating it minimally *is* a valid vertical slice.
-    *   **Task Details:** For each task:
+    *   **Task Details:** For each task (**REMINDER: Rigorously apply Vertical Slice Validation checks from lines 68-71**):
+        *   **Maintain Strict Cohesion:** Ensure all changes within this task relate directly to *one single core conceptual change* (e.g., refactoring respawn logic, implementing node depletion). Avoid bundling unrelated functional changes or mixing functional changes with unrelated cleanup (like cosmetic refactoring).
         *   Specify *which* files to create or modify (guided by `06-directory-structure.md`, respecting boundaries validated above, including primary targets and potentially referencing files identified in Step 2).
         *   Detail *what* specific, minimal changes are needed (e.g., create file AND integrate, add function signature AND call site, implement minimal logic AND connect it), ensuring alignment with `05-architecture-patterns.md`. **Strongly prefer using Adapters (per `05`) for cross-boundary interactions over direct modifications.** Consider function signatures and adapter code.
         *   Define necessary configuration changes for *that task*.
@@ -136,6 +137,41 @@ Task 3: Refactor Node Availability Checks
 ```
 
 This approach creates "vertical slices" where each task delivers complete, working functionality.
+
+**Note on File Modification:** It is acceptable and often necessary for multiple distinct vertical slice tasks to modify the *same file(s)*, provided each task focuses on a different, cohesive conceptual change within that file.
+
+### Example: Poor Task Cohesion
+
+**INCORRECT (Poor Cohesion) - Mixing Concerns Example:**
+```
+Task 1: Refactor Resource Node Data & Improve Colors
+- Files: ResourceNode.store.ts, territoryUtils.ts, constants.ts
+- Changes:
+  - Move `respawnTime` and `maxYield` properties from Entity to ResourceNode.store state.
+  - Update territoryUtils functions to use the store state.
+  - Define named constants for hex color values in constants.ts.
+  - Replace magic hex color strings in ResourceNode.store.ts with new constants.
+- Acceptance Criteria: Node data refactored. Colors use constants. App compiles.
+```
+**Problem:** This task combines a structural data refactoring (moving properties) with an unrelated cosmetic cleanup (naming colors). These are two distinct conceptual changes.
+
+**CORRECT (Improved Cohesion):**
+```
+Task 1: Refactor Resource Node Respawn/Yield Data
+- Files: ResourceNode.store.ts, territoryUtils.ts
+- Changes:
+  - Move `respawnTime` and `maxYield` properties.
+  - Update territoryUtils functions.
+- Acceptance Criteria: Node data refactored. App compiles and runs.
+
+Task 2 (Separate Cleanup Task): Standardize Color Constants
+- Files: constants.ts, ResourceNode.store.ts
+- Changes:
+  - Define named constants for hex colors.
+  - Replace magic hex strings with constants.
+- Acceptance Criteria: Colors use constants. App compiles.
+```
+This separates the distinct concerns into focused, cohesive tasks.
 
 ### Guidelines for Refactoring as Vertical Slices
 
@@ -239,14 +275,22 @@ The Markdown report for Phase 2, presenting the detailed technical plan for the 
 ### 3. Detailed Implementation Tasks (Thin Vertical Slices):
 *   **Task 1: [Brief name focusing on behavior implemented]**
     *   **Files:** [List files to create/modify]
-    *   **Changes:** [Detail specific changes]
+    *   **Changes:** [Detail specific changes, focused *only* on this task's core conceptual change]
     *   **Vertical Slice Behavior:** [Explicitly describe the complete, observable behavior this task delivers]
     *   **Integration Points:** [Explain how new components are used within this task]
-    *   **Acceptance Criteria:** [Include behavioral outcomes and verification steps]
+    *   **Acceptance Criteria:** [Include behavioral outcomes and verification steps, ensuring runnable state]
 
-*   [Additional tasks following the same pattern]
+*   [Additional tasks following the same pattern, maintaining strict focus/cohesion per task]
 
-### 4. Architectural & Standards Compliance:
+### 4. Recommended Post-Implementation Cleanup Tasks (Optional):
+*   Based on the changes above, consider the following separate cleanup tasks (apply Boy Scout rule, remove dead code identified post-refactor, etc.), following the principle of separating cleanup from functional changes:
+*   **Cleanup Task 1: [Brief name, e.g., Remove Deprecated Resource Fields]**
+    *   **Files:** [List files]
+    *   **Changes:** [Describe specific cleanup actions]
+    *   **Rationale:** [Why this cleanup is needed]
+*   *(Add more cleanup tasks if applicable, or state "None recommended at this stage")*
+
+### 5. Architectural & Standards Compliance:
 *   [Note how the implementation adheres to principles in `05..` (SOLID, **Functional Design/Testability**, State Separation), structure in `06..`, etc.]
 *   [Highlight any necessary deviations and justification]
 

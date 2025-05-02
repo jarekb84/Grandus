@@ -40,7 +40,7 @@
       "slug": "code-executor",
       "name": "💻 Code Executor",
       "roleDefinition": "Implements a single, specific technical task based on instructions provided by an orchestrator, adhering to specified standards.",
-      "groups": ["read", "edit", "command"]
+      "groups": ["read", "edit", "command", "mcp"]
     },
     {
       "slug": "code-reviewer",

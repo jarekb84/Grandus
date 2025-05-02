@@ -1,32 +1,25 @@
 import { create } from 'zustand';
-import { ResourceNodeMechanics, ResourceNodeType, ResourceYield } from '../shared/types/entities';
-
-// TODO FIX This should be updated, isRespawning and respawnEndTime should be inside mechanics.respawnSettings
-// TODO FIX This interface name and methods that use the same term probably doesn't need an explicit "RunTimeState" suffix
-//      Because this is defined within the zustand store and should be obvious from usage.
-interface ResourceNodeRuntimeState {
+import { ResourceNodeMechanics, ResourceNodeType } from '../shared/types/entities';
+interface ResourceNodeState {
   nodeId: string;
   nodeType: ResourceNodeType;
-  yields: ResourceYield[];
   mechanics: ResourceNodeMechanics;
-  isRespawning: boolean;
-  respawnEndTime: number | null;
 }
 
 interface ResourceNodeStoreState {
-  nodeStates: Map<string, ResourceNodeRuntimeState>;
+  nodeStates: Map<string, ResourceNodeState>;
   initializeNodeState: (
     nodeId: string,
     nodeType: ResourceNodeType,
-    yields: ResourceYield[],
     mechanics: ResourceNodeMechanics,
   ) => void;
   decrementNodeCapacity: (nodeId: string, amount: number) => void;
-  getNodeRuntimeState: (nodeId: string) => ResourceNodeRuntimeState | undefined;
+  getNodeState: (nodeId: string) => ResourceNodeState | undefined; 
   startRespawn: (nodeId: string) => void;
   finishRespawn: (nodeId: string) => void;
   resetStore: () => void;
   getResourceNodeIdsOfType: (resourceType: ResourceNodeType) => string[];
+  hasAvailableNodeType: (resourceType: ResourceNodeType) => boolean;
 }
 
 export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) => ({
@@ -35,7 +28,6 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
   initializeNodeState: (
     nodeId: string,
     nodeType: ResourceNodeType,
-    yields: ResourceYield[],
     mechanics: ResourceNodeMechanics,
   ): void => {
     set((state) => {
@@ -43,10 +35,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
       newNodeStates.set(nodeId, {
         nodeId,
         nodeType,
-        yields,
         mechanics,
-        isRespawning: false,
-        respawnEndTime: null,
       });
       return { nodeStates: newNodeStates };
     });
@@ -72,7 +61,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
     });
   },
 
-  getNodeRuntimeState: (nodeId: string): ResourceNodeRuntimeState | undefined => {
+  getNodeState: (nodeId: string): ResourceNodeState | undefined => {
     return get().nodeStates.get(nodeId);
   },
 
@@ -80,12 +69,19 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
     set((state) => {
       const newNodeStates = new Map(state.nodeStates);
       const node = newNodeStates.get(nodeId);
-      if (node && !node.isRespawning) {
+      if (node && !node.mechanics.respawn.isRespawning) {
         const duration = node.mechanics.respawn.cycleDurationMs;
+        const updatedMechanics: ResourceNodeMechanics = {
+          ...node.mechanics,
+          respawn: {
+            ...node.mechanics.respawn,
+            isRespawning: true,
+            respawnEndTime: Date.now() + duration,
+          },
+        };
         newNodeStates.set(nodeId, {
           ...node,
-          isRespawning: true,
-          respawnEndTime: Date.now() + duration,
+          mechanics: updatedMechanics,
         });
         return { nodeStates: newNodeStates };
       }
@@ -101,17 +97,20 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
         // Reset capacity to max, sourced from mechanics
         const maxCapacity = node.mechanics.capacity.max;
         const updatedMechanics: ResourceNodeMechanics = {
-            ...node.mechanics,
-            capacity: {
-                ...node.mechanics.capacity,
-                current: maxCapacity,
-            },
+          ...node.mechanics,
+          capacity: {
+            ...node.mechanics.capacity,
+            current: maxCapacity,
+          },
+          respawn: {
+            ...node.mechanics.respawn,
+            isRespawning: false,
+            respawnEndTime: null,
+          },
         };
         newNodeStates.set(nodeId, {
           ...node,
           mechanics: updatedMechanics,
-          isRespawning: false,
-          respawnEndTime: null,
         });
         return { nodeStates: newNodeStates };
       }
@@ -132,5 +131,17 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>((set, get) =>
       }
     }
     return matchingNodeIds;
+  },
+  hasAvailableNodeType: (resourceType: ResourceNodeType): boolean => {
+    const nodeStates = get().nodeStates;
+    for (const nodeState of nodeStates.values()) {
+      if (
+        nodeState.nodeType === resourceType &&
+        nodeState.mechanics.capacity.current > 0
+      ) {
+        return true; // Found at least one available node of the specified type
+      }
+    }
+    return false; // No available nodes of the specified type found
   },
 }));

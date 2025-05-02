@@ -19,11 +19,11 @@ export class RespawnService {
 
           // Check if respawn just started or end time changed
           if (
-            nodeState.isRespawning &&
-            nodeState.respawnEndTime !== null &&
+            nodeState.mechanics.respawn.isRespawning &&
+            nodeState.mechanics.respawn.respawnEndTime !== null &&
             (!previousState ||
-              !previousState.isRespawning ||
-              previousState.respawnEndTime !== nodeState.respawnEndTime)
+              !previousState.mechanics.respawn.isRespawning ||
+              previousState.mechanics.respawn.respawnEndTime !== nodeState.mechanics.respawn.respawnEndTime)
           ) {
             // Clear existing timer for this node if it exists
             if (this.activeTimers.has(nodeId)) {
@@ -31,7 +31,7 @@ export class RespawnService {
               this.activeTimers.delete(nodeId);
             }
 
-            const delay = nodeState.respawnEndTime - Date.now();
+            const delay = nodeState.mechanics.respawn.respawnEndTime - Date.now();
 
             if (delay > 0) {
               const timerId = setTimeout(() => {
@@ -46,8 +46,8 @@ export class RespawnService {
           }
           // Check if respawn just finished or was cancelled externally
           else if (
-            !nodeState.isRespawning &&
-            previousState?.isRespawning &&
+            !nodeState.mechanics.respawn.isRespawning &&
+            previousState?.mechanics.respawn.isRespawning &&
             this.activeTimers.has(nodeId)
           ) {
             clearTimeout(this.activeTimers.get(nodeId));

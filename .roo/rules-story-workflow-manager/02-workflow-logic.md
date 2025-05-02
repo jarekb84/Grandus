@@ -82,9 +82,19 @@ This document details the step-by-step workflow you must follow, driven by the `
 
     *   **If `status` is `plan_approved`:**
         *   **Communicate:** Inform user: "Story status is 'plan_approved'. Plan approved. Updating status to 'Coding In Progress' and initiating implementation."
-        *   **Action:**
-            1.  **Update Status:** Use MCP `setStatus <filePath> coding_in_progress`.
-            2.  **Initiate Coding:** Continue the loop; the next iteration will enter the `coding_in_progress` state.
+        *   **Action:** Execute Plan Finalization Sequence:
+            1.  **Communicate:** Inform user: "Populating pending task list from the plan..."
+            2.  **Read Plan:** Use `read_file` to get the content of the story file (`<filePath>`).
+            3.  **Identify & Extract Tasks:**
+                *   Parse the file content to locate the technical plan section (e.g., under a "## Technical Plan" heading).
+                *   Identify individual task items within the plan (e.g., assuming markdown list format like `- [ ] Task description...`).
+                *   For each identified task, determine its unique identifier or name as defined in the plan (e.g., "Task A", "Task B", "task-implement-login").
+                *   Create a JSON array containing these identifiers/names as strings. Example: `["Task A", "Task B", "task-implement-login"]`. Let's call this `taskIdsArray`.
+            4.  **Populate Pending List via MCP:**
+                *   Use the Story MCP Server command `addTasks <filePath> <taskIdsArray>`. Pass the story file path and the JSON array of task identifiers created in the previous step.
+                *   If this command fails, update status to `blocked` and report the error to the user. Halt processing.
+            5.  **Update Status:** If task population succeeds, use MCP `setStatus <filePath> coding_in_progress`.
+            6.  **Initiate Coding:** Continue the loop; the next iteration will enter the `coding_in_progress` state.
 
     *   **If `status` is `coding_in_progress`:**
         *   **Action:** Execute Task Sequence:

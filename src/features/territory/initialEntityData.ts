@@ -4,6 +4,17 @@ import {
   ResourceType,
 } from "@/features/shared/types/entities";
 
+export const COLORS = {
+  GREEN: 0x00ff00,
+  GRAY: 0x808080,
+  BLUE: 0x0000ff,
+  // TODO: Add other colors used elsewhere (e.g., Territory.scene.ts) if this is moved to a shared location
+} as const;
+
+export type ColorDefinition = typeof COLORS;
+export type ColorName = keyof ColorDefinition;
+
+
 export interface InitialEntityData {
   id: string;
   type: EntityType;
@@ -14,7 +25,7 @@ export interface InitialEntityData {
       shape: Shape;
       color: number;
       size: number;
-      depth: number,
+      depth: number;
     };
     yields?: {
       resourceType: ResourceType;
@@ -43,9 +54,9 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     properties: {
       graphical: {
         shape: Shape.SQUARE,
-        color: 0x00ff00,
+        color: COLORS.GREEN,
         size: 40,
-        depth:0,
+        depth: 0,
       },
     },
   },
@@ -57,9 +68,9 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     properties: {
       graphical: {
         shape: Shape.CIRCLE,
-        color: 0x808080, // Grayish color for stone
+        color: COLORS.GRAY,
         size: 28,
-        depth:0,        
+        depth: 0,
       },
       yields: [{ resourceType: ResourceType.STONE, baseAmount: 1, chance: 1 }],
       maxCapacity: 5,
@@ -79,7 +90,7 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
     properties: {
       graphical: {
         shape: Shape.CIRCLE,
-        color: 0x0000ff, // Blue color for player
+        color: COLORS.BLUE,
         size: 20,
         depth: 1,
       },

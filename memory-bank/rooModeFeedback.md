@@ -14,9 +14,10 @@
 
 *   User questioned potential premature architecture but accepted the Store+Service approach after justification based on project standards and future needs (1)
     *   Specific feedback: User provided detailed feedback on implementation options, questioning potential premature architecture but ultimately okay with proceeding with Option 2 (Store+Service) after re-evaluation.
-*   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (3)
+*   Technical plans require revision to ensure proper vertical slicing and cleanup of related code elements (4)
     *   Specific Example: Plan revised twice based on user feedback regarding vertical slicing for regression prevention and the need to clean up dead event wiring (onResourceGathered) in story-03b.
     *   Specific Example: Plan revised based on user feedback for Story 04a (naming, grouping, units).
+    *   Specific Example: User provided feedback rejecting the initial plan due to tasks mixing concepts and causing broken intermediate states. The plan was revised to break tasks down by single data concepts (respawn, yield, capacity, etc.) ensuring each task updates all affected files and results in a compilable/runnable state. Repomix context was provided and reviewed, confirming the revised plan structure (Story 04a1).
 *   Entity type definitions combine graphical and state concerns, leading to potential code smells and future refactoring needs (2)
     *   Specific Example: User raised concerns about the dual purpose of Entity types (graphical vs. runtime state) and initialEntityData, identifying it as a "code smell." Acknowledged the pragmatic need for the current approach for initialization but agreed that future refactoring to bifurcate type definitions is warranted. Approved the core logic of Tasks 2 (Store Creation/Init) and 3 (Service Integration) within the plan.
     *   Specific Example: Plan significantly revised for Story 04a based on detailed user analysis of code smells (mixed entity properties) and proposed refactoring approach (bifurcation).

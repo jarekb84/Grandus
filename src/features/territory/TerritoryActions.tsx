@@ -1,19 +1,26 @@
 import { FC } from "react";
+import { ResourceNodeType } from "../shared/types/entities";
 import {
-  ResourceType,  
+  ResourceType,
 } from "@/features/shared/types/entities";
 
 interface TerritoryActionsProps {
   isGathering: boolean;
-  onGather: (type: ResourceType) => void;  
+  onGather: (type: ResourceType) => void;
   onStartCombat: () => void;
+  hasAvailableNodeType: (resourceType: ResourceNodeType) => boolean;
 }
 
 const TerritoryActions: FC<TerritoryActionsProps> = ({
   isGathering,
   onGather,
   onStartCombat,
-}) => {
+  hasAvailableNodeType,
+}) => {  
+  const isStoneAvailable = hasAvailableNodeType(ResourceNodeType.STONE_DEPOSIT);  
+  const isWoodAvailable = hasAvailableNodeType(ResourceNodeType.TREE);
+  const isFoodAvailable = hasAvailableNodeType(ResourceNodeType.BERRY_BUSH);
+
   return (
     <div className="w-full bg-gray-800 rounded-lg p-4 mt-4">
       <div className="flex flex-col gap-4">
@@ -23,11 +30,9 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={() => onGather(ResourceType.STONE)}
-                disabled={
-                  isGathering 
-                }
+                disabled={isGathering || !isStoneAvailable}
                 className={`flex-1 px-4 py-2 bg-gray-700 text-white rounded ${
-                  isGathering 
+                  isGathering || !isStoneAvailable
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-gray-600"
                 }`}
@@ -36,11 +41,9 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               </button>
               <button
                 onClick={() => onGather(ResourceType.WOOD)}
-                disabled={
-                  isGathering 
-                }
+                disabled={isGathering || !isWoodAvailable}
                 className={`flex-1 px-4 py-2 bg-yellow-700 text-white rounded ${
-                  isGathering 
+                  isGathering || !isWoodAvailable
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-yellow-600"
                 }`}
@@ -49,11 +52,9 @@ const TerritoryActions: FC<TerritoryActionsProps> = ({
               </button>
               <button
                 onClick={() => onGather(ResourceType.FOOD)}
-                disabled={
-                  isGathering 
-                }
+                disabled={isGathering || !isFoodAvailable}
                 className={`flex-1 px-4 py-2 bg-green-700 text-white rounded ${
-                  isGathering 
+                  isGathering || !isFoodAvailable
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-green-600"
                 }`}

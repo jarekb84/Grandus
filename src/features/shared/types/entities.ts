@@ -58,11 +58,14 @@ export interface NodeGatheringMechanics {
   durationBaseMs: number;
   durationMultiplier: number;
   yieldMultiplier: number;
+  yields: ResourceYield[];
 }
 
 export interface NodeRespawnMechanics {
-  cycleDurationMs: number;
-  amountPerCycle: number;
+    cycleDurationMs: number;
+    amountPerCycle: number;
+    isRespawning: boolean;
+    respawnEndTime: number | null;
 }
 
 export interface ResourceNodeMechanics {
@@ -74,7 +77,6 @@ export interface ResourceNodeMechanics {
 export interface ResourceNodeEntity extends BaseEntity {
   type: EntityType.RESOURCE_NODE;
   nodeType: ResourceNodeType;
-  yields: ResourceYield[];
   mechanics: ResourceNodeMechanics;
 }
 
