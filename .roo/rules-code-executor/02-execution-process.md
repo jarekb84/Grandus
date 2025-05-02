@@ -2,17 +2,15 @@
 
 When you receive a task via the `new_task` tool call, follow these steps meticulously:
 
-1.  **Identify Target Task:**
-    *   Read the User Story file specified in the `input_artifact` using `read-file`.
-    *   Parse the content to locate the list of tasks (e.g., under a `## Tasks` heading). Assume a standard format like Markdown checkboxes (`- [ ] Task description (status: pending)`) or similar status indicators.
-    *   Identify the *first* task in the list that is *not* marked as complete.
-    *   Extract the description or instructions associated with *this specific task*. This becomes your primary instruction set.
-    *   Store the line number or unique identifier of this task within the story file for later status updates.
-    *   **Error Condition:** If the story file cannot be read, or no incomplete task is found, report success via `attempt_completion` (as there is no task for this instance to execute). Include a message like "No incomplete task found in [story file path]."
-    *   **Error Condition:** If the task description is ambiguous, contradictory, or incomplete for the identified task, proceed to step 7 (Reporting Failure).
+1.  **Receive Task Assignment:**
+    *   Identify the `input_artifact` (story file path) and the specific `task_id` provided in the `new_task` instructions.
+    *   Read the User Story file specified in `input_artifact` using `read-file`.
+    *   Locate the description or instructions associated with the provided `task_id`. This becomes your primary instruction set.
+    *   **Error Condition:** If the story file cannot be read, or the specific `task_id` cannot be found within the file's task list, proceed to Step 7 (Reporting Failure).
+    *   **Error Condition:** If the task description for the given `task_id` is ambiguous, contradictory, or incomplete, proceed to step 7 (Reporting Failure).
 
-2.  **Parse Task Instructions:**
-    *   Analyze the extracted task description.
+2.  **Parse Specific Task Instructions:**
+    *   Analyze the extracted task description associated with the given `task_id`.
     *   Identify the specific file path(s) targeted for modification based *only* on this task's description.
     *   Extract the precise instructions for code changes relevant *only* to this task.
     *   Note any context mentioned *within this task's description*.
@@ -40,15 +38,12 @@ When you receive a task via the `new_task` tool call, follow these steps meticul
 6.  **Apply Code Changes to Files:**
     *   Use `write_to_file` or `apply_diff` to write the implemented code changes to the specified codebase file(s).
 
-7.  **Update Specific Task Status in Story File:**
-    *   **On Success of Step 6:** Re-read the User Story file content (if necessary, to ensure you have the latest version before modifying).
-    *   Locate the line corresponding to the task you just completed (using the identifier stored in Step 1).
-    *   Modify this line to mark the task as complete (e.g., change `- [ ]` to `- [x]`, update `(status: pending)` to `(status: complete)`).
-    *   Use `apply_diff` or `write_to_file` to save this status update back to the User Story file.
-8.  **Check for Remaining Tasks:**
-    *   **On Success of Step 7:** Parse the current User Story file content (which should be up-to-date from the previous step).
-    *   Check if there are any *other* tasks listed (e.g., under `## Tasks`) that are still marked as incomplete.
-    *   Store the result as a boolean variable `tasks_remaining` (`true` if incomplete tasks exist, `false` otherwise).
+7.  **Mark Task Complete via MCP:**
+    *   **On Success of Step 6:** Use `completeTask` tool to call the Story MCP Server with `[input_artifact] [task_id]` (replace placeholders with actual values).
+    *   **Error Condition:** If the MCP command itself fails (returns an error), proceed to Step 8 (Reporting Failure).
+
+8.  **(Removed Step: Check for Remaining Tasks)**
+
 9.  **Prepare Output and Signal Completion:**
-    *   **On Success:** If steps 1-8 were completed successfully (including successful code file writing and story file task status update), proceed to `04-output-completion.md` for formatting the `attempt_completion` payload. Include the value of `tasks_remaining` determined in Step 8. Signal completion using `attempt_completion` with a success status. **Do NOT modify the overall story status field.**
+    *   **On Success:** If steps 1-7 were completed successfully (including successful code file writing and the MCP `completeTask` call), proceed to `04-output-completion.md` for formatting the `attempt_completion` payload (note: `<tasks_remaining>` tag is no longer included). Signal completion using `attempt_completion` with a success status.
     *   **On Failure (from Steps 1, 2, 3, 6, 7, or if Implementation is Blocked):** Prepare an error report explaining *why* the task could not be completed. Use `attempt_completion` with a failure status, formatting according to `99-completion-template.md`.

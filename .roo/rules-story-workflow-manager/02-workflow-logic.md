@@ -4,8 +4,8 @@ This document details the step-by-step workflow you must follow, driven by the `
 
 ## Required Tools
 
-*   `read-file`: To read the User Story content and determine its current status.
-*   `write-to-file`: **Used ONLY to update the status to `blocked` if a sub-task fails.**
+*   `read-file`: To read the User Story content *for analysis* (e.g., by specialists, or if you need content beyond status/tasks). **Not for reading status/tasks.**
+*   **Story MCP Server**: tool commands to interact with story and task statuses (e.g., `getStatus`, `setStatus`, `getPendingTasks`).
 *   `new_task`: To delegate tasks to specialist modes.
 *   `ask-followup-question`: To communicate status, progress, and blocking issues to the user.
 
@@ -13,10 +13,11 @@ This document details the step-by-step workflow you must follow, driven by the `
 
 1.  **Initialization:**
     *   Receive the input User Story file path.
-    *   Use `read-file` to load the content and identify the current `status:`. If missing, treat as `needs_grooming`.
+    *   Use `getStatus <filePath>` tool to call Story MCP
+    *   If it fails (e.g., `ERR_NO_STATUS_HEADER`), consider calling MCP `initializeStatus <filePath>` and then `getStatus` again. If still no status, treat as `needs_grooming`.
 
 2.  **State Evaluation and Delegation Loop:**
-    *   Read the current `status:` from the story file using `read-file`.
+    *   Read the current status using MCP `getStatus <filePath>`.
     *   Based on the status, execute the corresponding step below.
     *   If a step involves delegation:
         *   Call `new_task` with the specified details.
@@ -55,12 +56,8 @@ This document details the step-by-step workflow you must follow, driven by the `
                 *   Else (If no feedback is present):
                     *   No feedback processing is required.
             *   **Continue Workflow:**
-                *   **Check the completion payload** from the specialist mode.
-                *   **Specifically for `code-executor` success:** Parse the payload for the mandatory `<tasks_remaining type="boolean">` value.
-                    *   If `tasks_remaining` is `true`: **Do NOT re-read the story file.** Immediately proceed to delegate the next task to `code-executor` again (see Step 3, `ready_for_coding` status logic).
-                    *   If `tasks_remaining` is `false`: Proceed to the logic for handling the completion of the coding phase (e.g., update overall status, potentially read file once before update).
-                *   **For other modes or `code-executor` failure:** Re-read the story file using `read-file` to get the *new* status (which should have been updated by the specialist or set to `blocked`). Continue the loop with the new status.
-        *   On **Failure**: Use `write-to-file` to update the story file's status to `blocked` (if not already done). Report failure/block to user. Halt processing.
+                *   **Continue Workflow:** Get the current status using MCP `getStatus <filePath>`. Continue the loop based on this status. (The logic for handling `code-executor` specifically is now within the `coding_in_progress` state).
+        *   On **Failure**: Use MCP `setStatus <filePath> blocked`. Report failure/block to user. Halt processing.
     *   Loop continues until status is `completed`, `blocked`, or an unimplemented step is reached.
 
 3.  **Workflow Steps by Status:**
@@ -71,7 +68,7 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **`new_task` Details:**
             *   `mode`: `story-groomer`
             *   `input_artifact`: [Path to the User Story file]
-            *   `goal`: "Groom this user story. Ensure clarity, add acceptance criteria, and verify readiness. **Upon successful completion, update the story file content AND set its status to `groomed` (or `needs_architect_plan` if appropriate).**"
+            *   `goal`: "Groom this user story. Ensure clarity, add acceptance criteria, and verify readiness. **Update the story file content as needed. Do NOT update the overall story status field.**"
         *   **(Processing handled by loop logic)**
 
     *   **If `status` is `groomed` or `needs_architect_plan`:**
@@ -80,37 +77,39 @@ This document details the step-by-step workflow you must follow, driven by the `
         *   **`new_task` Details:**
             *   `mode`: `architect-planner`
             *   `input_artifact`: [Path to the User Story file]
-            *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Upon successful completion, update the story file content AND set its status to `plan_approved`.**"
+            *   `goal`: "Analyze this groomed user story and create a high-level technical implementation plan (Story-level plan). Embed this plan within the story file (e.g., under '## Technical Plan'). **Update the story file content as needed. Do NOT update the overall story status field.**"
         *   **(Processing handled by loop logic)**
 
     *   **If `status` is `plan_approved`:**
         *   **Communicate:** Inform user: "Story status is 'plan_approved'. Plan approved. Updating status to 'Coding In Progress' and initiating implementation."
         *   **Action:**
-            1.  **Update Status:** Use `write-to-file` to update the overall story status to `coding_in_progress`.
-            2.  **Initiate Coding:** Proceed immediately to the `coding_in_progress` step logic below (effectively starting the code execution loop).
+            1.  **Update Status:** Use MCP `setStatus <filePath> coding_in_progress`.
+            2.  **Initiate Coding:** Continue the loop; the next iteration will enter the `coding_in_progress` state.
 
     *   **If `status` is `coding_in_progress`:**
-        *   **Communicate:** Inform user: "Story status is 'Coding In Progress'. Delegating next available implementation task to `code-executor`."
-        *   **Action:** Execute or Continue Task Execution Sequence:
-            1.  **Delegate Task:** Call `new_task` for `code-executor`.
-                *   **`new_task` Details:**
-                    *   `mode`: `code-executor`
-                    *   `input_artifact`: [Path to the User Story file]
-                    *   `goal`: "Find the *first* incomplete task in the User Story file provided as `input_artifact`. Execute *only that task*. Update *only that specific task's status* to 'complete' within the story file. Check if *other* incomplete tasks remain and report this via a `<tasks_remaining type="boolean">` tag in your `attempt_completion` success payload."
-            2.  **Await Result & Loop:**
-                *   Wait for `attempt_completion` from `code-executor`.
-                *   **On Success:**
-                    *   **(Process User Feedback if present - as per existing logic)**
-                    *   Parse the `<success>` payload for the `<tasks_remaining>` value.
-                    *   If `tasks_remaining` is `true`:
-                        *   **Communicate:** Inform user: "`code-executor` completed a task, more remain. Delegating next."
-                        *   **Delegate Again:** Call `new_task` for `code-executor` with the exact same details. **Do NOT read the story file here.** Go back to Step 1 (Delegate Task) in this `coding_in_progress` block.
-                    *   If `tasks_remaining` is `false`:
-                        *   **Communicate:** Inform user: "`code-executor` completed the final task. Updating story status to 'Code Complete'."
-                        *   **Update Story Status:** Use `write-to-file` to update the *overall story status* to `code_complete`.
-                        *   **Continue Workflow:** Exit this sequence. Re-read the story file using `read-file` to confirm the new `code_complete` status and proceed to the next step in the main workflow loop.
-                *   **On Failure:**
-                    *   Update the main story status to `blocked` using `write-to-file`. Report failure/block to user. Halt processing.
+        *   **Action:** Execute Task Sequence:
+            1.  **Check for Pending Tasks:** Use MCP `getPendingTasks <filePath>`.
+            2.  **Evaluate Result:**
+                *   If the command fails or returns an empty list `[]`:
+                    *   **Communicate:** Inform user: "All implementation tasks completed. Updating story status to 'Code Complete'."
+                    *   **Update Story Status:** Use MCP `setStatus <filePath> code_complete`.
+                    *   **Continue Workflow:** Exit this `coding_in_progress` block and continue the main loop (will read new status).
+                *   If the command returns a list of pending task IDs:
+                    *   Identify the **first** task ID in the list (e.g., `nextTaskId`).
+                    *   **Communicate:** Inform user: "Story status is 'Coding In Progress'. Delegating task '[nextTaskId]' to `code-executor`."
+                    *   **Delegate Task:** Call `new_task` for `code-executor`.
+                        *   **`new_task` Details:**
+                            *   `mode`: `code-executor`
+                            *   `input_artifact`: [Path to the User Story file]
+                            *   `task_id`: `[nextTaskId]` (Pass the specific ID)
+                            *   `goal`: "Execute the technical task identified by `task_id: [nextTaskId]` found within the User Story file (`input_artifact`). Apply the necessary code changes. **Upon successful completion, use the Story MCP Server command `completeTask [input_artifact] [nextTaskId]` to mark this specific task as done.** Do NOT modify the overall story status or other tasks."
+                    *   **Await Result:** Wait for `attempt_completion` from `code-executor`.
+                    *   **On Success:**
+                        *   **(Process User Feedback if present - as per existing logic)**
+                        *   **Communicate:** Inform user: "`code-executor` completed task '[nextTaskId]'."
+                        *   **Loop:** Stay in the `coding_in_progress` state. The loop will re-run Step 1 (Check for Pending Tasks).
+                    *   **On Failure:**
+                        *   Use MCP `setStatus <filePath> blocked`. Report failure/block to user. Halt processing.
 
     *   **If `status` is `code_complete`:**
         *   **Communicate:** Inform user: "Coding phase complete for [Story File Path]."
@@ -124,7 +123,7 @@ This document details the step-by-step workflow you must follow, driven by the `
                 *   If user selects "No":
                     *   **Communicate:** Inform user: "Okay, providing commit message suggestion and marking story as complete."
                     *   **Commit Message:**  Generate a concise commit message (5-10 words) summarizing the changes from [Story File Path]."
-                    *   **Update Status:** Use `write-to-file` to update the story status to `completed`.                    
+                    *   **Update Status:** Use MCP `setStatus <filePath> completed`.
                 *   If user selects "Yes":
                     *   **Communicate:** Inform user: "Okay, awaiting your further instructions for [Story File Path]."
                     *   **Action:** Halt processing and wait for the user's next message.
