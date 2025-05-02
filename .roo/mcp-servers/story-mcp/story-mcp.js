@@ -121,6 +121,44 @@ switch (command) {
         break;
     }
 
+    case 'addTask': {
+        const newTask = args[2];
+        if (!newTask) {
+            exitWithError('Missing arguments for command addTask: newTask');
+        }
+        const lines = readFileLines(filePath);
+        const tasks = parseTasks(lines[1]);
+        tasks.push(newTask);
+        lines[1] = `${TASKS_PREFIX}${JSON.stringify(tasks)}`;
+        writeFileLines(filePath, lines);
+        console.log(JSON.stringify({ success: true, added: newTask, tasks: tasks }));
+        break;
+    }
+
+    case 'addTasks': {
+        const newTasksJson = args[2];
+        if (!newTasksJson) {
+            exitWithError('Missing arguments for command addTasks: newTasksJson');
+        }
+        let newTasks;
+        try {
+            newTasks = JSON.parse(newTasksJson);
+            if (!Array.isArray(newTasks)) {
+                exitWithError('Invalid format for newTasksJson: Not a JSON array.');
+            }
+        } catch (e) {
+            exitWithError(`Invalid format for newTasksJson: ${e.message}`);
+        }
+
+        const lines = readFileLines(filePath);
+        const tasks = parseTasks(lines[1]);
+        const updatedTasks = tasks.concat(newTasks);
+        lines[1] = `${TASKS_PREFIX}${JSON.stringify(updatedTasks)}`;
+        writeFileLines(filePath, lines);
+        console.log(JSON.stringify({ success: true, added: newTasks, tasks: updatedTasks }));
+        break;
+    }
+
     case 'initializeStatus': {
         const lines = readFileLines(filePath);
         // Check if status already exists to prevent duplication (optional but good practice)

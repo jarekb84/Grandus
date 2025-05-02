@@ -63,6 +63,28 @@ server.tool("initializeStatus", { filePath: z.string() }, async ({ filePath }) =
   }
 });
 
+// Expose `addTask(filePath, task)`
+server.tool("addTask", {
+  filePath: z.string(),
+  task: z.string()
+}, async ({ filePath, task }) => {
+  const out = callTool("addTask", filePath, task);
+  // Consider parsing 'out' to return structured JSON if needed,
+  // but for now, returning raw text output is consistent.
+  return { content: [{ type: "text", text: out }] };
+});
+
+// Expose `addTasks(filePath, tasks)`
+server.tool("addTasks", {
+  filePath: z.string(),
+  tasks: z.array(z.string()) // Expect an array of strings
+}, async ({ filePath, tasks }) => {
+  // Convert the tasks array back to a JSON string for the CLI tool
+  const tasksJson = JSON.stringify(tasks);
+  const out = callTool("addTasks", filePath, tasksJson);
+  // Consider parsing 'out' to return structured JSON if needed.
+  return { content: [{ type: "text", text: out }] };
+});
 // Hook up stdio transport and start
 await server.connect(new StdioServerTransport());
 console.error("📖 StoryMCP server listening on stdio");

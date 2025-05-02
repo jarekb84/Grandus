@@ -14,7 +14,7 @@
       "args": [".roo\\mcp-servers\\story-mcp\\story-mcp-server.js"],
       "cwd": "C:\\Source\\Grandus",               
       "transport": "stdio",
-      "alwaysAllow": ["initializeStatus","getStatus","setStatus","getPendingTasks","completeTask"]
+      "alwaysAllow": ["initializeStatus","getStatus","setStatus","getPendingTasks","completeTask", "addTask", "addTasks"]
     }
   }
 }
