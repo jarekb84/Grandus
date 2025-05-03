@@ -4,7 +4,7 @@ import {
   Shape,
   GraphicalProperties,
 } from "@/features/shared/types/entities";
-import { useResourceNodeStore } from "./ResourceNode.store";
+import { eventBus, NodeVisualStatePayload } from "../shared/events/eventBus";
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
@@ -22,15 +22,14 @@ interface HexCoords {
 }
 
 export interface EntityPosition {
-  entityId: string,
-  x: number,
-  y: number
+  entityId: string;
+  x: number;
+  y: number;
 }
 
 export class TerritoryScene extends Phaser.Scene {
   private entities: Map<string, EntitySprites> = new Map();
   private sceneEvents: MainSceneEvents;
-  private storeUnsubscribe: (() => void) | null = null;
   private static readonly SHAPE_KEYS = {
     [Shape.CIRCLE]: "circle",
     [Shape.SQUARE]: "square",
@@ -56,48 +55,30 @@ export class TerritoryScene extends Phaser.Scene {
     this.createShapeTextures();
     this.drawHexGrid();
     this.setupInputHandling();
-    this.subscribeToNodeStore();
+
+    this.handleNodeVisualUpdate = this.handleNodeVisualUpdate.bind(this);
+
+    eventBus.on("NODE_VISUAL_STATE_CHANGED", this.handleNodeVisualUpdate);
   }
 
-  private subscribeToNodeStore(): void {
-    this.updateNodeVisuals();
-    
-    this.storeUnsubscribe = useResourceNodeStore.subscribe(
-      () => this.updateNodeVisuals(),
-    );
+  private handleNodeVisualUpdate(payload: NodeVisualStatePayload): void {
+    const sprites = this.entities.get(payload.nodeId);
+    if (!sprites?.main) return;
+
+    sprites.main.setAlpha(1.0);
+    sprites.main.clearTint();
+
+    if (payload.activeEffects.includes("depleted")) {
+      sprites.main.setAlpha(0.3);
+      sprites.main.setTint(0x555555); // Dark grey tint
+    } else if (payload.activeEffects.includes("fully_stocked")) {
+      // Visuals already reset above, nothing more needed for 'fully_stocked' itself
+    }
+
+    if (payload.activeEffects.includes("respawning_pulse")) {
+      sprites.main.setTint(0x6666ff); // Light blue tint for respawning
+    }
   }
-
-    private updateNodeVisuals(): void {
-      // TODO: Decouple scene from direct ResourceNodeStore access (Deferred from story-04a1)
-    const currentStates = useResourceNodeStore.getState().nodeStates;
-
-    this.entities.forEach((sprites, entityId) => {
-      const nodeState = currentStates.get(entityId);
-
-      // TODO Fix territory scene should not be coupled directly to the ResourceNodeStore
-      if (nodeState && sprites.main) {
-        // Determine Visual State:
-        if (nodeState.mechanics.capacity.current <= 0) {
-          // Apply "Depleted" visual
-          sprites.main.setAlpha(0.3);
-          sprites.main.setTint(0x555555); // Dark grey tint
-        } else if (nodeState.mechanics.respawn.isRespawning) {
-          // Apply "Replenishing" visual
-          sprites.main.setAlpha(0.8);
-          sprites.main.setTint(0xffff99); // Slight yellow tint
-        } else {
-          // Apply "Normal" visual
-          sprites.main.setAlpha(1.0);
-          sprites.main.clearTint();
-        }
-      } else if (sprites.main) {
-         // If state is missing for some reason, reset to normal
-         sprites.main.setAlpha(1.0);
-         sprites.main.clearTint();
-      }
-    });
-  }
-
 
   private drawHexGrid(): void {
     const graphics = this.add.graphics({
@@ -254,10 +235,7 @@ export class TerritoryScene extends Phaser.Scene {
     return this.textures.exists(key);
   }
 
-  addEntity(
-    id: string,
-    graphical: GraphicalProperties,
-  ): void {
+  addEntity(id: string, graphical: GraphicalProperties): void {
     if (!this.ensureTexture(graphical.shape)) {
       console.warn(`Texture not found for shape: ${graphical.shape}`);
       return;
@@ -276,7 +254,9 @@ export class TerritoryScene extends Phaser.Scene {
     }
   }
 
-  private createSpritesForEntity(graphical: GraphicalProperties): EntitySprites {
+  private createSpritesForEntity(
+    graphical: GraphicalProperties,
+  ): EntitySprites {
     const { shape, size, color, depth } = graphical;
     const { x, y } = graphical.position;
 
@@ -299,7 +279,7 @@ export class TerritoryScene extends Phaser.Scene {
   async moveEntityTo(entityId: string, targetEntityId: string): Promise<void> {
     const sprites = this.entities.get(entityId);
     const targetSprite = this.entities.get(targetEntityId);
-    
+
     if (sprites == null || targetSprite == null) {
       return Promise.resolve();
     }
@@ -330,21 +310,16 @@ export class TerritoryScene extends Phaser.Scene {
    * @param entityId The ID of the entity.
    * @returns The {x, y} position or undefined if not found.
    */
-  public getEntityPosition(
-    entityId: string,
-  ): EntityPosition | undefined {
+  public getEntityPosition(entityId: string): EntityPosition | undefined {
     const sprites = this.entities.get(entityId);
     if (sprites?.main) {
-      return {entityId, x: sprites.main.x, y: sprites.main.y };
+      return { entityId, x: sprites.main.x, y: sprites.main.y };
     }
     return undefined;
   }
 
   // Phaser Scene lifecycle method
-  shutdown(): void {    
-    if (this.storeUnsubscribe) {
-      this.storeUnsubscribe();
-      this.storeUnsubscribe = null;
-    }    
+  shutdown(): void {
+    eventBus.off("NODE_VISUAL_STATE_CHANGED", this.handleNodeVisualUpdate);
   }
 }

@@ -25,3 +25,10 @@ The goal is to create a technical epic or sub-epic to address specific tasks and
 *   Explore different versioning strategies (e.g., major, minor, patch) and how version bumps might align with epics or projects, noting that this strategy needs to be figured out.
 *   Display the current version number within the application UI.
 *   Ensure built artifacts include the correct version and are deployed.
+
+## Other refactors
+*   `CombatScene` -> Global State (Currency/Game Mode)**
+    *   **Current Coupling:** Likely direct store calls (`currencyStore.addCoins()`, `gameContext.setActiveScene()`). Litmus Score: 5+ (High Risk - Emitter Knowledge, Cross-Domain).
+    *   **Proposed Event:** `COMBAT_ENDED { hexId: string; rewards: { coins: number; cash?: number }; outcome: 'victory' | 'defeat' }` emitted by `CombatScene` (or its orchestrator/adapter). A central orchestrator/service subscribes to update stores and manage transitions.
+    *   **Benefit:** Clearly decouples combat results (Phaser domain) from global state management and mode switching (React/Core domain). Enables easier addition of post-combat effects (achievements, stats).
+    *   **Recommendation:** **Maintain Priority for Epic 02 (Basic Combat).** Essential for integrating combat results cleanly using the event bus for appropriate cross-domain communication.
