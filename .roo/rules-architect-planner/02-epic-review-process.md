@@ -62,10 +62,10 @@
 ## Epic Review: [Epic Title/ID]
 
 ### Architectural Rules & Strategic Doc Analysis Summary:
-*   **`05-architecture-patterns.md`:** [Key principles noted, e.g., SRP, State Separation, Adapters]
-*   **`06-directory-structure.md`:** [Key org principles noted]
 *   **`STATE_ARCHITECTURE.md`:** [Key relevant principles/patterns identified...]
 *   **`PERFORMANCE_PLAN.md`:** [Key relevant targets/guidelines identified...]
+*   **`EVENT_BUS_GUIDELINES.md`:** [Key relevant targets/guidelines identified...]
+
 
 ### Code Discovery & Analysis Summary:
 *   **Phase 1 (Primary Target):** [Identified paths, mention if `list_code_definition_names` was used and key findings from it]
@@ -82,6 +82,7 @@
 ### High-Level Plan Alignment & Status (`./docs/` files vs. Discovered Code):
 *   **`STATE_ARCHITECTURE.md` Alignment:** [Assessment based on synthesized view...]
 *   **`PERFORMANCE_PLAN.md` Alignment:** [Assessment based on synthesized view...]
+*   **`EVENT_BUS_GUIDELINES.md`:** [Assessment based on synthesized view...]
 *   **Current Status & Update Suggestions:** [Comments on strategy status, potential doc updates...]
 
 ### Story-Specific Feedback:

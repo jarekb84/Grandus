@@ -37,7 +37,7 @@ This document outlines *how* you should approach analyzing the codebase and appl
 *   **Locating Standards:**
     *   `05-architecture-patterns.md` (Core principles, state, communication)
     *   `06-directory-structure.md` (Where files/features live)
-    *   Strategic Docs: `./docs/PERFORMANCE_PLAN.md`, `./docs/STATE_ARCHITECTURE.md`.
+    *   Strategic Docs: `./docs/PERFORMANCE_PLAN.md`, `./docs/STATE_ARCHITECTURE.md`, `./docs/EVENT_BUS_GUIDELINES.md`.
     *   General Rules: `.roo/rules/01-project-overview.md`, `.roo/rules/02-development-practices.md`.
 *   **Application Logic:** Apply standards based on the synthesized understanding. **Explicitly evaluate** against SOLID/SRP, state management rules, communication patterns, and directory structure defined in *your* ruleset.
 *   **Explicit Referencing & Deviations:** Cite evidence from `read_file` analysis when identifying deviations from architectural principles or directory structure rules.
