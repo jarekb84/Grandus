@@ -5,7 +5,7 @@ This document details the step-by-step workflow you must follow, driven by the `
 ## Required Tools
 
 *   `read-file`: To read the User Story content *for analysis* (e.g., by specialists, or if you need content beyond status/tasks). **Not for reading status/tasks.**
-*   **Story MCP Server**: tool commands to interact with story and task statuses (e.g., `getStatus`, `setStatus`, `getPendingTasks`).
+*   **Story MCP Server**: Tool commands to interact with story details. Key commands include `getStoryDetails` (fetches status and tasks together), `setStatus`, `addTasks`, `completeTask`, `initializeStatus`. (Use `getStatus` primarily for initial check).
 *   `new_task`: To delegate tasks to specialist modes.
 *   `ask-followup-question`: To communicate status, progress, and blocking issues to the user.
 
@@ -17,8 +17,8 @@ This document details the step-by-step workflow you must follow, driven by the `
     *   If it fails (e.g., `ERR_NO_STATUS_HEADER`), consider calling MCP `initializeStatus <filePath>` and then `getStatus` again. If still no status, treat as `needs_grooming`.
 
 2.  **State Evaluation and Delegation Loop:**
-    *   Read the current status using MCP `getStatus <filePath>`.
-    *   Based on the status, execute the corresponding step below.
+    *   Read the current story details using MCP `getStoryDetails <filePath>`. Store both the `status` and the `pendingTasks` list returned.
+    *   Based on the retrieved `status`, execute the corresponding step below.
     *   If a step involves delegation:
         *   Call `new_task` with the specified details.
         *   Await `attempt_completion` result.
@@ -56,7 +56,7 @@ This document details the step-by-step workflow you must follow, driven by the `
                 *   Else (If no feedback is present):
                     *   No feedback processing is required.
             *   **Continue Workflow:**
-                *   **Continue Workflow:** Get the current status using MCP `getStatus <filePath>`. Continue the loop based on this status. (The logic for handling `code-executor` specifically is now within the `coding_in_progress` state).
+                *   **Continue Workflow:** Get the current story details using MCP `getStoryDetails <filePath>`. Store both the `status` and the `pendingTasks` list returned. Continue the loop based on this `status`. (The logic for handling `code-executor` specifically is now within the `coding_in_progress` state).
         *   On **Failure**: Use MCP `setStatus <filePath> blocked`. Report failure/block to user. Halt processing.
     *   Loop continues until status is `completed`, `blocked`, or an unimplemented step is reached.
 
@@ -98,14 +98,14 @@ This document details the step-by-step workflow you must follow, driven by the `
 
     *   **If `status` is `coding_in_progress`:**
         *   **Action:** Execute Task Sequence:
-            1.  **Check for Pending Tasks:** Use MCP `getPendingTasks <filePath>`.
-            2.  **Evaluate Result:**
-                *   If the command fails or returns an empty list `[]`:
+            1.  **Evaluate Pending Tasks:** Use the `pendingTasks` list fetched at the start of this loop iteration (via `getStoryDetails`).
+            2.  **Evaluate Tasks:**
+                *   If the `pendingTasks` list is empty `[]` (or if fetching failed earlier, treat as empty):
                     *   **Communicate:** Inform user: "All implementation tasks completed. Updating story status to 'Code Complete'."
                     *   **Update Story Status:** Use MCP `setStatus <filePath> code_complete`.
                     *   **Continue Workflow:** Exit this `coding_in_progress` block and continue the main loop (will read new status).
-                *   If the command returns a list of pending task IDs:
-                    *   Identify the **first** task ID in the list (e.g., `nextTaskId`).
+                *   If the `pendingTasks` list contains task IDs:
+                    *   Identify the **first** task ID in the `pendingTasks` list (e.g., `nextTaskId`).
                     *   **Communicate:** Inform user: "Story status is 'Coding In Progress'. Delegating task '[nextTaskId]' to `code-executor`."
                     *   **Delegate Task:** Call `new_task` for `code-executor`.
                         *   **`new_task` Details:**

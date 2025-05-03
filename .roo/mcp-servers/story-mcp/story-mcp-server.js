@@ -85,6 +85,14 @@ server.tool("addTasks", {
   // Consider parsing 'out' to return structured JSON if needed.
   return { content: [{ type: "text", text: out }] };
 });
+
+// Expose `getStoryDetails(filePath)`
+server.tool("getStoryDetails", { filePath: z.string() }, async ({ filePath }) => {
+const out = callTool("getStoryDetails", filePath);
+// The underlying script should output JSON directly for status and tasks
+return { content: [{ type: "text", text: out }] };
+});
+
 // Hook up stdio transport and start
 await server.connect(new StdioServerTransport());
 console.error("📖 StoryMCP server listening on stdio");

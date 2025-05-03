@@ -175,6 +175,22 @@ switch (command) {
         break;
     }
 
+    case 'getStoryDetails': {
+        const lines = readFileLines(filePath);
+        const status = parseStatus(lines[0]);
+        // Allow for files that might *only* have status or be malformed slightly
+        const tasks = lines.length > 1 ? parseTasks(lines[1]) : [];
+
+        if (status === null) {
+             // Still require status header for this combined call
+            exitWithError('ERR_NO_STATUS_HEADER');
+        }
+
+        // Return both status and tasks
+        console.log(JSON.stringify({ status: status, tasks: tasks }));
+        break;
+    }
+
     default:
         exitWithError(`Unknown command: ${command}`);
 }
