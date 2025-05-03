@@ -63,7 +63,11 @@ const StateVisualizer = (): React.ReactElement => {
       <h2 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">
         State Visualizer
       </h2>
-      <StoreSection title="Resource Nodes" data={resourceNodeState} expanded />
+      <StoreSection
+        title="Resource Nodes"
+        data={resourceNodeState.nodeStates}
+        expanded
+      />
       <StoreSection title="Resources" data={resourcesState} />
       <StoreSection title="Game State" data={gameState} />
       <StoreSection title="Currency" data={currencyState} />

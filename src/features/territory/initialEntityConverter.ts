@@ -62,7 +62,7 @@ export const convertInitialEntityDataToEntity = (
         initialData.properties.gatheringSpeedMultiplier ?? 1;
       const yieldMult = initialData.properties.yieldMultiplier ?? 1;
       const respawnMs = initialData.properties.respawnDurationMs ?? 5000;
-      const respawnInc = initialData.properties.respawnCapacityIncrement ?? 1;
+      const respawnInc = initialData.properties.amountPerCycle ?? 1;
 
       // Create nested structures
       const capacity: NodeCapacity = { current: currentCap, max: maxCap };

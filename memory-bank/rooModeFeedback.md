@@ -5,7 +5,7 @@
     *   User clarified that the Stone node should not be strictly centered in the hex.
     *   User specified that the placement should allow visual space for the player character to move between the Home Base and the Stone node within the same hex.
     *   User requested an explicit AC to ensure only the Home Base and initial Stone node are displayed initially, and specifically mentioned the removal of other nodes.
-*   Grooming identified implementation ambiguities best resolved during technical planning (1)
+*   Grooming identified implementation ambiguities best resolved during technical planning (2)
     *   Specific feedback: User clarified that specific implementation decisions (e.g., mandatory ResourceService, ResourceSystem fate, adapter scope) for this technical refactoring story should be deferred to the architect-planner phase, as they require deeper code analysis.
 *   Groomer's proposed Acceptance Criteria were clear and required no user modification (1)
     *   Specific Example: User confirmed proposed refined Acceptance Criteria were accurate and ready without further changes for story-04a.
@@ -21,7 +21,7 @@
 *   Entity type definitions combine graphical and state concerns, leading to potential code smells and future refactoring needs (2)
     *   Specific Example: User raised concerns about the dual purpose of Entity types (graphical vs. runtime state) and initialEntityData, identifying it as a "code smell." Acknowledged the pragmatic need for the current approach for initialization but agreed that future refactoring to bifurcate type definitions is warranted. Approved the core logic of Tasks 2 (Store Creation/Init) and 3 (Service Integration) within the plan.
     *   Specific Example: Plan significantly revised for Story 04a based on detailed user analysis of code smells (mixed entity properties) and proposed refactoring approach (bifurcation).
-*   Planner effectively incorporated user feedback and guidance during plan creation, including structural changes and documentation (2)
+*   Planner effectively incorporated user feedback and guidance during plan creation, including structural changes and documentation (3)
     *   Specific Example: The planner incorporated detailed user feedback regarding event bus library choice, payload design for multiple states, corrected horizontal task slicing to vertical slices, and provided recommendations for future decoupling timing. Created a new guidelines document as requested (Story 04a2).
 
 ## code-executor Feedback
@@ -34,3 +34,5 @@
     *   Specific Example: Corrected player return position in GatheringService to match original home base return logic (Story 03b, Task 2).
     *   Specific Example: Corrected player ID usage ('player' vs 'player1') and node finding data source (scene entities via new method vs. global state) in adapter (Story 03b, Task 3).
     *   Specific Example: User correctly identified that initialEntityConverter.ts also needed updating for Task 0 (Story 04).
+*   Code implementation followed instructions but resulted in duplicated logic, suggesting potential refactoring opportunities (1)
+    *   Specific Example: User noted that the implementation for Task 4 in RespawnService.ts resulted in duplicated logic between the setTimeout callback and the immediate execution block. While the implementation followed the task instructions precisely, this duplication could be a target for future refactoring for simplification.

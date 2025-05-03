@@ -14,7 +14,6 @@ export const COLORS = {
 export type ColorDefinition = typeof COLORS;
 export type ColorName = keyof ColorDefinition;
 
-
 export interface InitialEntityData {
   id: string;
   type: EntityType;
@@ -41,7 +40,7 @@ export interface InitialEntityData {
     gatheringSpeedMultiplier?: number; // Multiplier for speed (e.g., 1.1 = 10% faster)
     yieldMultiplier?: number; // Multiplier for resource amount
     respawnDurationMs?: number; // Time in ms for one respawn cycle
-    respawnCapacityIncrement?: number; // Amount restored per cycle
+    amountPerCycle?: number; // Amount restored per cycle
   };
 }
 
@@ -79,7 +78,7 @@ export const initialTerritoryEntitiesData: InitialEntityData[] = [
       gatheringSpeedMultiplier: 1, // Default speed multiplier
       yieldMultiplier: 1, // Default yield multiplier
       respawnDurationMs: 5000, // Renamed from respawnDuration
-      respawnCapacityIncrement: 1, // Default increment amount
+      amountPerCycle: 1, // Default increment amount
     },
   },
   {

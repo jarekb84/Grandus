@@ -4,6 +4,7 @@ import {
   ResourceNodeType,
 } from "../shared/types/entities";
 import { eventBus, NodeVisualEffect } from "../shared/events/eventBus";
+
 interface ResourceNodeState {
   nodeId: string;
   nodeType: ResourceNodeType;
@@ -19,8 +20,8 @@ interface ResourceNodeStoreState {
   ) => void;
   decrementNodeCapacity: (nodeId: string, amount: number) => void;
   getNodeState: (nodeId: string) => ResourceNodeState | undefined;
-  startRespawn: (nodeId: string) => void;
-  finishRespawn: (nodeId: string) => void;
+  incrementRespawnCycle: (nodeId: string) => void;
+  initiateRespawnCycle: (nodeId: string) => void;
   resetStore: () => void;
   getResourceNodeIdsOfType: (resourceType: ResourceNodeType) => string[];
   hasAvailableNodeType: (resourceType: ResourceNodeType) => boolean;
@@ -47,9 +48,11 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
     },
 
     decrementNodeCapacity: (nodeId: string, amount: number): void => {
+      let activeEffects: NodeVisualEffect[] = [];
       set((state) => {
         const newNodeStates = new Map(state.nodeStates);
         const node = newNodeStates.get(nodeId);
+
         if (node) {
           const currentCapacity = node.mechanics.capacity.current;
           const newCapacityValue = Math.max(0, currentCapacity - amount);
@@ -62,79 +65,95 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
           };
           newNodeStates.set(nodeId, { ...node, mechanics: updatedMechanics });
 
-          const activeEffects: NodeVisualEffect[] =
-            newCapacityValue <= 0 ? ["depleted"] : ["fully_stocked"];
-          eventBus.emit("NODE_VISUAL_STATE_CHANGED", { nodeId, activeEffects });
-          eventBus.emit("NODE_CAPACITY_DECREMENTED", { nodeId });
+          activeEffects = newCapacityValue <= 0 ? ["depleted"] : [];
         }
+
         return { nodeStates: newNodeStates };
       });
+
+      eventBus.emit("NODE_VISUAL_STATE_CHANGED", { nodeId, activeEffects });
+      eventBus.emit("NODE_CAPACITY_DECREMENTED", { nodeId });
     },
 
     getNodeState: (nodeId: string): ResourceNodeState | undefined => {
       return get().nodeStates.get(nodeId);
     },
 
-    startRespawn: (nodeId: string): void => {
+    incrementRespawnCycle: (nodeId: string): void => {
+      let activeEffects: NodeVisualEffect[] = [];
       set((state) => {
         const newNodeStates = new Map(state.nodeStates);
-        const node = newNodeStates.get(nodeId);
-        if (node && !node.mechanics.respawn.isRespawning) {
-          const duration = node.mechanics.respawn.cycleDurationMs;
+        const nodeState = newNodeStates.get(nodeId);
+
+        if (nodeState && nodeState.mechanics.respawn.isRespawning) {
+          const { capacity, respawn } = nodeState.mechanics;
+          const newCapacity = Math.min(
+            capacity.current + respawn.amountPerCycle,
+            capacity.max,
+          );
+
           const updatedMechanics: ResourceNodeMechanics = {
-            ...node.mechanics,
-            respawn: {
-              ...node.mechanics.respawn,
-              isRespawning: true,
-              respawnEndTime: Date.now() + duration,
+            ...nodeState.mechanics,
+            capacity: {
+              ...capacity,
+              current: newCapacity,
             },
+            respawn: { ...respawn },
           };
+
+          if (newCapacity >= capacity.max) {
+            updatedMechanics.respawn.isRespawning = false;
+            updatedMechanics.respawn.respawnEndTime = null;
+            activeEffects = ["fully_stocked"];
+          } else {
+            updatedMechanics.respawn.isRespawning = true;
+            updatedMechanics.respawn.respawnEndTime =
+              Date.now() + respawn.cycleDurationMs;
+            activeEffects = ["respawning_pulse"];
+          }
+
           newNodeStates.set(nodeId, {
-            ...node,
+            ...nodeState,
             mechanics: updatedMechanics,
           });
-
-          eventBus.emit("NODE_VISUAL_STATE_CHANGED", {
-            nodeId,
-            activeEffects: ["depleted", "respawning_pulse"],
-          });
-          return { nodeStates: newNodeStates };
         }
-        return {};
+
+        return { nodeStates: newNodeStates };
       });
+
+      eventBus.emit("NODE_VISUAL_STATE_CHANGED", { nodeId, activeEffects });
     },
 
-    finishRespawn: (nodeId: string): void => {
+    initiateRespawnCycle: (nodeId: string): void => {
       set((state) => {
         const newNodeStates = new Map(state.nodeStates);
-        const node = newNodeStates.get(nodeId);
-        if (node) {
-          // Reset capacity to max, sourced from mechanics
-          const maxCapacity = node.mechanics.capacity.max;
+        const nodeState = newNodeStates.get(nodeId);
+
+        if (nodeState && !nodeState.mechanics.respawn.isRespawning) {
+          const { respawn } = nodeState.mechanics;
+          const firstRespawnEndTime = Date.now() + respawn.cycleDurationMs;
+
           const updatedMechanics: ResourceNodeMechanics = {
-            ...node.mechanics,
-            capacity: {
-              ...node.mechanics.capacity,
-              current: maxCapacity,
-            },
+            ...nodeState.mechanics,
             respawn: {
-              ...node.mechanics.respawn,
-              isRespawning: false,
-              respawnEndTime: null,
+              ...respawn,
+              isRespawning: true,
+              respawnEndTime: firstRespawnEndTime,
             },
           };
+
           newNodeStates.set(nodeId, {
-            ...node,
+            ...nodeState,
             mechanics: updatedMechanics,
           });
-
-          eventBus.emit("NODE_VISUAL_STATE_CHANGED", {
-            nodeId,
-            activeEffects: ["fully_stocked"],
-          });
-          return { nodeStates: newNodeStates };
         }
-        return {};
+
+        return { nodeStates: newNodeStates };
+      });
+
+      eventBus.emit("NODE_VISUAL_STATE_CHANGED", {
+        nodeId,
+        activeEffects: ["respawning_pulse"],
       });
     },
 
