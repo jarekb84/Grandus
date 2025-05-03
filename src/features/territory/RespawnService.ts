@@ -1,73 +1,86 @@
 import { useResourceNodeStore } from "./ResourceNode.store";
+import {
+  eventBus,
+  NodeCapacityDecrementedPayload,
+} from "../shared/events/eventBus";
 
 export class RespawnService {
   private activeTimers = new Map<string, NodeJS.Timeout>();
-  private unsubscribe: (() => void) | null = null;
-  private previousStates = new Map(useResourceNodeStore.getState().nodeStates);
+  private capacityDecrementHandler =
+    this.handleNodeCapacityDecremented.bind(this);
 
   constructor() {
-    this.subscribeToStore();
+    eventBus.on("NODE_CAPACITY_DECREMENTED", this.capacityDecrementHandler);
   }
 
-  private subscribeToStore(): void {
-    this.unsubscribe = useResourceNodeStore.subscribe(
-      (newState) => {
-        const currentStates = newState.nodeStates;
+  private handleNodeCapacityDecremented(
+    payload: NodeCapacityDecrementedPayload,
+  ): void {
+    const { nodeId } = payload;
+    const nodeState = useResourceNodeStore.getState().getNodeState(nodeId);
 
-        currentStates.forEach((nodeState, nodeId) => {
-          const previousState = this.previousStates.get(nodeId);
+    if (!nodeState) {
+      console.warn(
+        `RespawnService: Received capacity decrement event for unknown node ID: ${nodeId}`,
+      );
+      return;
+    }
 
-          // Check if respawn just started or end time changed
-          if (
-            nodeState.mechanics.respawn.isRespawning &&
-            nodeState.mechanics.respawn.respawnEndTime !== null &&
-            (!previousState ||
-              !previousState.mechanics.respawn.isRespawning ||
-              previousState.mechanics.respawn.respawnEndTime !== nodeState.mechanics.respawn.respawnEndTime)
-          ) {
-            // Clear existing timer for this node if it exists
-            if (this.activeTimers.has(nodeId)) {
-              clearTimeout(this.activeTimers.get(nodeId));
-              this.activeTimers.delete(nodeId);
-            }
+    if (
+      nodeState.mechanics.capacity.current < nodeState.mechanics.capacity.max &&
+      !nodeState.mechanics.respawn.isRespawning
+    ) {
+      useResourceNodeStore.getState().startRespawn(nodeId);
 
-            const delay = nodeState.mechanics.respawn.respawnEndTime - Date.now();
+      const updatedNodeState = useResourceNodeStore
+        .getState()
+        .getNodeState(nodeId);
 
-            if (delay > 0) {
-              const timerId = setTimeout(() => {
-                useResourceNodeStore.getState().finishRespawn(nodeId);
-                this.activeTimers.delete(nodeId); // Remove timer after execution
-              }, delay);
-              this.activeTimers.set(nodeId, timerId);
-            } else {
-              // If respawnEndTime is in the past, finish immediately
-              useResourceNodeStore.getState().finishRespawn(nodeId);
-            }
-          }
-          // Check if respawn just finished or was cancelled externally
-          else if (
-            !nodeState.mechanics.respawn.isRespawning &&
-            previousState?.mechanics.respawn.isRespawning &&
-            this.activeTimers.has(nodeId)
-          ) {
-            clearTimeout(this.activeTimers.get(nodeId));
-            this.activeTimers.delete(nodeId);
-          }
-        });
+      if (
+        updatedNodeState?.mechanics.respawn.isRespawning &&
+        updatedNodeState.mechanics.respawn.respawnEndTime
+      ) {
+        this.scheduleRespawnCompletion(
+          nodeId,
+          updatedNodeState.mechanics.respawn.respawnEndTime,
+        );
+      } else {
+        console.warn(
+          `RespawnService: Node ${nodeId} did not enter respawning state or has no respawnEndTime after startRespawn call.`,
+        );
+      }
+    }
+  }
 
-        // Clean up timers for nodes that might have been removed from the store
-        this.activeTimers.forEach((_timer, nodeId) => {
-          if (!currentStates.has(nodeId)) {
-            clearTimeout(this.activeTimers.get(nodeId));
-            this.activeTimers.delete(nodeId);
-          }
-        });
+  private scheduleRespawnCompletion(
+    nodeId: string,
+    respawnEndTime: number,
+  ): void {
+    // Clear existing timer for this node if it exists (e.g., if triggered rapidly)
+    if (this.activeTimers.has(nodeId)) {
+      clearTimeout(this.activeTimers.get(nodeId));
+      this.activeTimers.delete(nodeId);
+    }
 
+    const delay = respawnEndTime - Date.now();
 
-        // Update previousStates for the next comparison
-        this.previousStates = new Map(currentStates);
-      },
-    );
+    if (delay > 0) {
+      const timerId = setTimeout(() => {
+        useResourceNodeStore.getState().finishRespawn(nodeId);
+        this.activeTimers.delete(nodeId); // Remove timer after execution
+      }, delay);
+      this.activeTimers.set(nodeId, timerId);
+    } else {
+      // If respawnEndTime is somehow in the past, finish immediately
+      console.warn(
+        `RespawnService: Respawn end time for node ${nodeId} is in the past. Finishing immediately.`,
+      );
+      useResourceNodeStore.getState().finishRespawn(nodeId);
+      // Ensure timer is removed if it existed
+      if (this.activeTimers.has(nodeId)) {
+        this.activeTimers.delete(nodeId);
+      }
+    }
   }
 
   public destroy(): void {
@@ -77,10 +90,7 @@ export class RespawnService {
     });
     this.activeTimers.clear();
 
-    // Unsubscribe from the store
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
+    // Unsubscribe from the event bus
+    eventBus.off("NODE_CAPACITY_DECREMENTED", this.capacityDecrementHandler);
   }
 }

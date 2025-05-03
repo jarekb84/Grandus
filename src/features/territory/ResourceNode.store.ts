@@ -65,6 +65,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
           const activeEffects: NodeVisualEffect[] =
             newCapacityValue <= 0 ? ["depleted"] : ["fully_stocked"];
           eventBus.emit("NODE_VISUAL_STATE_CHANGED", { nodeId, activeEffects });
+          eventBus.emit("NODE_CAPACITY_DECREMENTED", { nodeId });
         }
         return { nodeStates: newNodeStates };
       });

@@ -1,4 +1,4 @@
-STATUS: todo
+STATUS: completed
 TASKS_PENDING: []
 ## Technical Story: Refactor RespawnService to be Event-Driven
 
@@ -51,3 +51,82 @@ TASKS_PENDING: []
 
 *   This refactoring makes the `RespawnService` a dedicated handler for the *side effect* (timing the respawn completion) triggered by a state change event.
 *   This story is a prerequisite for further work on respawn mechanics (like incremental respawn cycles).
+
+## Technical Plan (Revised based on feedback)
+
+### 1. Approved Implementation Approach:
+*   **Selected Option:** Event-Driven Refactoring (Simplified Payload).
+*   **Key Characteristics:** Decouple `RespawnService` from `ResourceNodeStore` subscription, using a new `NODE_CAPACITY_DECREMENTED` event (containing only `nodeId`) via the central `eventBus`. The `RespawnService` handler will fetch the current node state from the store to check conditions (`isRespawning`, `currentCapacity < maxCapacity`) before triggering `startRespawn`. `RespawnService` remains responsible for scheduling the `finishRespawn` timer using the `respawnEndTime` from the store state set by `startRespawn`.
+*   **Rationale for Payload Change:** Based on feedback, passing capacity details in the event is redundant and potentially unsafe due to concurrency. The handler must fetch the live state from the store to reliably check `isRespawning`. Therefore, only the `nodeId` is needed in the event payload.
+*   **User Feedback Incorporation:** Plan revised to simplify event payload and restructure tasks based on user feedback regarding payload redundancy and vertical slice adherence.
+
+### 2. Required Refactoring:
+*   None identified *prior* to this story's tasks; this story *is* the refactoring.
+
+### 3. Detailed Implementation Tasks (Revised Structure):
+
+*   **Task 1: Implement Event-Driven Respawn Trigger (Define, Emit, Listen)**
+    *   **Goal:** Implement the complete new event flow: define the simplified event, emit it from the store, and refactor `RespawnService` to listen and react.
+    *   **Files:**
+        *   `src/features/shared/events/eventBus.ts`
+        *   `src/features/territory/ResourceNode.store.ts`
+        *   `src/features/territory/RespawnService.ts`
+    *   **Changes:**
+        *   **`eventBus.ts`:**
+            *   Define `NodeCapacityDecrementedPayload` interface: `{ nodeId: string; }`. (Removed previous/new/max capacity).
+            *   Add `NODE_CAPACITY_DECREMENTED: NodeCapacityDecrementedPayload;` to `AppEventMap`.
+        *   **`ResourceNode.store.ts`:**
+            *   Import `eventBus`.
+            *   In `decrementNodeCapacity` action, *after* the state is updated via `set`, emit `eventBus.emit('NODE_CAPACITY_DECREMENTED', { nodeId });`. (Simplified payload).
+        *   **`RespawnService.ts`:**
+            *   Remove `unsubscribe` property, `previousStates` property, and the `subscribeToStore` method/call.
+            *   Import `eventBus`, `NodeCapacityDecrementedPayload`, and `useResourceNodeStore`.
+            *   Add property to store event handler reference (e.g., `private capacityDecrementHandler = this.handleNodeCapacityDecremented.bind(this);`).
+            *   In constructor, call `eventBus.on('NODE_CAPACITY_DECREMENTED', this.capacityDecrementHandler);`.
+            *   Implement `handleNodeCapacityDecremented(payload: NodeCapacityDecrementedPayload)`:
+                *   Fetch current node state: `const nodeState = useResourceNodeStore.getState().getNodeState(payload.nodeId);`.
+                *   Check if node exists: `if (!nodeState) return;`.
+                *   Check conditions using *fetched state*: `if (nodeState.mechanics.capacity.current < nodeState.mechanics.capacity.max && !nodeState.mechanics.respawn.isRespawning)`. (Using fetched state values).
+                *   Inside, call `useResourceNodeStore.getState().startRespawn(payload.nodeId);`.
+                *   Immediately after calling `startRespawn`, re-fetch the node state to get the updated `respawnEndTime`: `const updatedNodeState = useResourceNodeStore.getState().getNodeState(payload.nodeId);`.
+                *   If `updatedNodeState?.mechanics.respawn.respawnEndTime`, use existing timer logic (`activeTimers`, `setTimeout`, call to `finishRespawn`) to schedule completion based on the new `respawnEndTime`. Ensure existing timers for the node are cleared.
+            *   In `destroy`, call `eventBus.off('NODE_CAPACITY_DECREMENTED', this.capacityDecrementHandler);` and clear `activeTimers`.
+    *   **Vertical Slice Behavior:** The complete event-driven mechanism for triggering respawn initiation is implemented. `RespawnService` now reacts to the new event and correctly schedules the `finishRespawn` timer. (Note: The old trigger in `GatheringService` still exists at this point but will be removed in Task 2).
+    *   **Acceptance Criteria:** Store subscription logic is removed from `RespawnService`. Simplified `NODE_CAPACITY_DECREMENTED` event is defined. Store emits the event with only `nodeId`. `RespawnService` listener is added. Handler fetches current state, correctly checks conditions (`isRespawning`, `current < max`), calls `startRespawn`, and schedules `finishRespawn` using the resulting `respawnEndTime`. Timers are managed correctly. Application compiles and runs without errors or regressions. Respawn cycle functions correctly via the new event mechanism.
+
+*   **Task 2: Cleanup Old Trigger Mechanism**
+    *   **Goal:** Remove the redundant direct call to `startRespawn` from `GatheringService`.
+    *   **Files:** `src/features/territory/GatheringService.ts`
+    *   **Changes:**
+        *   Remove the block of code (approx lines 66-78 in previous analysis) that re-fetches node state and directly calls `useResourceNodeStore.getState().startRespawn(targetNodeId)`.
+    *   **Vertical Slice Behavior:** The old, direct respawn trigger mechanism is removed, leaving only the event-driven flow implemented in Task 1.
+    *   **Integration Points:** N/A (removal).
+    *   **Acceptance Criteria:** Direct call to `startRespawn` is removed from `GatheringService`. Respawn *only* triggers via the event flow after gathering depletes capacity below max. Application compiles and runs without errors or regressions.
+
+### 4. Recommended Post-Implementation Cleanup Tasks (Optional):
+*   None recommended at this stage beyond the tasks defined above.
+
+### 5. Architectural & Standards Compliance:
+*   **Alignment:** The revised plan adheres to architectural principles (`05-architecture-patterns.md`):
+    *   Improves **SRP** for `RespawnService`.
+    *   Utilizes the **Event Bus** for decoupling.
+    *   Helps **Isolate Side Effects**.
+*   **Directory Structure:** Changes occur within appropriate directories (`06-directory-structure.md`).
+*   **Development Practices:** Task structure revised based on feedback to better align with vertical slice principles (`02-development-practices.md`, `03-story-planning-process.md`), reducing "dead code" duration and ensuring cleaner separation of concerns between the refactoring and cleanup.
+
+### 6. Testing Guidance:
+*   **Unit Tests:**
+    *   Verify `ResourceNodeStore.decrementNodeCapacity` emits `NODE_CAPACITY_DECREMENTED` with only `{ nodeId }`.
+    *   Test `RespawnService.handleNodeCapacityDecremented` logic, mocking `eventBus`, store actions/state (`getNodeState`, `startRespawn`, `finishRespawn`), and timers. Ensure it correctly fetches state, checks conditions, calls `startRespawn`, and schedules `finishRespawn`.
+*   **Integration/Manual Verification:**
+    *   Perform end-to-end test (as described previously), verifying respawn triggers correctly *only* via the event mechanism after Task 2 is complete.
+    *   Verify `GatheringService` no longer contains the direct `startRespawn` call after Task 2.
+
+### 7. Dependencies & Integration Points:
+*   **Internal:** `eventBus`, `useResourceNodeStore`.
+*   **External:** None.
+*   **New Libraries:** None.
+
+### 8. Complexity Estimate:
+*   **Overall Complexity:** Medium (No change from previous estimate)
+*   **Rationale:** While the payload is simplified, the core logic and coordination across files remain. Ensuring the handler correctly fetches and uses live state and manages timers is key. The revised task structure improves flow but doesn't significantly alter the inherent complexity.

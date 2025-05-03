@@ -30,7 +30,7 @@ const StoreSection: React.FC<StoreSectionProps> = ({
         <span>{isOpen ? "[-]" : "[+]"}</span>
       </button>
       {isOpen && (
-        <div className="p-2 bg-gray-800 rounded-b max-h-100 overflow-y-auto">
+        <div className="p-2 bg-gray-800 rounded-b max-h-250 overflow-y-auto">
           <pre className="text-xs whitespace-pre-wrap break-all">
             {JSON.stringify(data, replacer, 2)}
           </pre>
@@ -59,12 +59,12 @@ const StateVisualizer = (): React.ReactElement => {
   const combatState = useCombatStore((state) => state);
 
   return (
-    <div className="fixed top-4 right-4 w-80 h-[calc(100vh-2rem)] bg-gray-900 text-white p-4 border border-gray-700 rounded-lg shadow-lg overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+    <div className="fixed top-4 right-4 w-100 h-[calc(100vh-2rem)] bg-gray-900 text-white p-4 border border-gray-700 rounded-lg shadow-lg overflow-y-auto z-50 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
       <h2 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">
         State Visualizer
       </h2>
       <StoreSection title="Resource Nodes" data={resourceNodeState} expanded />
-      <StoreSection title="Resources" data={resourcesState} expanded />
+      <StoreSection title="Resources" data={resourcesState} />
       <StoreSection title="Game State" data={gameState} />
       <StoreSection title="Currency" data={currencyState} />
       <StoreSection title="Combat" data={combatState} />

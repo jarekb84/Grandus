@@ -31,13 +31,13 @@ export const orchestrateGathering = async ({
     return { gathered: false };
   }
 
-  const nodeState = useResourceNodeStore
-    .getState()
-    .getNodeState(targetNodeId);
+  const nodeState = useResourceNodeStore.getState().getNodeState(targetNodeId);
 
   // Check if node exists in the store and has capacity
   if (!nodeState || nodeState.mechanics.capacity.current <= 0) {
-     console.warn(`GatheringService: Target node (ID: ${targetNodeId}) not found in store or has no capacity.`);
+    console.warn(
+      `GatheringService: Target node (ID: ${targetNodeId}) not found in store or has no capacity.`,
+    );
     return { gathered: false };
   }
 
@@ -63,23 +63,9 @@ export const orchestrateGathering = async ({
     .getState()
     .decrementNodeCapacity(targetNodeId, yieldAmount);
 
-  // Re-fetch the state to check if respawn should start
-  const updatedNodeState = useResourceNodeStore
-    .getState()
-    .getNodeState(targetNodeId);
-
-  if (
-    updatedNodeState &&
-    updatedNodeState.mechanics.capacity.current < updatedNodeState.mechanics.capacity.max &&
-    !updatedNodeState.mechanics.respawn.isRespawning
-  ) {
-
-    useResourceNodeStore.getState().startRespawn(targetNodeId);
-  }
-
   // Move player back to home base
   // TODO: Resolve hardcoded homeBaseId 'base1' (Deferred from story-04a1)
-  await scene.moveEntityTo(playerId, 'base1');
+  await scene.moveEntityTo(playerId, "base1");
 
   return { gathered: true, resourceType: resourceType, amount: yieldAmount };
 };

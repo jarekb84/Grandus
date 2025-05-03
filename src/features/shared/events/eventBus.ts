@@ -10,8 +10,13 @@ export interface NodeVisualStatePayload {
   activeEffects: NodeVisualEffect[];
 }
 
+export interface NodeCapacityDecrementedPayload {
+  nodeId: string;
+}
+
 export type AppEventMap = {
   NODE_VISUAL_STATE_CHANGED: NodeVisualStatePayload;
+  NODE_CAPACITY_DECREMENTED: NodeCapacityDecrementedPayload;
   // Add other application-wide events here as needed
 };
 
