@@ -4,7 +4,19 @@ import {
   Shape,
   GraphicalProperties,
 } from "@/features/shared/types/entities";
-import { eventBus, NodeVisualStatePayload } from "../shared/events/eventBus";
+import {
+  eventBus,
+  NodeVisualStatePayload,
+  NodeRespawnProgressPayload,
+} from "../shared/events/eventBus";
+import { RespawnVisualizerManager } from "./visuals/RespawnProgressVisualizer.manager";
+import { ClockwiseBorderVisualizer } from "./visuals/ClockwiseBorder.visualizer";
+import { UnderneathBarVisualizer } from "./visuals/UnderneathBar.visualizer";
+import { RadialFillVisualizer } from "./visuals/RadialFill.visualizer";
+import { PulsingOutlineVisualizer } from "./visuals/PulsingOutline.visualizer";
+import { BottomUpBorderVisualizer } from "./visuals/BottomUpBorder.visualizer";
+import { ColorShiftingBorderVisualizer } from "./visuals/ColorShiftingBorder.visualizer";
+import { SimpleScalingIndicatorVisualizer } from "./visuals/SimpleScalingIndicator.visualizer";
 
 export interface MainSceneEvents {
   onEntityInteraction: (entityId: string, type: EntityType) => void;
@@ -29,6 +41,7 @@ export interface EntityPosition {
 
 export class TerritoryScene extends Phaser.Scene {
   private entities: Map<string, EntitySprites> = new Map();
+  private visualizerManager!: RespawnVisualizerManager;
   private sceneEvents: MainSceneEvents;
   private static readonly SHAPE_KEYS = {
     [Shape.CIRCLE]: "circle",
@@ -48,6 +61,7 @@ export class TerritoryScene extends Phaser.Scene {
 
   public centerX: number = 0;
   public centerY: number = 0;
+
   create(): void {
     this.centerX = this.cameras.main.centerX;
     this.centerY = this.cameras.main.centerY;
@@ -56,27 +70,84 @@ export class TerritoryScene extends Phaser.Scene {
     this.drawHexGrid();
     this.setupInputHandling();
 
+    this.visualizerManager = new RespawnVisualizerManager(this);
+    this.visualizerManager.registerVisualizer(
+      "bottomUp",
+      BottomUpBorderVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "clockwiseBorder",
+      ClockwiseBorderVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "radialFill",
+      RadialFillVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "pulsingOutline",
+      PulsingOutlineVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "colorShiftBorder",
+      ColorShiftingBorderVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "underneathBar",
+      UnderneathBarVisualizer,
+    );
+    this.visualizerManager.registerVisualizer(
+      "simpleScaling",
+      SimpleScalingIndicatorVisualizer,
+    );
+
     this.handleNodeVisualUpdate = this.handleNodeVisualUpdate.bind(this);
+    this.handleNodeRespawnProgress = this.handleNodeRespawnProgress.bind(this);
 
     eventBus.on("NODE_VISUAL_STATE_CHANGED", this.handleNodeVisualUpdate);
+    eventBus.on("NODE_RESPAWN_PROGRESS", this.handleNodeRespawnProgress);
+  }
+
+  private handleNodeRespawnProgress(payload: NodeRespawnProgressPayload): void {
+    const primaryVisualizer = this.visualizerManager.getVisualizer(
+      payload.nodeId,
+    );
+    if (primaryVisualizer) {
+      primaryVisualizer.show();
+      primaryVisualizer.update(payload.duration);
+    }
+
+    // if (payload.nodeId === 'stoneNode1') {
+    //   const visualizerKeys = this.visualizerManager.getRegisteredVisualizerKeys();
+    //   visualizerKeys.forEach(key => {
+    //     const cloneId = `${payload.nodeId}-clone-${key}`;
+    //     const cloneVisualizer = this.visualizerManager.getVisualizer(cloneId);
+    //     if (cloneVisualizer) {
+    //       cloneVisualizer.show();
+    //       cloneVisualizer.update(payload.duration);
+    //     }
+    //   });
+    // }
   }
 
   private handleNodeVisualUpdate(payload: NodeVisualStatePayload): void {
     const sprites = this.entities.get(payload.nodeId);
+    const visualizer = this.visualizerManager.getVisualizer(payload.nodeId);
+
     if (!sprites?.main) return;
 
-    sprites.main.setAlpha(1.0);
-    sprites.main.clearTint();
-
-    if (payload.activeEffects.includes("depleted")) {
+    if (payload.activeEffects.includes("empty")) {
       sprites.main.setAlpha(0.3);
       sprites.main.setTint(0x555555); // Dark grey tint
-    } else if (payload.activeEffects.includes("fully_stocked")) {
-      // Visuals already reset above, nothing more needed for 'fully_stocked' itself
     }
 
-    if (payload.activeEffects.includes("respawning_pulse")) {
+    if (payload.activeEffects.includes("partial")) {
       sprites.main.setTint(0x6666ff); // Light blue tint for respawning
+    }
+
+    if (payload.activeEffects.includes("full")) {
+      visualizer?.hide();
+      sprites.main.setAlpha(1.0);
+      sprites.main.clearTint();
     }
   }
 
@@ -243,9 +314,41 @@ export class TerritoryScene extends Phaser.Scene {
 
     const sprites = this.createSpritesForEntity(graphical);
     this.entities.set(id, sprites);
+
+    const ACTIVE_VISUALIZER_TYPE = "bottomUp";
+    this.visualizerManager.createVisualizer(
+      ACTIVE_VISUALIZER_TYPE,
+      id,
+      sprites.main,
+    );
+
+    // if (id === 'stoneNode1') {
+    //   const originalX = graphical.position.x;
+    //   const originalY = graphical.position.y;
+
+    //   const visualizerKeys: string[] = this.visualizerManager.getRegisteredVisualizerKeys();
+    //   const N = visualizerKeys.length;
+    //   const horizontalSpacing = 50;
+    //   const verticalOffset = 100;
+    //   const startXOffset = -((N - 1) * horizontalSpacing) / 2;
+
+    //   visualizerKeys.forEach((key, i) => {
+    //     const cloneId = `${id}-clone-${key}`;
+    //     const cloneGraphical = { ...graphical };
+    //     const cloneX = originalX + startXOffset + i * horizontalSpacing;
+    //     const cloneY = originalY + verticalOffset;
+    //     cloneGraphical.position = { x: cloneX, y: cloneY };
+
+    //     const cloneSprites = this.createSpritesForEntity(cloneGraphical);
+    //     this.entities.set(cloneId, cloneSprites);
+    //     this.visualizerManager.createVisualizer(key, cloneId, cloneSprites.main);
+    //   });
+    // }
   }
 
   removeEntity(entityId: string): void {
+    this.visualizerManager.removeVisualizer(entityId);
+
     const sprites = this.entities.get(entityId);
     if (sprites) {
       sprites.main.destroy();
@@ -321,5 +424,16 @@ export class TerritoryScene extends Phaser.Scene {
   // Phaser Scene lifecycle method
   shutdown(): void {
     eventBus.off("NODE_VISUAL_STATE_CHANGED", this.handleNodeVisualUpdate);
+    eventBus.off("NODE_RESPAWN_PROGRESS", this.handleNodeRespawnProgress);
+
+    if (this.visualizerManager) {
+      this.visualizerManager.destroyAll();
+    }
+
+    this.entities.forEach((sprites) => {
+      sprites.main.destroy();
+      sprites.outline.destroy();
+    });
+    this.entities.clear();
   }
 }

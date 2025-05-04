@@ -65,7 +65,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
           };
           newNodeStates.set(nodeId, { ...node, mechanics: updatedMechanics });
 
-          activeEffects = newCapacityValue <= 0 ? ["depleted"] : [];
+          activeEffects = newCapacityValue <= 0 ? ["empty"] : [];
         }
 
         return { nodeStates: newNodeStates };
@@ -81,6 +81,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
 
     incrementRespawnCycle: (nodeId: string): void => {
       let activeEffects: NodeVisualEffect[] = [];
+      let cycleDurationMs = 0;
       set((state) => {
         const newNodeStates = new Map(state.nodeStates);
         const nodeState = newNodeStates.get(nodeId);
@@ -104,12 +105,13 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
           if (newCapacity >= capacity.max) {
             updatedMechanics.respawn.isRespawning = false;
             updatedMechanics.respawn.respawnEndTime = null;
-            activeEffects = ["fully_stocked"];
+            activeEffects = ["full"];
           } else {
             updatedMechanics.respawn.isRespawning = true;
+            cycleDurationMs = respawn.cycleDurationMs;
             updatedMechanics.respawn.respawnEndTime =
               Date.now() + respawn.cycleDurationMs;
-            activeEffects = ["respawning_pulse"];
+            activeEffects = ["partial"];
           }
 
           newNodeStates.set(nodeId, {
@@ -122,9 +124,14 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
       });
 
       eventBus.emit("NODE_VISUAL_STATE_CHANGED", { nodeId, activeEffects });
+      eventBus.emit("NODE_RESPAWN_PROGRESS", {
+        nodeId,
+        duration: cycleDurationMs,
+      });
     },
 
     initiateRespawnCycle: (nodeId: string): void => {
+      let cycleDurationMs = 0;
       set((state) => {
         const newNodeStates = new Map(state.nodeStates);
         const nodeState = newNodeStates.get(nodeId);
@@ -132,6 +139,7 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
         if (nodeState && !nodeState.mechanics.respawn.isRespawning) {
           const { respawn } = nodeState.mechanics;
           const firstRespawnEndTime = Date.now() + respawn.cycleDurationMs;
+          cycleDurationMs = respawn.cycleDurationMs;
 
           const updatedMechanics: ResourceNodeMechanics = {
             ...nodeState.mechanics,
@@ -151,9 +159,9 @@ export const useResourceNodeStore = create<ResourceNodeStoreState>(
         return { nodeStates: newNodeStates };
       });
 
-      eventBus.emit("NODE_VISUAL_STATE_CHANGED", {
+      eventBus.emit("NODE_RESPAWN_PROGRESS", {
         nodeId,
-        activeEffects: ["respawning_pulse"],
+        duration: cycleDurationMs,
       });
     },
 
